@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="shoppinglist.client/shoppinglist.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="ShoppingList.Server/ShoppingList.Server.csproj" />
+</Solution>
