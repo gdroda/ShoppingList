@@ -13,4 +13,9 @@
         public string Title { get; set; } = string.Empty;
         public List<ListedItem> ListedItems { get; set; } = [];
     }
+
+    public class ShopListCreateDTO()
+    {
+        public string Title { get; set; } = string.Empty;
+    }
 }
