@@ -10,6 +10,7 @@
     
     public class ShopListDTO()
     {
+        public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public List<ListedItem> ListedItems { get; set; } = [];
     }

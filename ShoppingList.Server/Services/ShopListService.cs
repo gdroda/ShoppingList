@@ -26,7 +26,7 @@ namespace ShoppingList.Server.Services
             {
                 var value = await _dbContext.ShopLists
                 .Where(s => s.Id == id)
-                .Select(s => new ShopListDTO { Title = s.Title, ListedItems = s.ListedItems })
+                .Select(s => new ShopListDTO {Id = s.Id, Title = s.Title, ListedItems = s.ListedItems })
                 .FirstOrDefaultAsync();
                 
                 if (value != null)
@@ -45,7 +45,7 @@ namespace ShoppingList.Server.Services
         public async Task<List<ShopListDTO>> GetAllShopLists()
         {
             var value = await _dbContext.ShopLists
-                .Select(s => new ShopListDTO { Title = s.Title, ListedItems = s.ListedItems })
+                .Select(s => new ShopListDTO { Id = s.Id, Title = s.Title, ListedItems = s.ListedItems })
                 .ToListAsync();
             return value;
         }

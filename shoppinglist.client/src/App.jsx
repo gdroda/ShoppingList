@@ -1,30 +1,31 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import './App.css';
 
 
-    const App = () => {
-        const [items, setItems] = useState([]);
+function App() {
+    const [items, setItems] = useState([]);
 
-        useEffect(() => {
-            fetch('https://localhost:7262/api/shoplist/')
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    }
-                    throw response;
-                },
-                )
-                .then((data) => {
-                    setItems(data);
-                });
-        });
-
+    const handleClick = async () => {
+        try {
+            const data = await (await fetch(`https://localhost:7262/api/shoplist/`)).json()
+            setItems(data)
+        } catch (err) {
+            console.log(err.message)
+        }
+    }
+    if (items) {
         return (
+            <>
+                <button className="APIButton" onClick={handleClick}>APIButton</button>
             <ul>
-                {items.map(item => (<li key={item.id}>{item.title}</li>) )}
-            </ul>
-        );
-    };
+                {items.map(item => (<li key={item.id}>{item.title}</li>)) }
+                </ul>
+            </>
+        )
+        
+    }
+}
+
 
 
 export default App;
