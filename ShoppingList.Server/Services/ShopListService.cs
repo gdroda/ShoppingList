@@ -10,6 +10,7 @@ namespace ShoppingList.Server.Services
         public Task<ShopList> CreateShopList(ShopListCreateDTO shopListCreateDTO);
         public Task<ShopListDTO> GetShopListId(int id);
         public Task<List<ShopListDTO>> GetAllShopLists();
+        public Task<ShopListDTO> UpdateShopList(ItemDTO itemDTO, int listId);
     }
     public class ShopListService: IShopListService
     {
@@ -52,10 +53,30 @@ namespace ShoppingList.Server.Services
 
         public async Task<ShopList> CreateShopList(ShopListCreateDTO shopListCreateDTO)
         {
-            var newList = new ShopList { Title = shopListCreateDTO.Title, UserId = 0, ListedItems = [] };
+            var newList = new ShopList { Title = shopListCreateDTO.Title, UserId = 0 };
             var shopListEntity = await _dbContext.ShopLists.AddAsync(newList);
             await _dbContext.SaveChangesAsync();
             return shopListEntity.Entity;
+        }
+
+        public async Task<ShopListDTO> UpdateShopList(ItemDTO itemDTO, int listId)
+        {
+            /*
+            List<ListedItem> tempItemList = new();
+            var currentList = _dbContext.ShopLists
+                .Where(s => s.Id == listId)
+                .Select(s => new ShopListDTO { Id = s.Id, Title = s.Title, ListedItems = s.ListedItems }).FirstOrDefault();
+            if (currentList != null) 
+            {
+                tempItemList = new List<Item>(currentList.ListedItems);
+            }
+            else return null;
+
+            tempItemList.Add(item);
+
+            */
+            throw new NotImplementedException();
+
         }
     }
 }

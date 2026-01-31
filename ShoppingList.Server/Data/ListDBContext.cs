@@ -10,6 +10,7 @@ namespace ShoppingList.Server.Data
 
         }
 
+        /*
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ListedItem>()
@@ -21,10 +22,10 @@ namespace ShoppingList.Server.Data
                 .HasOne(li => li.Item)
                 .WithMany()
                 .HasForeignKey(li => li.ItemId);
-        }
+        }*/
 
         public DbSet<Item> Items { get; set; }
         public DbSet<ShopList> ShopLists { get; set; }
-        public DbSet<ListedItem> ListedItems { get; set; }
+        //public DbSet<ListedItem> ListedItems { get; set; }
     }
 }

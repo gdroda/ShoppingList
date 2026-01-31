@@ -11,7 +11,7 @@ using ShoppingList.Server.Data;
 namespace ShoppingList.Server.Migrations
 {
     [DbContext(typeof(ListDBContext))]
-    [Migration("20260128192240_InitialCreate")]
+    [Migration("20260131132432_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -39,35 +39,17 @@ namespace ShoppingList.Server.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
 
-                    b.HasKey("Id");
-
-                    b.ToTable("Items");
-                });
-
-            modelBuilder.Entity("ShoppingList.Server.Models.ListedItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ItemId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ShopListId")
+                    b.Property<int?>("ShopListId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ItemId");
-
                     b.HasIndex("ShopListId");
 
-                    b.ToTable("ListedItems");
+                    b.ToTable("Items");
                 });
 
             modelBuilder.Entity("ShoppingList.Server.Models.ShopList", b =>
@@ -90,28 +72,16 @@ namespace ShoppingList.Server.Migrations
                     b.ToTable("ShopLists");
                 });
 
-            modelBuilder.Entity("ShoppingList.Server.Models.ListedItem", b =>
+            modelBuilder.Entity("ShoppingList.Server.Models.Item", b =>
                 {
-                    b.HasOne("ShoppingList.Server.Models.Item", "Item")
-                        .WithMany()
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ShoppingList.Server.Models.ShopList", "ShopList")
-                        .WithMany("ItemList")
-                        .HasForeignKey("ShopListId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Item");
-
-                    b.Navigation("ShopList");
+                    b.HasOne("ShoppingList.Server.Models.ShopList", null)
+                        .WithMany("ListedItems")
+                        .HasForeignKey("ShopListId");
                 });
 
             modelBuilder.Entity("ShoppingList.Server.Models.ShopList", b =>
                 {
-                    b.Navigation("ItemList");
+                    b.Navigation("ListedItems");
                 });
 #pragma warning restore 612, 618
         }

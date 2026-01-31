@@ -11,8 +11,8 @@ using ShoppingList.Server.Data;
 namespace ShoppingList.Server.Migrations
 {
     [DbContext(typeof(ListDBContext))]
-    [Migration("20260128195856_AddedKeys")]
-    partial class AddedKeys
+    [Migration("20260131141729_AddedItemRows")]
+    partial class AddedItemRows
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,35 +39,20 @@ namespace ShoppingList.Server.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
 
-                    b.HasKey("Id");
-
-                    b.ToTable("Items");
-                });
-
-            modelBuilder.Entity("ShoppingList.Server.Models.ListedItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ItemId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ShopListId")
+                    b.Property<int>("Row")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ShopListId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ItemId");
-
                     b.HasIndex("ShopListId");
 
-                    b.ToTable("ListedItems");
+                    b.ToTable("Items");
                 });
 
             modelBuilder.Entity("ShoppingList.Server.Models.ShopList", b =>
@@ -90,23 +75,11 @@ namespace ShoppingList.Server.Migrations
                     b.ToTable("ShopLists");
                 });
 
-            modelBuilder.Entity("ShoppingList.Server.Models.ListedItem", b =>
+            modelBuilder.Entity("ShoppingList.Server.Models.Item", b =>
                 {
-                    b.HasOne("ShoppingList.Server.Models.Item", "Item")
-                        .WithMany()
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ShoppingList.Server.Models.ShopList", "ShopList")
+                    b.HasOne("ShoppingList.Server.Models.ShopList", null)
                         .WithMany("ListedItems")
-                        .HasForeignKey("ShopListId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Item");
-
-                    b.Navigation("ShopList");
+                        .HasForeignKey("ShopListId");
                 });
 
             modelBuilder.Entity("ShoppingList.Server.Models.ShopList", b =>

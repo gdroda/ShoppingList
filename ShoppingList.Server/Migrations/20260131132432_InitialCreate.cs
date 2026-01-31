@@ -12,20 +12,6 @@ namespace ShoppingList.Server.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Items",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Price = table.Column<decimal>(type: "numeric", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Items", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ShopLists",
                 columns: table => new
                 {
@@ -40,49 +26,35 @@ namespace ShoppingList.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ListedItems",
+                name: "Items",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Price = table.Column<decimal>(type: "numeric", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
-                    ShopListId = table.Column<int>(type: "integer", nullable: false),
-                    ItemId = table.Column<int>(type: "integer", nullable: false)
+                    ShopListId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ListedItems", x => x.Id);
+                    table.PrimaryKey("PK_Items", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ListedItems_Items_ItemId",
-                        column: x => x.ItemId,
-                        principalTable: "Items",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ListedItems_ShopLists_ShopListId",
+                        name: "FK_Items_ShopLists_ShopListId",
                         column: x => x.ShopListId,
                         principalTable: "ShopLists",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ListedItems_ItemId",
-                table: "ListedItems",
-                column: "ItemId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ListedItems_ShopListId",
-                table: "ListedItems",
+                name: "IX_Items_ShopListId",
+                table: "Items",
                 column: "ShopListId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "ListedItems");
-
             migrationBuilder.DropTable(
                 name: "Items");
 

@@ -10,9 +10,11 @@ namespace ShoppingList.Server.Controllers
     public class ShopListController : ControllerBase
     {
         private readonly IShopListService _shopListService;
-        public ShopListController(IShopListService shopListService)
+        private readonly IItemServices _itemService;
+        public ShopListController(IShopListService shopListService, IItemServices itemService)
         {
             _shopListService = shopListService;
+            _itemService = itemService;
         }
 
         [HttpGet("{id}")]
@@ -33,6 +35,28 @@ namespace ShoppingList.Server.Controllers
         public async Task<ActionResult<ShopList>> CreateShopList(ShopListCreateDTO shopListCreateDTO)
         {
             return Ok(await _shopListService.CreateShopList(shopListCreateDTO));
+        }
+
+        [HttpPut("{listId}")]
+        public async Task<ActionResult<ShopList>> UpdateShopList(ItemDTO itemDTO, int listId)
+        {
+            var list = await _shopListService.GetShopListId(listId);
+            if (list != null)
+            {
+                var item = await _itemService.GetItemFromRow(itemDTO, list);
+                if (item != null)
+                {
+                    var response = await _itemService.UpdateItem(item, itemDTO);
+                    if (response != null) return Ok(response);
+                }
+                else
+                {
+                    var response = await _itemService.CreateItem(itemDTO, list);
+                    if (response != null) return Ok(response);
+                }
+                
+            }
+            return NotFound();
         }
     }
 }
