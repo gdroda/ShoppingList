@@ -30,6 +30,11 @@ body {
   min-height: 100vh;
 }
 
+div[name="grid"] {
+    text-align: left;
+    min-width: 80vw;
+}
+
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
