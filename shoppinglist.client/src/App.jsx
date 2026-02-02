@@ -29,7 +29,7 @@ function App() {
         {
             field: "περιγραφή", editable: true, cellEditor: 'agTextCellEditor', flex: 3 },
         {
-            field: "τιμή", editable: true, cellEditor: 'agNumberCellEditor', flex: 1,
+            field: "ποσότητα", editable: true, cellEditor: 'agNumberCellEditor', flex: 1,
             cellEditorParams: {
                 precision: 1,
                 step: 1,
@@ -38,13 +38,14 @@ function App() {
             }
         },
         {
-            field: "ποσότητα", editable: true, cellEditor: 'agNumberCellEditor', flex: 1,
+            field: "τιμή", editable: true, cellEditor: 'agNumberCellEditor', flex: 1,
             cellEditorParams: {
                 precision: 1,
                 step: 1,
                 min: 0,
-                showStepperButtons: true
-            }
+                showStepperButtons: true,
+                
+            }, valueFormatter: p => p.value.toLocaleString() + ' €'
         }
     ]);
 
