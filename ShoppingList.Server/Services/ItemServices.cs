@@ -7,8 +7,8 @@ namespace ShoppingList.Server.Services
     public interface IItemServices
     {
         public Task<List<Item>> GetItems(ShopList list);
-        public Task<Item> GetItemFromRow(ItemDTO itemDTO, ShopListDTO list);
-        public Task<Item> CreateItem(ItemDTO itemDTO, ShopListDTO shopListDTO);
+        public Task<Item> GetItemFromRow(ItemDTO itemDTO, ShopListGetDTO list);
+        public Task<Item> CreateItem(ItemDTO itemDTO, ShopListGetDTO shopListDTO);
         public Task<string> UpdateItem(Item item, ItemDTO itemDTO);
     }
     public class ItemServices :IItemServices
@@ -29,7 +29,7 @@ namespace ShoppingList.Server.Services
             return listToReturn;
         }
 
-        public async Task<Item> GetItemFromRow(ItemDTO itemDTO, ShopListDTO list)
+        public async Task<Item> GetItemFromRow(ItemDTO itemDTO, ShopListGetDTO list)
         {
             var shoplist = await _dbContext.ShopLists
                 .FirstOrDefaultAsync(s => s.Id == list.Id);
@@ -46,7 +46,7 @@ namespace ShoppingList.Server.Services
             return null!;
         }
 
-        public async Task<Item> CreateItem(ItemDTO itemDTO, ShopListDTO shopListDTO)
+        public async Task<Item> CreateItem(ItemDTO itemDTO, ShopListGetDTO shopListDTO)
         {
             var currList = await _dbContext.ShopLists
                 .FirstOrDefaultAsync(s => s.Id == shopListDTO.Id);

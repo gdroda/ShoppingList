@@ -18,7 +18,7 @@ namespace ShoppingList.Server.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ShopListDTO>> GetShopListId(int id)
+        public async Task<ActionResult<ShopListGetDTO>> GetShopListId(int id)
         {
             var responce = await _shopListService.GetShopListId(id);
             if (responce != null) return Ok(responce);
@@ -26,7 +26,7 @@ namespace ShoppingList.Server.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<ShopListDTO>>> GetAllShopList()
+        public async Task<ActionResult<List<ShopListGetDTO>>> GetAllShopList()
         {
             return Ok(await _shopListService.GetAllShopLists());
         }

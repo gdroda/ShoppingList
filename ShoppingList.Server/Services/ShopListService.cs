@@ -8,9 +8,9 @@ namespace ShoppingList.Server.Services
     public interface IShopListService
     {
         public Task<ShopList> CreateShopList(ShopListCreateDTO shopListCreateDTO);
-        public Task<ShopListDTO> GetShopListId(int id);
-        public Task<List<ShopListDTO>> GetAllShopLists();
-        public Task<ShopListDTO> UpdateShopList(ItemDTO itemDTO, int listId);
+        public Task<ShopListGetDTO> GetShopListId(int id);
+        public Task<List<ShopListGetDTO>> GetAllShopLists();
+        public Task<ShopListGetDTO> UpdateShopList(ItemDTO itemDTO, int listId);
     }
     public class ShopListService: IShopListService
     {
@@ -21,13 +21,13 @@ namespace ShoppingList.Server.Services
             _dbContext = dbContext;
         }
 
-        public async Task<ShopListDTO> GetShopListId(int id)
+        public async Task<ShopListGetDTO> GetShopListId(int id)
         {
             try
             {
                 var value = await _dbContext.ShopLists
                 .Where(s => s.Id == id)
-                .Select(s => new ShopListDTO {Id = s.Id, Title = s.Title, ListedItems = s.ListedItems })
+                .Select(s => new ShopListGetDTO {Id = s.Id, Title = s.Title, ListedItems = s.ListedItems })
                 .FirstOrDefaultAsync();
                 
                 if (value != null)
@@ -43,10 +43,10 @@ namespace ShoppingList.Server.Services
             }
         }
 
-        public async Task<List<ShopListDTO>> GetAllShopLists()
+        public async Task<List<ShopListGetDTO>> GetAllShopLists()
         {
             var value = await _dbContext.ShopLists
-                .Select(s => new ShopListDTO { Id = s.Id, Title = s.Title, ListedItems = s.ListedItems })
+                .Select(s => new ShopListGetDTO { Id = s.Id, Title = s.Title, ListedItems = s.ListedItems })
                 .ToListAsync();
             return value;
         }
@@ -59,7 +59,7 @@ namespace ShoppingList.Server.Services
             return shopListEntity.Entity;
         }
 
-        public async Task<ShopListDTO> UpdateShopList(ItemDTO itemDTO, int listId)
+        public async Task<ShopListGetDTO> UpdateShopList(ItemDTO itemDTO, int listId)
         {
             /*
             List<ListedItem> tempItemList = new();
