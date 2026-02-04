@@ -31,10 +31,12 @@ namespace ShoppingList.Server.Controllers
             return Ok(await _shopListService.GetAllShopLists());
         }
 
-        [HttpPost]
-        public async Task<ActionResult<ShopList>> CreateShopList(ShopListCreateDTO shopListCreateDTO)
+        [HttpPost("{name}")]
+        public async Task<ActionResult<ShopList>> CreateShopList(ShopListCreateDTO shopListCreateDTO, string name)
         {
-            return Ok(await _shopListService.CreateShopList(shopListCreateDTO));
+            var response = await _shopListService.CreateShopList(shopListCreateDTO, name);
+            if (response != null) return Ok(response);
+            else return BadRequest();
         }
 
         [HttpPut("{listId}")]
@@ -43,7 +45,7 @@ namespace ShoppingList.Server.Controllers
             var list = await _shopListService.GetShopListId(listId);
             if (list != null)
             {
-                var item = await _itemService.GetItemFromRow(itemDTO, list);
+                var item = await _itemService.GetItemFromRow(itemDTO, listId);
                 if (item != null)
                 {
                     var response = await _itemService.UpdateItem(item, itemDTO);
@@ -51,7 +53,7 @@ namespace ShoppingList.Server.Controllers
                 }
                 else
                 {
-                    var response = await _itemService.CreateItem(itemDTO, list);
+                    var response = await _itemService.CreateItem(itemDTO, listId);
                     if (response != null) return Ok(response);
                 }
                 

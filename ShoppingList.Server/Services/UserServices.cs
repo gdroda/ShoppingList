@@ -6,8 +6,8 @@ namespace ShoppingList.Server.Services
 {
     public interface IUserServices
     {
-        public Task<User> GetUser(string name);
-        public Task<User> CreateUser(UserDTO userDTO);
+        public Task<UserGetDTO> GetUser(string name);
+        public Task<User> CreateUser(UserCreateDTO userDTO);
     }
 
     public class UserServices: IUserServices
@@ -19,10 +19,13 @@ namespace ShoppingList.Server.Services
             _dbContext = dbContext;
         }
 
-        public async Task<User> GetUser(string name)
+        public async Task<UserGetDTO> GetUser(string name)
         {
             var user = await _dbContext.Users
-                .FirstOrDefaultAsync(u => u.Name == name);
+                .Where(u => u.Name == name)
+                .Select(u => new UserGetDTO {
+                    Name = u.Name, 
+                    ShopListsGetDTO = u.ShopLists.Select(s => new ShopListGetDTO { Title = s.Title, ListedItems = s.ListedItems}).ToList() }).FirstOrDefaultAsync();
             if (user != null)
             {
                 return user;
@@ -30,7 +33,7 @@ namespace ShoppingList.Server.Services
             else return null;
         }
 
-        public async Task<User> CreateUser(UserDTO userDTO)
+        public async Task<User> CreateUser(UserCreateDTO userDTO)
         {
             var user = new User { Name = userDTO.Name };
             var userCreation = await _dbContext.Users.AddAsync(user);

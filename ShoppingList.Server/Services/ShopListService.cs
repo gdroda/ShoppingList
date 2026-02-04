@@ -7,7 +7,7 @@ namespace ShoppingList.Server.Services
 {
     public interface IShopListService
     {
-        public Task<ShopList> CreateShopList(ShopListCreateDTO shopListCreateDTO);
+        public Task<ShopListGetDTO> CreateShopList(ShopListCreateDTO shopListCreateDTO, string userName);
         public Task<ShopListGetDTO> GetShopListId(int id);
         public Task<List<ShopListGetDTO>> GetAllShopLists();
         public Task<ShopListGetDTO> UpdateShopList(ItemDTO itemDTO, int listId);
@@ -15,10 +15,12 @@ namespace ShoppingList.Server.Services
     public class ShopListService: IShopListService
     {
         private readonly ListDBContext _dbContext;
+        private readonly IUserServices _userServices;
 
-        public ShopListService(ListDBContext dbContext)
+        public ShopListService(ListDBContext dbContext, IUserServices userServices)
         {
             _dbContext = dbContext;
+            _userServices = userServices;
         }
 
         public async Task<ShopListGetDTO> GetShopListId(int id)
@@ -27,7 +29,7 @@ namespace ShoppingList.Server.Services
             {
                 var value = await _dbContext.ShopLists
                 .Where(s => s.Id == id)
-                .Select(s => new ShopListGetDTO {Id = s.Id, Title = s.Title, ListedItems = s.ListedItems })
+                .Select(s => new ShopListGetDTO {Title = s.Title, ListedItems = s.ListedItems })
                 .FirstOrDefaultAsync();
                 
                 if (value != null)
@@ -46,17 +48,24 @@ namespace ShoppingList.Server.Services
         public async Task<List<ShopListGetDTO>> GetAllShopLists()
         {
             var value = await _dbContext.ShopLists
-                .Select(s => new ShopListGetDTO { Id = s.Id, Title = s.Title, ListedItems = s.ListedItems })
+                .Select(s => new ShopListGetDTO { Title = s.Title, ListedItems = s.ListedItems })
                 .ToListAsync();
             return value;
         }
 
-        public async Task<ShopList> CreateShopList(ShopListCreateDTO shopListCreateDTO)
+        public async Task<ShopListGetDTO> CreateShopList(ShopListCreateDTO shopListCreateDTO, string userName)
         {
-            var newList = new ShopList { Title = shopListCreateDTO.Title, UserId = 0 };
-            var shopListEntity = await _dbContext.ShopLists.AddAsync(newList);
-            await _dbContext.SaveChangesAsync();
-            return shopListEntity.Entity;
+            var user = await _dbContext.Users
+                .FirstOrDefaultAsync(u => u.Name == userName);
+            if (user != null)
+            {
+                var newList = new ShopList { Title = shopListCreateDTO.Title, UserId = user.Id, User = user };
+                var shopListEntity = await _dbContext.ShopLists.AddAsync(newList);
+                await _dbContext.SaveChangesAsync();
+                return new ShopListGetDTO { Title = newList.Title };
+            }
+            else return null;
+            
         }
 
         public async Task<ShopListGetDTO> UpdateShopList(ItemDTO itemDTO, int listId)

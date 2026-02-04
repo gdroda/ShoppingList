@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ShoppingList.Server.Models;
+using System.Reflection.Metadata;
 
 namespace ShoppingList.Server.Data
 {
@@ -7,7 +8,15 @@ namespace ShoppingList.Server.Data
     {
         public ListDBContext(DbContextOptions options) : base(options)
         {
+        }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>()
+                .HasMany(s => s.ShopLists)
+                .WithOne(u => u.User)
+                .HasForeignKey(s => s.UserId);
+                
         }
 
         public DbSet<Item> Items { get; set; }

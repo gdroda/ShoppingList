@@ -1,14 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ShoppingList.Server.Data;
 using ShoppingList.Server.Models;
+using System.Collections.Generic;
 
 namespace ShoppingList.Server.Services
 {
     public interface IItemServices
     {
         public Task<List<Item>> GetItems(ShopList list);
-        public Task<Item> GetItemFromRow(ItemDTO itemDTO, ShopListGetDTO list);
-        public Task<Item> CreateItem(ItemDTO itemDTO, ShopListGetDTO shopListDTO);
+        public Task<Item> GetItemFromRow(ItemDTO itemDTO, int listId);
+        public Task<Item> CreateItem(ItemDTO itemDTO, int listId);
         public Task<string> UpdateItem(Item item, ItemDTO itemDTO);
     }
     public class ItemServices :IItemServices
@@ -29,10 +30,10 @@ namespace ShoppingList.Server.Services
             return listToReturn;
         }
 
-        public async Task<Item> GetItemFromRow(ItemDTO itemDTO, ShopListGetDTO list)
+        public async Task<Item> GetItemFromRow(ItemDTO itemDTO, int listId)
         {
             var shoplist = await _dbContext.ShopLists
-                .FirstOrDefaultAsync(s => s.Id == list.Id);
+                .FirstOrDefaultAsync(s => s.Id == listId);
             if (shoplist != null)
             {
                 foreach (var item in shoplist.ListedItems)
@@ -46,10 +47,10 @@ namespace ShoppingList.Server.Services
             return null!;
         }
 
-        public async Task<Item> CreateItem(ItemDTO itemDTO, ShopListGetDTO shopListDTO)
+        public async Task<Item> CreateItem(ItemDTO itemDTO, int listId)
         {
             var currList = await _dbContext.ShopLists
-                .FirstOrDefaultAsync(s => s.Id == shopListDTO.Id);
+                .FirstOrDefaultAsync(s => s.Id == listId);
 
             if (currList != null)
             {
@@ -77,7 +78,7 @@ namespace ShoppingList.Server.Services
 
             if (changes > 0)
             {
-                return $"{changes} were made";
+                return $"{changes} changes were made";
             }
             else return null!;
         }

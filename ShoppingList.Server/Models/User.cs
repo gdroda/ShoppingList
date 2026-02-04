@@ -1,4 +1,6 @@
-﻿namespace ShoppingList.Server.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace ShoppingList.Server.Models
 {
     public class User
     {
@@ -6,9 +8,16 @@
         public string Name { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string GoogleId { get; set; } = string.Empty;
+        public List<ShopList> ShopLists { get; set; } = [];
     }
 
-    public class UserDTO
+    public class UserGetDTO
+    {
+        public string Name { get; set; } = string.Empty;
+        public List<ShopListGetDTO> ShopListsGetDTO { get; set; } = [];
+    }
+
+    public class UserCreateDTO
     {
         public string Name { get; set; } = string.Empty;
     }

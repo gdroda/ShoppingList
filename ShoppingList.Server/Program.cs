@@ -12,6 +12,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ListDBContext>(opt => opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IShopListService, ShopListService>();
 builder.Services.AddScoped<IItemServices, ItemServices>();
+builder.Services.AddScoped<IUserServices, UserServices>();
 
 builder.Services.AddCors(opt => opt.AddPolicy("MyCorsPolicy", policy =>
 {

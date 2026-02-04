@@ -11,8 +11,8 @@ using ShoppingList.Server.Data;
 namespace ShoppingList.Server.Migrations
 {
     [DbContext(typeof(ListDBContext))]
-    [Migration("20260131141729_AddedItemRows")]
-    partial class AddedItemRows
+    [Migration("20260203194749_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -72,7 +72,34 @@ namespace ShoppingList.Server.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("ShopLists");
+                });
+
+            modelBuilder.Entity("ShoppingList.Server.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("GoogleId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("ShoppingList.Server.Models.Item", b =>
@@ -84,7 +111,23 @@ namespace ShoppingList.Server.Migrations
 
             modelBuilder.Entity("ShoppingList.Server.Models.ShopList", b =>
                 {
+                    b.HasOne("ShoppingList.Server.Models.User", "User")
+                        .WithMany("ShopLists")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ShoppingList.Server.Models.ShopList", b =>
+                {
                     b.Navigation("ListedItems");
+                });
+
+            modelBuilder.Entity("ShoppingList.Server.Models.User", b =>
+                {
+                    b.Navigation("ShopLists");
                 });
 #pragma warning restore 612, 618
         }
