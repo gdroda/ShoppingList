@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ShoppingList.Server.Models;
 using ShoppingList.Server.Services;
-using System.Xml.Linq;
 
 namespace ShoppingList.Server.Controllers
 {
