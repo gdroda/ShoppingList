@@ -7,7 +7,6 @@
     <SpaRoot>..\shoppinglist.client</SpaRoot>
     <SpaProxyLaunchCommand>npm run dev</SpaProxyLaunchCommand>
     <SpaProxyServerUrl>https://localhost:64099</SpaProxyServerUrl>
-    <UserSecretsId>f0ba3286-5d5a-4b9e-8600-6ba7c2526f31</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
