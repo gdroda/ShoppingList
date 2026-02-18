@@ -7,9 +7,13 @@
     <SpaRoot>..\shoppinglist.client</SpaRoot>
     <SpaProxyLaunchCommand>npm run dev</SpaProxyLaunchCommand>
     <SpaProxyServerUrl>https://localhost:64099</SpaProxyServerUrl>
+    <UserSecretsId>b5bdadb0-f211-48c9-9cd5-db6495f787e1</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Google.Apis.Auth" Version="1.73.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
       <Version>10.*-*</Version>
