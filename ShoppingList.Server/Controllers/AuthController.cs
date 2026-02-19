@@ -42,7 +42,7 @@ namespace ShoppingList.Server.Controllers
             {
                 var name = User.Identity.Name;
                 var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
-                var user = await _userServices.GetUser(name);
+                var user = await _userServices.GetUser(ame);
                 if (user != null)
                 {
                     return Ok(user);
