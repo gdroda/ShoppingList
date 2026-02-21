@@ -1,9 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
-import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
-import { AgGridReact } from 'ag-grid-react';
 import './App.css';
 
-ModuleRegistry.registerModules([AllCommunityModule]);
 
 interface User { 
     name: string;
@@ -45,44 +42,53 @@ export default function App() {
     }, []);
 
 
+
     
 
 
+    
+    const [inputText, setInputText] = useState('');
+
+    const handleChange = (e) => {
+        const newValue = e.target.value;
+        setInputText(newValue);
+
+        const lines = newValue.split('\n');
+        //const cleanLines = lines.filter(line => line.trim() !== '');
+    };
 
 
-
-
-
-
-    const [rowData, _setRowData] = useState([
-        { περιγραφή: "Πράγμα 1", τιμή: 21, ποσότητα: 1 },
-        { περιγραφή: "Πράγμα 2", τιμή: 10, ποσότητα: 5},
-        { περιγραφή: "Πράγμα 3", τιμή: 2, ποσότητα: 1 },
-    ]);
-
-    const [colDefs, _setColDefs] = useState([
-        {
-            field: "περιγραφή", editable: true, cellEditor: 'agTextCellEditor', flex: 3 },
-        {
-            field: "ποσότητα", editable: true, cellEditor: 'agNumberCellEditor', flex: 1,
-            cellEditorParams: {
-                precision: 1,
-                step: 1,
-                min: 0,
-                showStepperButtons: true
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            const lines = inputText.split('\n');
+            let latestLine = lines[lines.length - 1];
+            const words = latestLine.split(' ');
+            for (let i = 0; i < words.length ;i++) {
+                if (!isNaN(words[i])) {
+                    if (i > 0) {
+                        let temp = words[i - 1];
+                        words[i - 1] = words[i];
+                        words[i] = temp;
+                        latestLine = words.join(' ');
+                        lines[lines.length - 1] = latestLine;
+                        setInputText(lines.join("\n"))
+                    }
+                }
             }
-        },
-        {
-            field: "τιμή", editable: true, cellEditor: 'agNumberCellEditor', flex: 1,
-            cellEditorParams: {
-                precision: 1,
-                step: 1,
-                min: 0,
-                showStepperButtons: true,
-                
-            }, valueFormatter: p => p.value.toLocaleString() + ' €'
         }
-    ]);
+    };
+
+    const parsedItems = inputText.split('\n').filter(line => line.trim() !== '');
+
+
+    const reverseOrder = (inputString) => {
+
+    }
+
+
+
+
+
 
     if (isLoading) {
         return <div>Checking authentication...</div>;
@@ -108,38 +114,37 @@ export default function App() {
         }
     }
 
+
+
     if (items) {
         return (
-            <>
-                <div name="grid" style={{ height: 500 }}>
-                    <AgGridReact
-                        rowData={rowData}
-                        columnDefs={colDefs}
-                    />
+            <div style={{ fontFamily: 'sans-serif', maxWidth: '400px', margin: '20px auto' }}>
+                <h2>Add Shopping Items</h2>
+                <p style={{ color: '#666', fontSize: '14px' }}>Enter one item per line.</p>
+
+                <textarea
+                    value={inputText}
+                    onChange={handleChange}
+                    onKeyDown={handleKeyDown}
+                    rows={8}
+                    style={{ width: '100%', padding: '10px', fontSize: '16px' }}
+                    placeholder="Apples&#10;Bananas&#10;Milk"
+                />
+
+                <div style={{ marginTop: '20px' }}>
+                    <h3>Parsed Items ({parsedItems.length}):</h3>
+                    <ul>
+                        {parsedItems.map((item, index) => (
+                            <li key={index}>{item}</li>
+                        ))}
+                    </ul>
                 </div>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Μανστερ</td>
-                            <td>3</td>
-                            <td>{(1.22 * 3) + " €"}</td>
-                        </tr>
-                    </tbody>
-                </table>
-
                 <div>
-                <button onClick ={() => Login()}>Log in with Google</button>
+                    <button onClick={() => Login()}>Log in with Google</button>
                     <h2>{userData?.name}, {userData?.email}</h2>
                 </div>
-            </>
+            </div>
+
         )
         
     }
