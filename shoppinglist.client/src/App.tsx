@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import './App.css';
 
 
@@ -11,7 +11,7 @@ export default function App() {
     const [userData, setUserData] = useState < User | null > (null);
     const [isLoading, setLoading] = useState(true);
 
-    const [items, setItems] = useState([]);
+    //const [items, setItems] = useState([]);
 
     useEffect(() => {
         const initiateAuthorization = async () => {
@@ -47,45 +47,48 @@ export default function App() {
 
 
     
-    const [inputText, setInputText] = useState('');
+    const [items, setItems] = useState([
+        { id: Date.now(), checked: false, text: '', qty: '', price: '' }
+    ]);
 
-    const handleChange = (e) => {
-        const newValue = e.target.value;
-        setInputText(newValue);
+    // To handle auto-focusing the next line
+    const inputRefs = useRef([]);
 
-        const lines = newValue.split('\n');
-        //const cleanLines = lines.filter(line => line.trim() !== '');
+    const updateItem = (id, field, value) => {
+        setItems(items.map(item =>
+            item.id === id ? { ...item, [field]: value } : item
+        ));
     };
 
-
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e, index) => {
         if (e.key === 'Enter') {
-            const lines = inputText.split('\n');
-            let latestLine = lines[lines.length - 1];
-            const words = latestLine.split(' ');
-            for (let i = 0; i < words.length ;i++) {
-                if (!isNaN(words[i])) {
-                    if (i > 0) {
-                        let temp = words[i - 1];
-                        words[i - 1] = words[i];
-                        words[i] = temp;
-                        latestLine = words.join(' ');
-                        lines[lines.length - 1] = latestLine;
-                        setInputText(lines.join("\n"))
-                    }
+            e.preventDefault();
+            const newItem = { id: Date.now(), checked: false, text: '', qty: '', price: '' };
+
+            // Insert new item after current index
+            const newItems = [...items];
+            newItems.splice(index + 1, 0, newItem);
+            setItems(newItems);
+
+            // Focus the new input on the next render
+            setTimeout(() => {
+                if (inputRefs.current[index + 1]) {
+                    inputRefs.current[index + 1].focus();
                 }
+            }, 0);
+        }
+
+        // Optional: Backspace on empty line deletes the line
+        if (e.key === 'Backspace' && items[index].text === '' && items.length > 1) {
+            e.preventDefault();
+            const newItems = items.filter((_, i) => i !== index);
+            setItems(newItems);
+            // Focus previous line
+            if (inputRefs.current[index - 1]) {
+                inputRefs.current[index - 1].focus();
             }
         }
     };
-
-    const parsedItems = inputText.split('\n').filter(line => line.trim() !== '');
-
-
-    const reverseOrder = (inputString) => {
-
-    }
-
-
 
 
 
@@ -115,36 +118,105 @@ export default function App() {
     }
 
 
+    /* Set the width of the side navigation to 250px */
+    function openNav() {
+        document.getElementById("mySidenav").style.width = "250px";
+    }
+
+    /* Set the width of the side navigation to 0 */
+    function closeNav() {
+        document.getElementById("mySidenav").style.width = "0";
+    } 
+
 
     if (items) {
         return (
-            <div style={{ fontFamily: 'sans-serif', maxWidth: '400px', margin: '20px auto' }}>
-                <h2>Add Shopping Items</h2>
-                <p style={{ color: '#666', fontSize: '14px' }}>Enter one item per line.</p>
+            <div>
 
-                <textarea
-                    value={inputText}
-                    onChange={handleChange}
-                    onKeyDown={handleKeyDown}
-                    rows={8}
-                    style={{ width: '100%', padding: '10px', fontSize: '16px' }}
-                    placeholder="Apples&#10;Bananas&#10;Milk"
-                />
+                <div style={{ maxWidth: '600px', margin: '40px auto', fontFamily: 'sans-serif' }}>
+                    <h2>My Shopping List</h2>
+                    <div style={{ border: '1px solid #ddd', borderRadius: '8px', overflow: 'hidden' }}>
+                        {items.map((item, index) => (
+                            <div
+                                key={item.id}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    padding: '8px 12px',
+                                    borderBottom: '1px solid #eee',
+                                    background: item.checked ? '#f9f9f9' : 'white'
+                                }}
+                            >
+                                {/* 1. The Checkbox */}
+                                <input
+                                    type="checkbox"
+                                    checked={item.checked}
+                                    onChange={(e) => updateItem(item.id, 'checked', e.target.checked)}
+                                    style={{ marginRight: '12px', cursor: 'pointer' }}
+                                />
 
-                <div style={{ marginTop: '20px' }}>
-                    <h3>Parsed Items ({parsedItems.length}):</h3>
-                    <ul>
-                        {parsedItems.map((item, index) => (
-                            <li key={index}>{item}</li>
+                                {/* 2. The Item Name (The "Textarea" part) */}
+                                <input
+                                    ref={el => inputRefs.current[index] = el}
+                                    type="text"
+                                    value={item.text}
+                                    placeholder="Item name..."
+                                    onChange={(e) => updateItem(item.id, 'text', e.target.value)}
+                                    onKeyDown={(e) => handleKeyDown(e, index)}
+                                    style={{
+                                        flex: 1,
+                                        border: 'none',
+                                        outline: 'none',
+                                        fontSize: '16px',
+                                        textDecoration: item.checked ? 'line-through' : 'none',
+                                        color: item.checked ? '#aaa' : '#333'
+                                    }}
+                                />
+
+                                {/* 3. The Interpolated Style Inputs (Qty/Price) */}
+                                <div style={{ display: 'flex', gap: '5px' }}>
+                                    <input
+                                        type="text"
+                                        placeholder="Qty"
+                                        value={item.qty}
+                                        onChange={(e) => updateItem(item.id, 'qty', e.target.value)}
+                                        
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="$"
+                                        value={item.price}
+                                        onChange={(e) => updateItem(item.id, 'price', e.target.value)}
+                                        
+                                    />
+                                </div>
+                            </div>
                         ))}
-                    </ul>
+                    </div>
+                    </div>
+
+
+
+
+
+            <div id="mySidenav" className="sidenav">
+                    <a className="closebtn" onClick={() => closeNav()}>&times;</a>
+                    <a href="#">About</a>
+                    <a href="#">Services</a>
+                    <a href="#">Clients</a>
+                    <a href="#">Contact</a>
                 </div>
+
+                <span onClick={() => openNav()}>open</span>
+
+                <div id="main">
+                </div>
+
                 <div>
                     <button onClick={() => Login()}>Log in with Google</button>
                     <h2>{userData?.name}, {userData?.email}</h2>
                 </div>
             </div>
-
         )
         
     }
