@@ -11,7 +11,11 @@ export default function App() {
     const [userData, setUserData] = useState < User | null > (null);
     const [isLoading, setLoading] = useState(true);
 
-    //const [items, setItems] = useState([]);
+    const [items, setItems] = useState([
+        { id: Date.now(), checked: false, text: '', qty: '', price: '' }
+    ]);
+
+    const inputRefs = useRef([]);
 
     useEffect(() => {
         const initiateAuthorization = async () => {
@@ -42,17 +46,30 @@ export default function App() {
     }, []);
 
 
+    useEffect(() => {
+        const getList = async () => {
+            try {
+                const resp = await fetch("https://localhost:7262/api/shoplist/1", {
+                    method: "GET",
+                    credentials: "include"
+                })
+                if (resp.ok) {
+                    const data = await resp.json();
+                    console.log(data);
+                }
+            }
+            catch (error) {
+                console.log(error);
+            }
+        }
+        getList();
+    }, []);
 
     
 
 
     
-    const [items, setItems] = useState([
-        { id: Date.now(), checked: false, text: '', qty: '', price: '' }
-    ]);
-
-    // To handle auto-focusing the next line
-    const inputRefs = useRef([]);
+    
 
     const updateItem = (id, field, value) => {
         setItems(items.map(item =>
@@ -65,7 +82,6 @@ export default function App() {
             e.preventDefault();
             const newItem = { id: Date.now(), checked: false, text: '', qty: '', price: '' };
 
-            // Insert new item after current index
             const newItems = [...items];
             newItems.splice(index + 1, 0, newItem);
             setItems(newItems);
@@ -75,10 +91,9 @@ export default function App() {
                 if (inputRefs.current[index + 1]) {
                     inputRefs.current[index + 1].focus();
                 }
-            }, 0);
+            }, 10);
         }
 
-        // Optional: Backspace on empty line deletes the line
         if (e.key === 'Backspace' && items[index].text === '' && items.length > 1) {
             e.preventDefault();
             const newItems = items.filter((_, i) => i !== index);
@@ -147,7 +162,6 @@ export default function App() {
                                     background: item.checked ? '#f9f9f9' : 'white'
                                 }}
                             >
-                                {/* 1. The Checkbox */}
                                 <input
                                     type="checkbox"
                                     checked={item.checked}
@@ -155,14 +169,14 @@ export default function App() {
                                     style={{ marginRight: '12px', cursor: 'pointer' }}
                                 />
 
-                                {/* 2. The Item Name (The "Textarea" part) */}
                                 <input
-                                    ref={el => inputRefs.current[index] = el}
+                                    ref={el => { if (el) { inputRefs.current[index] = el; } else { delete inputRefs.current[index] } }}
                                     type="text"
                                     value={item.text}
                                     placeholder="Item name..."
                                     onChange={(e) => updateItem(item.id, 'text', e.target.value)}
                                     onKeyDown={(e) => handleKeyDown(e, index)}
+                                    enterKeyHint="enter"
                                     style={{
                                         flex: 1,
                                         border: 'none',
@@ -173,7 +187,6 @@ export default function App() {
                                     }}
                                 />
 
-                                {/* 3. The Interpolated Style Inputs (Qty/Price) */}
                                 <div style={{ display: 'flex', gap: '5px' }}>
                                     <input
                                         type="text"
@@ -195,7 +208,10 @@ export default function App() {
                     </div>
                     </div>
 
-
+                <div>
+                    <button>Create List</button>
+                    <button>Open List</button>
+                </div>
 
 
 
