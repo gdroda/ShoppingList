@@ -7,13 +7,21 @@ interface User {
     email: string
 }
 
+interface BackendItem {
+    id: number;
+    name: string;
+    quantity: number;
+    price: number;
+}
+
 export default function App() {
     const [userData, setUserData] = useState < User | null > (null);
     const [isLoading, setLoading] = useState(true);
 
     const [items, setItems] = useState([
-        { id: Date.now(), checked: false, text: '', qty: '', price: '' }
+        { id: Date.now(), checked: false, text: '', qty: 0, price: 0 }
     ]);
+
 
     const inputRefs = useRef([]);
 
@@ -55,7 +63,18 @@ export default function App() {
                 })
                 if (resp.ok) {
                     const data = await resp.json();
-                    console.log(data);
+                    const safeData = Array.isArray(data.listedItems) ? data : (data?.items || []);
+                    
+                    const dataz = [{ id: 1, name: 'Test Item', quantity: '1', price: 10, isDone: false }];
+                    const mappedItems = dataz.map((itemDB: any, index: number) => ({
+                        id: itemDB.Id === 0 ? `temp-${index}-${Date.now()}` : itemDB.id,  //temp for unique ID
+                        text: itemDB.Name || '',
+                        qty: itemDB.Quantity || '',
+                        price: itemDB.Price || '',
+                        checked: false
+                    }));
+                    console.log(mappedItems);
+                    setItems(mappedItems);
                 }
             }
             catch (error) {
@@ -80,7 +99,7 @@ export default function App() {
     const handleKeyDown = (e, index) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            const newItem = { id: Date.now(), checked: false, text: '', qty: '', price: '' };
+            const newItem = { id: Date.now(), checked: false, text: '', qty: 0, price: 0 };
 
             const newItems = [...items];
             newItems.splice(index + 1, 0, newItem);
