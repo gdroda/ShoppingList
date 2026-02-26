@@ -16,6 +16,8 @@ namespace ShoppingList.Server.Controllers
             _userServices = userServices;
         }
 
+        //THIS IS NOT NEEDED CAUSE ITS USED IN AUTHCONTROLLER, WE'RE KEEPING IT JUST IN CASE, delete if not used
+
         [HttpGet("{name}")]
         public async Task<ActionResult<User>> GetUser(string name)
         {

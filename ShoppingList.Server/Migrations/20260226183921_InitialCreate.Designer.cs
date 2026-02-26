@@ -11,7 +11,7 @@ using ShoppingList.Server.Data;
 namespace ShoppingList.Server.Migrations
 {
     [DbContext(typeof(ListDBContext))]
-    [Migration("20260203194749_InitialCreate")]
+    [Migration("20260226183921_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -32,6 +32,9 @@ namespace ShoppingList.Server.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("IsChecked")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -40,9 +43,6 @@ namespace ShoppingList.Server.Migrations
                         .HasColumnType("numeric");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Row")
                         .HasColumnType("integer");
 
                     b.Property<int?>("ShopListId")

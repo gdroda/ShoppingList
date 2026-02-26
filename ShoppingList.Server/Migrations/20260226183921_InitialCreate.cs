@@ -55,7 +55,7 @@ namespace ShoppingList.Server.Migrations
                     Name = table.Column<string>(type: "text", nullable: false),
                     Price = table.Column<decimal>(type: "numeric", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
-                    Row = table.Column<int>(type: "integer", nullable: false),
+                    IsChecked = table.Column<bool>(type: "boolean", nullable: false),
                     ShopListId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>

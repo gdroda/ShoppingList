@@ -1,16 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ShoppingList.Server.Data;
 using ShoppingList.Server.Models;
-using System.Collections.Generic;
 
 namespace ShoppingList.Server.Services
 {
     public interface IItemServices
     {
         public Task<List<Item>> GetItems(ShopList list);
-        public Task<Item> GetItemFromRow(ItemDTO itemDTO, int listId);
-        public Task<Item> CreateItem(ItemDTO itemDTO, int listId);
-        public Task<string> UpdateItem(Item item, ItemDTO itemDTO);
+        public Task<Item> CreateItem(ItemCreateDTO itemDTO, int listId);
+        public Task<string> UpdateItem(Item item, ItemCreateDTO itemDTO);
     }
     public class ItemServices :IItemServices
     {
@@ -30,31 +28,15 @@ namespace ShoppingList.Server.Services
             return listToReturn;
         }
 
-        public async Task<Item> GetItemFromRow(ItemDTO itemDTO, int listId)
-        {
-            var shoplist = await _dbContext.ShopLists
-                .FirstOrDefaultAsync(s => s.Id == listId);
-            if (shoplist != null)
-            {
-                foreach (var item in shoplist.ListedItems)
-                {
-                    if (item.Row == itemDTO.Row)
-                    {
-                        return item;
-                    }
-                }
-            }
-            return null!;
-        }
 
-        public async Task<Item> CreateItem(ItemDTO itemDTO, int listId)
+        public async Task<Item> CreateItem(ItemCreateDTO itemDTO, int listId)
         {
             var currList = await _dbContext.ShopLists
                 .FirstOrDefaultAsync(s => s.Id == listId);
 
             if (currList != null)
             {
-                var newItem = new Item { Name = itemDTO.Name, Price = itemDTO.Price, Quantity = itemDTO.Quantity, Row = itemDTO.Row };
+                var newItem = new Item { Name = itemDTO.Name, Price = itemDTO.Price, Quantity = itemDTO.Quantity, IsChecked = itemDTO.IsChecked};
                 currList.ListedItems.Add(newItem);
                 await _dbContext.SaveChangesAsync();
 
@@ -63,7 +45,7 @@ namespace ShoppingList.Server.Services
             else return null!;
         }
 
-        public async Task<string> UpdateItem(Item item, ItemDTO itemDTO)
+        public async Task<string> UpdateItem(Item item, ItemCreateDTO itemDTO)
         {
             var changes = await _dbContext.Items
                 .Where(i => i.Id == item.Id)

@@ -29,6 +29,9 @@ namespace ShoppingList.Server.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("IsChecked")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -37,9 +40,6 @@ namespace ShoppingList.Server.Migrations
                         .HasColumnType("numeric");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Row")
                         .HasColumnType("integer");
 
                     b.Property<int?>("ShopListId")

@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using ShoppingList.Server.Models;
 using ShoppingList.Server.Services;
+using System.Security.Claims;
+using static Google.Apis.Requests.BatchRequest;
 
 namespace ShoppingList.Server.Controllers
 {
@@ -10,55 +13,86 @@ namespace ShoppingList.Server.Controllers
     public class ShopListController : ControllerBase
     {
         private readonly IShopListService _shopListService;
-        private readonly IItemServices _itemService;
-        public ShopListController(IShopListService shopListService, IItemServices itemService)
+        private readonly IUserServices _userService;
+        public ShopListController(IShopListService shopListService, IUserServices userService)
         {
             _shopListService = shopListService;
-            _itemService = itemService;
+            _userService = userService;
         }
 
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<ShopListGetDTO>> GetShopListId(int id)
         {
-            var responce = await _shopListService.GetShopListId(id);
-            if (responce != null) return Ok(responce);
-            else return NotFound();
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+                var user = await _userService.GetUser(email);
+                if (user != null)
+                {
+                    var response = await _shopListService.GetShopListId(id, user.Id);
+                    if (response != null) return Ok(response);
+                }
+                else return NotFound();
+            }
+            return Unauthorized();
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<List<ShopListGetDTO>>> GetAllShopList()
         {
-            return Ok(await _shopListService.GetAllShopLists());
-        }
-
-        [HttpPost("{name}")]
-        public async Task<ActionResult<ShopList>> CreateShopList(ShopListCreateDTO shopListCreateDTO, string name)
-        {
-            var response = await _shopListService.CreateShopList(shopListCreateDTO, name);
-            if (response != null) return Ok(response);
-            else return BadRequest();
-        }
-
-        [HttpPut("{listId}")]
-        public async Task<ActionResult<ShopList>> UpdateShopList(ItemDTO itemDTO, int listId)
-        {
-            var list = await _shopListService.GetShopListId(listId);
-            if (list != null)
+            if (User.Identity?.IsAuthenticated == true)
             {
-                var item = await _itemService.GetItemFromRow(itemDTO, listId);
-                if (item != null)
+                var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+                var user = await _userService.GetUser(email);
+                if (user != null)
                 {
-                    var response = await _itemService.UpdateItem(item, itemDTO);
+                    var response = await _shopListService.GetAllShopLists(user.Id);
                     if (response != null) return Ok(response);
+                    else return BadRequest();
                 }
-                else
-                {
-                    var response = await _itemService.CreateItem(itemDTO, listId);
-                    if (response != null) return Ok(response);
-                }
-                
+                else return NotFound();
             }
-            return NotFound();
+            return Unauthorized();
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<ActionResult<ShopList>> CreateShopList([FromBody] ShopListCreateDTO shopListCreateDTO)
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+                var user = await _userService.GetUser(email);
+                if (user != null)
+                {
+                    var response = await _shopListService.CreateShopList(shopListCreateDTO, user.Id);
+                    if (response != null) return Ok(response);
+                    else return BadRequest();
+                }
+                else return NotFound();
+            }
+            return Unauthorized();
+        }
+
+        [Authorize]
+        [HttpPut("{listId}")]
+        public async Task<ActionResult<ShopList>> UpdateShopList([FromBody] ItemCreateDTO[] itemDTO, int listId)
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+                var user = await _userService.GetUser(email);
+                if (user != null)
+                {
+                    var response = await _shopListService.UpdateShopList(itemDTO, listId, user.Id);
+                    if (response != null) return Ok(response);
+                    else return BadRequest();
+                }
+                else return NotFound();
+            }
+            return Unauthorized();
         }
     }
 }

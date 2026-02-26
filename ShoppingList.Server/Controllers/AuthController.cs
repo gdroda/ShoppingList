@@ -42,14 +42,15 @@ namespace ShoppingList.Server.Controllers
             {
                 var name = User.Identity.Name;
                 var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
-                var user = await _userServices.GetUser(name);
+                var googleId = User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                var user = await _userServices.GetUser(email);
                 if (user != null)
                 {
                     return Ok(user);
                 }
                 else
                 {
-                    await _userServices.CreateUser(new Models.UserCreateDTO { Name = name });
+                    await _userServices.CreateUser(new Models.UserCreateDTO { Name = name, Email = email, GoogleId = googleId });
                 }
             }
             return Unauthorized();

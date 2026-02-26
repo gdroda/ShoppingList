@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿
 
 namespace ShoppingList.Server.Models
 {
@@ -13,6 +13,7 @@ namespace ShoppingList.Server.Models
     
     public class ShopListGetDTO()
     {
+        public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public List<Item> ListedItems { get; set; } = [];
     }

@@ -17,9 +17,10 @@ interface BackendItem {
 export default function App() {
     const [userData, setUserData] = useState < User | null > (null);
     const [isLoading, setLoading] = useState(true);
+    const [listId, setListId] = useState();
 
     const [items, setItems] = useState([
-        { id: Date.now(), checked: false, text: '', qty: 0, price: 0 }
+        { id: Date.now(), isChecked: false, name: '', quantity: 0, price: 0 }
     ]);
 
 
@@ -54,7 +55,7 @@ export default function App() {
     }, []);
 
 
-    useEffect(() => {
+    const LoadList = () => {
         const getList = async () => {
             try {
                 const resp = await fetch("https://localhost:7262/api/shoplist/1", {
@@ -63,18 +64,23 @@ export default function App() {
                 })
                 if (resp.ok) {
                     const data = await resp.json();
-                    const safeData = Array.isArray(data.listedItems) ? data : (data?.items || []);
-                    
-                    const dataz = [{ id: 1, name: 'Test Item', quantity: '1', price: 10, isDone: false }];
-                    const mappedItems = dataz.map((itemDB: any, index: number) => ({
-                        id: itemDB.Id === 0 ? `temp-${index}-${Date.now()}` : itemDB.id,  //temp for unique ID
-                        text: itemDB.Name || '',
-                        qty: itemDB.Quantity || '',
-                        price: itemDB.Price || '',
-                        checked: false
+                    setListId(data.id);
+                    const safeData = Array.isArray(data.listedItems) ? data.listedItems : (data.listedItems?.items || []);
+                    const mappedItems = safeData.map((itemDB: any, index: number) => ({
+                        id: itemDB.id === 0 ? `temp-${index}-${Date.now()}` : itemDB.id,  //temp for unique ID
+                        name: itemDB.name || '',
+                        quantity: itemDB.quantity || '',
+                        price: itemDB.price || '',
+                        isChecked: false
                     }));
-                    console.log(mappedItems);
-                    setItems(mappedItems);
+                    const emptyRow = {
+                        id: Date.now(),
+                        name: '',
+                        quantity: 0,
+                        price: 0,
+                        isChecked: false
+                    }
+                    setItems([...mappedItems, emptyRow]);
                 }
             }
             catch (error) {
@@ -82,7 +88,7 @@ export default function App() {
             }
         }
         getList();
-    }, []);
+    };
 
     
 
@@ -99,7 +105,7 @@ export default function App() {
     const handleKeyDown = (e, index) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            const newItem = { id: Date.now(), checked: false, text: '', qty: 0, price: 0 };
+            const newItem = { id: Date.now(), isChecked: false, name: '', quantity: 0, price: 0 };
 
             const newItems = [...items];
             newItems.splice(index + 1, 0, newItem);
@@ -113,7 +119,7 @@ export default function App() {
             }, 10);
         }
 
-        if (e.key === 'Backspace' && items[index].text === '' && items.length > 1) {
+        if (e.key === 'Backspace' && items[index].name === '' && items.length > 1) {
             e.preventDefault();
             const newItems = items.filter((_, i) => i !== index);
             setItems(newItems);
@@ -151,6 +157,67 @@ export default function App() {
         }
     }
 
+    const CreateList = async () => {
+        try {
+            const payload = {
+                Title: "Testlist"
+            }
+            const response = await fetch('https://localhost:7262/api/shoplist/', {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            if (response.ok) {
+                console.log(response.json());
+                //setUserData(null);
+                //window.location.href = "https://localhost:64099";
+            }
+        }
+        catch (error) {
+            console.log("Create list failed.", error);
+        }
+    }
+
+    interface ItemToSend {
+        Name: string,
+        Price: number,
+        Quantity: number,
+        IsChecked: boolean
+    }
+
+    //const [itemsToSend, setItemsToSend] = useState
+    const SaveList = async () => {
+        try {
+            const payload: ItemToSend[] = items.map(item => ({
+                Name: item.name,
+                Price: item.price,
+                Quantity: item.quantity,
+                IsChecked: item.isChecked
+            }));
+            console.log(listId);
+            console.log(JSON.stringify(payload))
+                const response = await fetch(`https://localhost:7262/api/shoplist/${listId}`, {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                    body: JSON.stringify(payload)
+            });
+            if (response.ok) {
+                console.log(response.json());
+                //setUserData(null);
+                //window.location.href = "https://localhost:64099";
+            }
+        }
+        catch (error) {
+            console.log("Create list failed.", error);
+        }
+    }
+
 
     /* Set the width of the side navigation to 250px */
     function openNav() {
@@ -178,22 +245,22 @@ export default function App() {
                                     alignItems: 'center',
                                     padding: '8px 12px',
                                     borderBottom: '1px solid #eee',
-                                    background: item.checked ? '#f9f9f9' : 'white'
+                                    background: item.isChecked ? '#f9f9f9' : 'white'
                                 }}
                             >
                                 <input
                                     type="checkbox"
-                                    checked={item.checked}
-                                    onChange={(e) => updateItem(item.id, 'checked', e.target.checked)}
+                                    checked={item.isChecked}
+                                    onChange={(e) => updateItem(item.id, 'isChecked', e.target.checked)}
                                     style={{ marginRight: '12px', cursor: 'pointer' }}
                                 />
 
                                 <input
                                     ref={el => { if (el) { inputRefs.current[index] = el; } else { delete inputRefs.current[index] } }}
                                     type="text"
-                                    value={item.text}
+                                    value={item.name}
                                     placeholder="Item name..."
-                                    onChange={(e) => updateItem(item.id, 'text', e.target.value)}
+                                    onChange={(e) => updateItem(item.id, 'name', e.target.value)}
                                     onKeyDown={(e) => handleKeyDown(e, index)}
                                     enterKeyHint="enter"
                                     style={{
@@ -201,8 +268,8 @@ export default function App() {
                                         border: 'none',
                                         outline: 'none',
                                         fontSize: '16px',
-                                        textDecoration: item.checked ? 'line-through' : 'none',
-                                        color: item.checked ? '#aaa' : '#333'
+                                        textDecoration: item.isChecked ? 'line-through' : 'none',
+                                        color: item.isChecked ? '#aaa' : '#333'
                                     }}
                                 />
 
@@ -210,8 +277,8 @@ export default function App() {
                                     <input
                                         type="text"
                                         placeholder="Qty"
-                                        value={item.qty}
-                                        onChange={(e) => updateItem(item.id, 'qty', e.target.value)}
+                                        value={item.quantity}
+                                        onChange={(e) => updateItem(item.id, 'quantity', e.target.value)}
                                         
                                     />
                                     <input
@@ -228,8 +295,9 @@ export default function App() {
                     </div>
 
                 <div>
-                    <button>Create List</button>
-                    <button>Open List</button>
+                    <button onClick={() => CreateList() }>Create List</button>
+                    <button onClick={() => LoadList() }>Open List</button>
+                    <button onClick={() => SaveList() }>Save List</button>
                 </div>
 
 
@@ -250,6 +318,9 @@ export default function App() {
                 <div>
                     <button onClick={() => Login()}>Log in with Google</button>
                     <h2>{userData?.name}, {userData?.email}</h2>
+                </div>
+                <div>
+                    <button onClick={() => Logout() }>Log out</button>
                 </div>
             </div>
         )
