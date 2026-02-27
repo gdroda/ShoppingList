@@ -9,6 +9,7 @@ namespace ShoppingList.Server.Services
         public Task<List<Item>> GetItems(ShopList list);
         public Task<Item> CreateItem(ItemCreateDTO itemDTO, int listId);
         public Task<string> UpdateItem(Item item, ItemCreateDTO itemDTO);
+        public Task<string> DeleteItem(Item item);
     }
     public class ItemServices :IItemServices
     {
@@ -63,6 +64,11 @@ namespace ShoppingList.Server.Services
                 return $"{changes} changes were made";
             }
             else return null!;
+        }
+
+        public Task<string> DeleteItem(Item item)
+        {
+            throw new NotImplementedException();
         }
     }
 }

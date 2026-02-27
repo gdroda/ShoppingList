@@ -11,6 +11,7 @@ namespace ShoppingList.Server.Services
         public Task<ShopListGetDTO> GetShopListId(int id, int userId);
         public Task<List<ShopListGetDTO>> GetAllShopLists(int userId);
         public Task<ShopListGetDTO> UpdateShopList(ItemCreateDTO[] itemDTO, int listId, int userId);
+        public Task<string> DeleteList(ShopList shopList);
     }
     public class ShopListService: IShopListService
     {
@@ -88,6 +89,11 @@ namespace ShoppingList.Server.Services
                 return new ShopListGetDTO { Title = currentList.Title };
             }
             else return null;
+        }
+
+        public Task<string> DeleteList(ShopList shopList)
+        {
+            throw new NotImplementedException();
         }
     }
 }
