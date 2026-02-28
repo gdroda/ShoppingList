@@ -37,7 +37,8 @@ namespace ShoppingList.Server.Services
 
             if (currList != null)
             {
-                var newItem = new Item { Name = itemDTO.Name, Price = itemDTO.Price, Quantity = itemDTO.Quantity, IsChecked = itemDTO.IsChecked};
+                var newItem = new Item { Name = itemDTO.Name, Price = itemDTO.Price, Quantity = itemDTO.Quantity, IsChecked = itemDTO.IsChecked
+                , ShopList = currList, ListId = listId};
                 currList.ListedItems.Add(newItem);
                 await _dbContext.SaveChangesAsync();
 
@@ -66,9 +67,11 @@ namespace ShoppingList.Server.Services
             else return null!;
         }
 
-        public Task<string> DeleteItem(Item item)
+        public async Task<string> DeleteItem(Item item)
         {
-            throw new NotImplementedException();
+            _dbContext.Items.Remove(item);
+            //await _dbContext.SaveChangesAsync();
+            return ($"{item.Name} has been deleted successfully.");
         }
     }
 }

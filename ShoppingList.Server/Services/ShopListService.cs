@@ -11,7 +11,7 @@ namespace ShoppingList.Server.Services
         public Task<ShopListGetDTO> GetShopListId(int id, int userId);
         public Task<List<ShopListGetDTO>> GetAllShopLists(int userId);
         public Task<ShopListGetDTO> UpdateShopList(ItemCreateDTO[] itemDTO, int listId, int userId);
-        public Task<string> DeleteList(ShopList shopList);
+        public Task<string> DeleteList(int listId, int userId);
     }
     public class ShopListService: IShopListService
     {
@@ -80,7 +80,12 @@ namespace ShoppingList.Server.Services
 
             if (currentList != null)
             {
-                currentList.ListedItems.Clear();
+                var itemsToDelete = _dbContext.Items
+                    .Where(i => i.ListId == listId)
+                    .Include(s => s.ShopList).ToList();
+
+                _dbContext.Items.RemoveRange(itemsToDelete);
+
                 foreach (ItemCreateDTO item in itemDTO)
                 {
                     await _itemServices.CreateItem(item, listId);
@@ -91,9 +96,27 @@ namespace ShoppingList.Server.Services
             else return null;
         }
 
-        public Task<string> DeleteList(ShopList shopList)
+        public async Task<string> DeleteList(int listId, int userId)
         {
-            throw new NotImplementedException();
+            var listToDelete = _dbContext.ShopLists
+                .Where(s => s.Id == listId)
+                .Where(s => s.UserId == userId)
+                .Include(i => i.ListedItems)
+                .FirstOrDefault();
+
+            if (listToDelete != null)
+            {
+                var itemsToDelete = _dbContext.Items
+                    .Where(i => i.ListId == listId)
+                    .Include(s => s.ShopList).ToList();
+
+                _dbContext.Items.RemoveRange(itemsToDelete);
+                _dbContext.ShopLists.Remove(listToDelete);
+                await _dbContext.SaveChangesAsync();
+                return ($"{listToDelete.Title} has been deleted");
+            }
+            else return null;
+            
         }
     }
 }

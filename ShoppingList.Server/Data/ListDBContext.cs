@@ -16,7 +16,12 @@ namespace ShoppingList.Server.Data
                 .HasMany(s => s.ShopLists)
                 .WithOne(u => u.User)
                 .HasForeignKey(s => s.UserId);
-                
+
+            modelBuilder.Entity<ShopList>()
+                .HasMany(s => s.ListedItems)
+                .WithOne(u => u.ShopList)
+                .HasForeignKey(s => s.ListId);
+
         }
 
         public DbSet<Item> Items { get; set; }

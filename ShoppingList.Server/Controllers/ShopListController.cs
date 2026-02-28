@@ -94,5 +94,24 @@ namespace ShoppingList.Server.Controllers
             }
             return Unauthorized();
         }
+
+        [Authorize]
+        [HttpDelete("{listId}")]
+        public async Task<ActionResult<ShopList>> DeleteList (int listId)
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+                var user = await _userService.GetUser(email);
+                if (user != null)
+                {
+                    var response = await _shopListService.DeleteList(listId, user.Id);
+                    if (response != null) return Ok(response);
+                    else return BadRequest();
+                }
+                else return NotFound();
+            }
+            return Unauthorized();
+        }
     }
 }

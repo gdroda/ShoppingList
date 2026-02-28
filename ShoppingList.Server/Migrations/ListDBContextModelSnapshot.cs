@@ -32,6 +32,9 @@ namespace ShoppingList.Server.Migrations
                     b.Property<bool>("IsChecked")
                         .HasColumnType("boolean");
 
+                    b.Property<int>("ListId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -42,12 +45,9 @@ namespace ShoppingList.Server.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("ShopListId")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("ShopListId");
+                    b.HasIndex("ListId");
 
                     b.ToTable("Items");
                 });
@@ -101,9 +101,13 @@ namespace ShoppingList.Server.Migrations
 
             modelBuilder.Entity("ShoppingList.Server.Models.Item", b =>
                 {
-                    b.HasOne("ShoppingList.Server.Models.ShopList", null)
+                    b.HasOne("ShoppingList.Server.Models.ShopList", "ShopList")
                         .WithMany("ListedItems")
-                        .HasForeignKey("ShopListId");
+                        .HasForeignKey("ListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ShopList");
                 });
 
             modelBuilder.Entity("ShoppingList.Server.Models.ShopList", b =>

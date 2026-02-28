@@ -56,22 +56,23 @@ namespace ShoppingList.Server.Migrations
                     Price = table.Column<decimal>(type: "numeric", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
                     IsChecked = table.Column<bool>(type: "boolean", nullable: false),
-                    ShopListId = table.Column<int>(type: "integer", nullable: true)
+                    ListId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Items", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Items_ShopLists_ShopListId",
-                        column: x => x.ShopListId,
+                        name: "FK_Items_ShopLists_ListId",
+                        column: x => x.ListId,
                         principalTable: "ShopLists",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Items_ShopListId",
+                name: "IX_Items_ListId",
                 table: "Items",
-                column: "ShopListId");
+                column: "ListId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ShopLists_UserId",

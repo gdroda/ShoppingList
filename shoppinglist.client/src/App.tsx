@@ -58,7 +58,7 @@ export default function App() {
     const LoadList = () => {
         const getList = async () => {
             try {
-                const resp = await fetch("https://localhost:7262/api/shoplist/1", {
+                const resp = await fetch("https://localhost:7262/api/shoplist/2", {
                     method: "GET",
                     credentials: "include"
                 })
@@ -218,6 +218,21 @@ export default function App() {
         }
     }
 
+    const DeleteList = async () => {
+        try {
+            const response = await fetch(`https://localhost:7262/api/shoplist/${listId}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+            if (response.ok) {
+                console.log("Successfully deleted.");
+            }
+        }
+        catch (error) {
+            console.log("Delete list failed.", error);
+        }
+    }
+
 
     /* Set the width of the side navigation to 250px */
     function openNav() {
@@ -297,7 +312,8 @@ export default function App() {
                 <div>
                     <button onClick={() => CreateList() }>Create List</button>
                     <button onClick={() => LoadList() }>Open List</button>
-                    <button onClick={() => SaveList() }>Save List</button>
+                    <button onClick={() => SaveList()}>Save List</button>
+                    <button onClick={() => DeleteList()}>Delete List</button>
                 </div>
 
 
