@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import './App.css';
+import { Button } from '@/components/ui/button.js';
 
 
 interface User { 
@@ -310,10 +311,10 @@ export default function App() {
                     </div>
 
                 <div>
-                    <button onClick={() => CreateList() }>Create List</button>
-                    <button onClick={() => LoadList() }>Open List</button>
-                    <button onClick={() => SaveList()}>Save List</button>
-                    <button onClick={() => DeleteList()}>Delete List</button>
+                    <Button onClick={() => CreateList() }>Create List</Button>
+                    <Button onClick={() => LoadList() }>Open List</Button>
+                    <Button onClick={() => SaveList()}>Save List</Button>
+                    <Button onClick={() => DeleteList()}>Delete List</Button>
                 </div>
 
 

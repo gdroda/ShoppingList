@@ -9,7 +9,6 @@ namespace ShoppingList.Server.Services
         public Task<List<Item>> GetItems(ShopList list);
         public Task<Item> CreateItem(ItemCreateDTO itemDTO, int listId);
         public Task<string> UpdateItem(Item item, ItemCreateDTO itemDTO);
-        public Task<string> DeleteItem(Item item);
     }
     public class ItemServices :IItemServices
     {
@@ -67,11 +66,5 @@ namespace ShoppingList.Server.Services
             else return null!;
         }
 
-        public async Task<string> DeleteItem(Item item)
-        {
-            _dbContext.Items.Remove(item);
-            //await _dbContext.SaveChangesAsync();
-            return ($"{item.Name} has been deleted successfully.");
-        }
     }
 }
