@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import './App.css';
 import { Button } from '@/components/ui/button.js';
-
+import { Input } from '@/components/ui/input.js';
 
 interface User { 
     name: string;
@@ -270,8 +270,7 @@ export default function App() {
                                     onChange={(e) => updateItem(item.id, 'isChecked', e.target.checked)}
                                     style={{ marginRight: '12px', cursor: 'pointer' }}
                                 />
-
-                                <input
+                                <Input
                                     ref={el => { if (el) { inputRefs.current[index] = el; } else { delete inputRefs.current[index] } }}
                                     type="text"
                                     value={item.name}
