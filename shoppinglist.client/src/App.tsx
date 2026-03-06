@@ -235,6 +235,8 @@ export default function App() {
     }
 
 
+
+
     /* Set the width of the side navigation to 250px */
     function openNav() {
         document.getElementById("mySidenav").style.width = "250px";
@@ -250,27 +252,23 @@ export default function App() {
         return (
             <div>
 
-                <div style={{ maxWidth: '600px', margin: '40px auto', fontFamily: 'sans-serif' }}>
+
+
+                <div className="w-full items-center">
                     <h2>My Shopping List</h2>
-                    <div style={{ border: '1px solid #ddd', borderRadius: '8px', overflow: 'hidden' }}>
+                    <div className="flex flex-col md:flex-col items-center py-10 " >
                         {items.map((item, index) => (
                             <div
                                 key={item.id}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    padding: '8px 12px',
-                                    borderBottom: '1px solid #eee',
-                                    background: item.isChecked ? '#f9f9f9' : 'white'
-                                }}
+                                className="flex flex-row md:flex-row items-center gap-1 p-0.5 "
                             >
                                 <input
                                     type="checkbox"
                                     checked={item.isChecked}
                                     onChange={(e) => updateItem(item.id, 'isChecked', e.target.checked)}
-                                    style={{ marginRight: '12px', cursor: 'pointer' }}
+                                    className="w-1/8"
                                 />
-                                <Input
+                                <input
                                     ref={el => { if (el) { inputRefs.current[index] = el; } else { delete inputRefs.current[index] } }}
                                     type="text"
                                     value={item.name}
@@ -278,36 +276,30 @@ export default function App() {
                                     onChange={(e) => updateItem(item.id, 'name', e.target.value)}
                                     onKeyDown={(e) => handleKeyDown(e, index)}
                                     enterKeyHint="enter"
-                                    style={{
-                                        flex: 1,
-                                        border: 'none',
-                                        outline: 'none',
-                                        fontSize: '16px',
-                                        textDecoration: item.isChecked ? 'line-through' : 'none',
-                                        color: item.isChecked ? '#aaa' : '#333'
-                                    }}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                                 />
+                                <input
+                                    type="text"
+                                    placeholder="Qty"
+                                    value={item.quantity}
+                                    onChange={(e) => updateItem(item.id, 'quantity', e.target.value)}
+                                    className="w-1/8 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
 
-                                <div style={{ display: 'flex', gap: '5px' }}>
-                                    <input
-                                        type="text"
-                                        placeholder="Qty"
-                                        value={item.quantity}
-                                        onChange={(e) => updateItem(item.id, 'quantity', e.target.value)}
-                                        
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="$"
-                                        value={item.price}
-                                        onChange={(e) => updateItem(item.id, 'price', e.target.value)}
-                                        
-                                    />
-                                </div>
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="$"
+                                    value={item.price}
+                                    onChange={(e) => updateItem(item.id, 'price', e.target.value)}
+                                    className="w-1/8 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+
+                                />
                             </div>
                         ))}
                     </div>
                     </div>
+
+
 
                 <div>
                     <Button onClick={() => CreateList() }>Create List</Button>
