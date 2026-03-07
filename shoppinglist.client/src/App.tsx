@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import './App.css';
 import { Button } from '@/components/ui/button.js';
+import { Sidebar, SidebarTrigger, SidebarProvider, useSidebar, SidebarInset } from '@/components/ui/sidebar.js';
 import { Input } from '@/components/ui/input.js';
 
 interface User { 
@@ -15,17 +16,28 @@ interface BackendItem {
     price: number;
 }
 
+export function CustomTrigger() {
+    const { toggleSidebar } = useSidebar()
+
+    return <button onClick={toggleSidebar}>Toggle Sidebar</button>
+}
+
+
 export default function App() {
     const [userData, setUserData] = useState < User | null > (null);
     const [isLoading, setLoading] = useState(true);
     const [listId, setListId] = useState();
 
     const [items, setItems] = useState([
-        { id: Date.now(), isChecked: false, name: '', quantity: 0, price: 0 }
+        { id: Date.now(), isChecked: false, name: '', quantity: '', price: '' }
     ]);
 
 
     const inputRefs = useRef([]);
+
+    
+      
+
 
     useEffect(() => {
         const initiateAuthorization = async () => {
@@ -77,8 +89,8 @@ export default function App() {
                     const emptyRow = {
                         id: Date.now(),
                         name: '',
-                        quantity: 0,
-                        price: 0,
+                        quantity: '',
+                        price: '',
                         isChecked: false
                     }
                     setItems([...mappedItems, emptyRow]);
@@ -106,7 +118,7 @@ export default function App() {
     const handleKeyDown = (e, index) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            const newItem = { id: Date.now(), isChecked: false, name: '', quantity: 0, price: 0 };
+            const newItem = { id: Date.now(), isChecked: false, name: '', quantity: '', price: '' };
 
             const newItems = [...items];
             newItems.splice(index + 1, 0, newItem);
@@ -172,9 +184,7 @@ export default function App() {
                 body: JSON.stringify(payload)
             });
             if (response.ok) {
-                console.log(response.json());
-                //setUserData(null);
-                //window.location.href = "https://localhost:64099";
+                console.log("List Created Successfully.");
             }
         }
         catch (error) {
@@ -194,8 +204,8 @@ export default function App() {
         try {
             const payload: ItemToSend[] = items.map(item => ({
                 Name: item.name,
-                Price: item.price,
-                Quantity: item.quantity,
+                Price: parseInt(item.price),
+                Quantity: parseInt(item.quantity),
                 IsChecked: item.isChecked
             }));
             console.log(listId);
@@ -209,9 +219,7 @@ export default function App() {
                     body: JSON.stringify(payload)
             });
             if (response.ok) {
-                console.log(response.json());
-                //setUserData(null);
-                //window.location.href = "https://localhost:64099";
+                console.log("List Saved Successfully.");
             }
         }
         catch (error) {
@@ -251,85 +259,123 @@ export default function App() {
     if (items) {
         return (
             <div>
+                
+                    <SidebarProvider className='flex'>
+                    <SidebarInset>
 
 
 
-                <div className="w-full items-center">
-                    <h2>My Shopping List</h2>
-                    <div className="flex flex-col md:flex-col items-center py-10 " >
-                        {items.map((item, index) => (
-                            <div
-                                key={item.id}
-                                className="flex flex-row md:flex-row items-center gap-1 p-0.5 "
-                            >
-                                <input
-                                    type="checkbox"
-                                    checked={item.isChecked}
-                                    onChange={(e) => updateItem(item.id, 'isChecked', e.target.checked)}
-                                    className="w-1/8"
-                                />
-                                <input
-                                    ref={el => { if (el) { inputRefs.current[index] = el; } else { delete inputRefs.current[index] } }}
-                                    type="text"
-                                    value={item.name}
-                                    placeholder="Item name..."
-                                    onChange={(e) => updateItem(item.id, 'name', e.target.value)}
-                                    onKeyDown={(e) => handleKeyDown(e, index)}
-                                    enterKeyHint="enter"
-                                    className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Qty"
-                                    value={item.quantity}
-                                    onChange={(e) => updateItem(item.id, 'quantity', e.target.value)}
-                                    className="w-1/8 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
 
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="$"
-                                    value={item.price}
-                                    onChange={(e) => updateItem(item.id, 'price', e.target.value)}
-                                    className="w-1/8 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
 
-                                />
+                        <SidebarTrigger />
+                        <div className="w-full items-center">
+                            <h2>My Shopping List</h2>
+                            <div className="flex flex-col md:flex-col items-center py-10 " >
+                                {items.map((item, index) => (
+                                    <div
+                                        key={item.id}
+                                        className={`flex flex-row md:flex-row items-center gap-1 p-0.5 
+                                ${item.isChecked ? `line-through text-gray-400 italic bg-gray-50` : `text-gray-900`}`}
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={item.isChecked}
+                                            onChange={(e) => updateItem(item.id, 'isChecked', e.target.checked)}
+                                            className="w-1/8"
+                                        />
+                                        <input
+                                            ref={el => { if (el) { inputRefs.current[index] = el; } else { delete inputRefs.current[index] } }}
+                                            type="text"
+                                            value={item.name}
+                                            placeholder="Item name..."
+                                            spellCheck="false"
+                                            onChange={(e) => updateItem(item.id, 'name', e.target.value)}
+                                            onKeyDown={(e) => handleKeyDown(e, index)}
+                                            enterKeyHint="enter"
+                                            className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Qty"
+                                            maxLength="2"
+                                            inputMode="decimal"
+                                            value={item.quantity}
+                                            onChange={(e) => updateItem(item.id, 'quantity', e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (!/[0-9]/.test(e.key) && e.key !== 'Tab') { e.preventDefault(); }
+                                                handleKeyDown(e, index)
+                                            }}
+                                            className="w-1/8 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+
+                                        />
+                                        <input
+                                            type="text"
+                                            maxLength="2"
+                                            placeholder="$"
+                                            value={item.price}
+                                            inputMode="decimal"
+                                            onChange={(e) => updateItem(item.id, 'price', e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (!/[0-9]/.test(e.key)) { e.preventDefault(); }
+                                                handleKeyDown(e, index)
+                                            }}
+                                            className="w-1/8 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+
+                                        />
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
-                    </div>
+                        </div>
 
 
 
-                <div>
-                    <Button onClick={() => CreateList() }>Create List</Button>
-                    <Button onClick={() => LoadList() }>Open List</Button>
-                    <Button onClick={() => SaveList()}>Save List</Button>
-                    <Button onClick={() => DeleteList()}>Delete List</Button>
-                </div>
+                        <div>
+                            <Button onClick={() => CreateList()}>Create List</Button>
+                            <Button onClick={() => LoadList()}>Open List</Button>
+                            <Button onClick={() => SaveList()}>Save List</Button>
+                            <Button onClick={() => DeleteList()}>Delete List</Button>
+                        </div>
 
 
 
-            <div id="mySidenav" className="sidenav">
-                    <a className="closebtn" onClick={() => closeNav()}>&times;</a>
-                    <a href="#">About</a>
-                    <a href="#">Services</a>
-                    <a href="#">Clients</a>
-                    <a href="#">Contact</a>
-                </div>
+                        <div id="mySidenav" className="sidenav">
+                            <a className="closebtn" onClick={() => closeNav()}>&times;</a>
+                            <a href="#">About</a>
+                            <a href="#">Services</a>
+                            <a href="#">Clients</a>
+                            <a href="#">Contact</a>
+                        </div>
 
-                <span onClick={() => openNav()}>open</span>
+                        <span onClick={() => openNav()}>open</span>
 
-                <div id="main">
-                </div>
+                        <div id="main">
+                        </div>
 
-                <div>
-                    <button onClick={() => Login()}>Log in with Google</button>
-                    <h2>{userData?.name}, {userData?.email}</h2>
-                </div>
-                <div>
-                    <button onClick={() => Logout() }>Log out</button>
-                </div>
+                        <div>
+                            <button onClick={() => Login()}>Log in with Google</button>
+                            <h2>{userData?.name}, {userData?.email}</h2>
+                        </div>
+                        <div>
+                            <button onClick={() => Logout()}>Log out</button>
+                        </div>
+
+
+
+
+
+                        </SidebarInset>
+                        <Sidebar>
+                            <main>
+                                <SidebarTrigger />
+                                h
+                            </main>
+                        </Sidebar>
+                    </SidebarProvider>
+
+                
+
+                
+
             </div>
         )
         
