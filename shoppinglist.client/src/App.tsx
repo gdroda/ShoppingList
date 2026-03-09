@@ -3,6 +3,7 @@ import './App.css';
 import { Button } from '@/components/ui/button.js';
 import { Sidebar, SidebarTrigger, SidebarProvider, useSidebar, SidebarInset } from '@/components/ui/sidebar.js';
 import { Input } from '@/components/ui/input.js';
+import { useDebounce } from './debounce.tsx';
 
 interface User { 
     name: string;
@@ -39,6 +40,7 @@ export default function App() {
         { id: Date.now(), isChecked: false, name: '', quantity: '', price: '' }
     ]);
 
+    const debouncedSave = useDebounce(items, 1000)
 
     const inputRefs = useRef([]);
 
@@ -74,8 +76,7 @@ export default function App() {
                         })
                         if (resp.ok) {
                             const data = await resp.json();
-                            console.log(data)
-                            setUserLists(data);
+                            setUserLists(data)
                         } else {
                             setUserLists(null);
                         }
@@ -92,6 +93,15 @@ export default function App() {
     }, []);
 
 
+
+
+
+
+    useEffect(() => {
+        if (!isLoading) {
+            LoadList(userLists[0].id)
+        }
+    }, [userLists])
 
     const LoadList = (id) => {
         const getList = async () => {
@@ -129,11 +139,54 @@ export default function App() {
         getList();
     };
 
-    
 
 
+
+
+    interface ItemToSend {
+        Name: string,
+        Price: number,
+        Quantity: number,
+        IsChecked: boolean
+    }
+
+    const SaveList = async () => {
+        try {
+            const payload: ItemToSend[] = items.filter(item => item.name && item.name.trim() !== "").map(item => ({
+                Name: item.name,
+                Price: Number(item.price) || 0,
+                Quantity: Number(item.quantity) || 0,
+                IsChecked: item.isChecked
+            }));
+            const response = await fetch(`https://localhost:7262/api/shoplist/${listId}`, {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            if (response.ok) {
+                console.log("List Saved Successfully.");
+            }
+        }
+        catch (error) {
+            console.log("Create list failed.", error);
+        }
+    }
     
-    
+
+    useEffect(() => {
+        if (debouncedSave && !isLoading) {
+            SaveList();
+        }
+    }, [debouncedSave])
+
+
+
+
+
+
 
     const updateItem = (id, field, value) => {
         setItems(items.map(item =>
@@ -156,6 +209,11 @@ export default function App() {
                     inputRefs.current[index + 1].focus();
                 }
             }, 10);
+        }
+
+        if (e.key === 'Backspace' && items[index].name.length == 1 && items.length == 1) {
+            items[index].quantity = '';
+            items[index].price = '';
         }
 
         if (e.key === 'Backspace' && items[index].name === '' && items.length > 1) {
@@ -218,37 +276,9 @@ export default function App() {
         }
     }
 
-    interface ItemToSend {
-        Name: string,
-        Price: number,
-        Quantity: number,
-        IsChecked: boolean
-    }
 
-    const SaveList = async () => {
-        try {
-            const payload: ItemToSend[] = items.filter(item => item.name && item.name.trim() !== "").map(item => ({
-                Name: item.name,
-                Price: Number(item.price) || 0,
-                Quantity: Number(item.quantity) || 0,
-                IsChecked: item.isChecked
-            }));
-                const response = await fetch(`https://localhost:7262/api/shoplist/${listId}`, {
-                method: "PUT",
-                credentials: "include",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                    body: JSON.stringify(payload)
-            });
-            if (response.ok) {
-                console.log("List Saved Successfully.");
-            }
-        }
-        catch (error) {
-            console.log("Create list failed.", error);
-        }
-    }
+
+    
 
     const DeleteList = async () => {
         try {
@@ -354,7 +384,6 @@ export default function App() {
 
                         <div>
                             <Button onClick={() => CreateList()}>Create List</Button>
-                            <Button onClick={() => SaveList()}>Save List</Button>
                             <Button onClick={() => DeleteList()}>Delete List</Button>
                         </div>
 
