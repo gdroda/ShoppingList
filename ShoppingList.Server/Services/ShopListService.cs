@@ -51,7 +51,7 @@ namespace ShoppingList.Server.Services
         {
             var value = await _dbContext.ShopLists
                 .Where(s => s.UserId == userId)
-                .Select(s => new ShopListGetDTO { Title = s.Title, ListedItems = s.ListedItems })
+                .Select(s => new ShopListGetDTO {Id = s.Id, Title = s.Title, ListedItems = s.ListedItems })
                 .ToListAsync();
             return value;
         }

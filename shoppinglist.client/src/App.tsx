@@ -9,17 +9,23 @@ interface User {
     email: string
 }
 
-interface BackendItem {
-    id: number;
-    name: string;
-    quantity: number;
-    price: number;
-}
 
-export function CustomTrigger() {
+export function CustomTrigger({
+    className,
+    onClick,
+    children,
+    ...props
+}: React.ComponentProps<typeof Button>) {
     const { toggleSidebar } = useSidebar()
 
-    return <button onClick={toggleSidebar}>Toggle Sidebar</button>
+    return <Button
+        className={className}
+        onClick={(event) => {
+            onClick?.(event)
+            toggleSidebar()
+        }}
+        {...props }
+    >{children}</Button>
 }
 
 
@@ -27,6 +33,7 @@ export default function App() {
     const [userData, setUserData] = useState < User | null > (null);
     const [isLoading, setLoading] = useState(true);
     const [listId, setListId] = useState();
+    const [userLists, setUserLists] = useState([]);
 
     const [items, setItems] = useState([
         { id: Date.now(), isChecked: false, name: '', quantity: '', price: '' }
@@ -34,9 +41,6 @@ export default function App() {
 
 
     const inputRefs = useRef([]);
-
-    
-      
 
 
     useEffect(() => {
@@ -61,6 +65,26 @@ export default function App() {
                 finally {
                     setLoading(false);
                 }
+
+                const loadLists = async () => {
+                    try {
+                        const resp = await fetch("https://localhost:7262/api/shoplist", {
+                            method: "GET",
+                            credentials: "include"
+                        })
+                        if (resp.ok) {
+                            const data = await resp.json();
+                            console.log(data)
+                            setUserLists(data);
+                        } else {
+                            setUserLists(null);
+                        }
+                    }
+                    catch (error) {
+                        console.log(error);
+                    }
+                }
+                loadLists();
             }
             checkLoginStatus();
         }
@@ -68,10 +92,11 @@ export default function App() {
     }, []);
 
 
-    const LoadList = () => {
+
+    const LoadList = (id) => {
         const getList = async () => {
             try {
-                const resp = await fetch("https://localhost:7262/api/shoplist/2", {
+                const resp = await fetch(`https://localhost:7262/api/shoplist/${id}`, {
                     method: "GET",
                     credentials: "include"
                 })
@@ -94,6 +119,7 @@ export default function App() {
                         isChecked: false
                     }
                     setItems([...mappedItems, emptyRow]);
+
                 }
             }
             catch (error) {
@@ -199,17 +225,14 @@ export default function App() {
         IsChecked: boolean
     }
 
-    //const [itemsToSend, setItemsToSend] = useState
     const SaveList = async () => {
         try {
-            const payload: ItemToSend[] = items.map(item => ({
+            const payload: ItemToSend[] = items.filter(item => item.name && item.name.trim() !== "").map(item => ({
                 Name: item.name,
-                Price: parseInt(item.price),
-                Quantity: parseInt(item.quantity),
+                Price: Number(item.price) || 0,
+                Quantity: Number(item.quantity) || 0,
                 IsChecked: item.isChecked
             }));
-            console.log(listId);
-            console.log(JSON.stringify(payload))
                 const response = await fetch(`https://localhost:7262/api/shoplist/${listId}`, {
                 method: "PUT",
                 credentials: "include",
@@ -260,7 +283,7 @@ export default function App() {
         return (
             <div>
                 
-                    <SidebarProvider className='flex'>
+                <SidebarProvider className='flex'>
                     <SidebarInset>
 
 
@@ -302,7 +325,7 @@ export default function App() {
                                             value={item.quantity}
                                             onChange={(e) => updateItem(item.id, 'quantity', e.target.value)}
                                             onKeyDown={(e) => {
-                                                if (!/[0-9]/.test(e.key) && e.key !== 'Tab') { e.preventDefault(); }
+                                                if (!/[0-9]/.test(e.key) && e.key !== 'Tab' && e.key !== 'Backspace') { e.preventDefault(); }
                                                 handleKeyDown(e, index)
                                             }}
                                             className="w-1/8 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -316,7 +339,7 @@ export default function App() {
                                             inputMode="decimal"
                                             onChange={(e) => updateItem(item.id, 'price', e.target.value)}
                                             onKeyDown={(e) => {
-                                                if (!/[0-9]/.test(e.key)) { e.preventDefault(); }
+                                                if (!/[0-9]/.test(e.key) && e.key !== 'Backspace') { e.preventDefault(); }
                                                 handleKeyDown(e, index)
                                             }}
                                             className="w-1/8 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -331,25 +354,11 @@ export default function App() {
 
                         <div>
                             <Button onClick={() => CreateList()}>Create List</Button>
-                            <Button onClick={() => LoadList()}>Open List</Button>
                             <Button onClick={() => SaveList()}>Save List</Button>
                             <Button onClick={() => DeleteList()}>Delete List</Button>
                         </div>
 
 
-
-                        <div id="mySidenav" className="sidenav">
-                            <a className="closebtn" onClick={() => closeNav()}>&times;</a>
-                            <a href="#">About</a>
-                            <a href="#">Services</a>
-                            <a href="#">Clients</a>
-                            <a href="#">Contact</a>
-                        </div>
-
-                        <span onClick={() => openNav()}>open</span>
-
-                        <div id="main">
-                        </div>
 
                         <div>
                             <button onClick={() => Login()}>Log in with Google</button>
@@ -366,8 +375,14 @@ export default function App() {
                         </SidebarInset>
                         <Sidebar>
                             <main>
-                                <SidebarTrigger />
-                                h
+                                <SidebarTrigger/>
+                            <ul className="list-disc pl-5 space-y-2">
+                                {userLists.map((list) => (
+                                    <li key={list.id}>
+                                        <CustomTrigger children={list.title } onClick={() => LoadList(list.id)}></CustomTrigger>
+                                    </li>
+                                )) }
+                            </ul>
                             </main>
                         </Sidebar>
                     </SidebarProvider>
