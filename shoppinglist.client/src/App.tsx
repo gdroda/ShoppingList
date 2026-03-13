@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button.js';
 import { Sidebar, SidebarTrigger, SidebarProvider, useSidebar, SidebarInset } from '@/components/ui/sidebar.js';
 import { Input } from '@/components/ui/input.js';
 import { useDebounce } from './debounce.tsx';
+import { NameModal } from './RenameModal.js';
 
 interface User { 
     name: string;
@@ -41,6 +42,12 @@ export default function App() {
     ]);
 
     const debouncedSave = useDebounce(items, 1000)
+
+    const [isRenameOpen, setIsRenameOpen] = useState(false);
+    const handleNameSubmit = (newName: string) => {
+        console.log(newName);
+        setIsRenameOpen(false);
+    }
 
     const inputRefs = useRef([]);
 
@@ -211,10 +218,7 @@ export default function App() {
             }, 10);
         }
 
-        if (e.key === 'Backspace' && items[index].name.length == 1 && items.length == 1) {
-            items[index].quantity = '';
-            items[index].price = '';
-        }
+        
 
         if (e.key === 'Backspace' && items[index].name === '' && items.length > 1) {
             e.preventDefault();
@@ -227,6 +231,13 @@ export default function App() {
         }
     };
 
+    const handleChange = (e, index) => {
+        console.log(items[index].name.length)
+        if (items[index].name.length === 1 && items.length <= 1) {
+            items[index].quantity = '';
+            items[index].price = '';
+        }
+    }
 
 
 
@@ -313,6 +324,8 @@ export default function App() {
         return (
             <div>
                 
+                
+
                 <SidebarProvider className='flex'>
                     <SidebarInset>
 
@@ -321,14 +334,18 @@ export default function App() {
 
 
                         <SidebarTrigger />
-                        <div className="w-full items-center">
-                            <h2>My Shopping List</h2>
+                        <div className="w-full">
+                            <div className="flex flex-row md:flex justify-start gap-25 p-1">
+                                <h2>My Shopping List</h2>
+                                <Button onClick={() => setIsRenameOpen(true) }>Rename</Button>
+                            </div>
+                            
                             <div className="flex flex-col md:flex-col items-center py-10 " >
                                 {items.map((item, index) => (
                                     <div
                                         key={item.id}
                                         className={`flex flex-row md:flex-row items-center gap-1 p-0.5 
-                                ${item.isChecked ? `line-through text-gray-400 italic bg-gray-50` : `text-gray-900`}`}
+                                ${item.isChecked ? `line-through text-gray-400 bg-gray-50` : `text-gray-900`}`}
                                     >
                                         <input
                                             type="checkbox"
@@ -342,7 +359,7 @@ export default function App() {
                                             value={item.name}
                                             placeholder="Item name..."
                                             spellCheck="false"
-                                            onChange={(e) => updateItem(item.id, 'name', e.target.value)}
+                                            onChange={(e) => { updateItem(item.id, 'name', e.target.value); handleChange(e, index); }}
                                             onKeyDown={(e) => handleKeyDown(e, index)}
                                             enterKeyHint="enter"
                                             className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -404,7 +421,7 @@ export default function App() {
                         </SidebarInset>
                         <Sidebar>
                             <main>
-                                <SidebarTrigger/>
+                            <SidebarTrigger className="flex items-end"/>
                             <ul className="list-disc pl-5 space-y-2">
                                 {userLists.map((list) => (
                                     <li key={list.id}>
@@ -416,10 +433,11 @@ export default function App() {
                         </Sidebar>
                     </SidebarProvider>
 
-                
-
-                
-
+                <NameModal
+                    isOpen={isRenameOpen}
+                    onClose={() => setIsRenameOpen(false)}
+                    onSubmit={handleNameSubmit }
+                />
             </div>
         )
         
