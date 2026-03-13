@@ -35,6 +35,7 @@ export default function App() {
     const [userData, setUserData] = useState < User | null > (null);
     const [isLoading, setLoading] = useState(true);
     const [listId, setListId] = useState();
+    const [listTitle, setListTitle] = useState();
     const [userLists, setUserLists] = useState([]);
 
     const [items, setItems] = useState([
@@ -43,11 +44,31 @@ export default function App() {
 
     const debouncedSave = useDebounce(items, 1000)
 
+
+
     const [isRenameOpen, setIsRenameOpen] = useState(false);
-    const handleNameSubmit = (newName: string) => {
-        console.log(newName);
+    const handleNameSubmit = async (newName: string) => {
+        try {
+            const response = await fetch(`https://localhost:7262/api/shoplist/rename/${listId}`, {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ Title: newName })
+            });
+            if (response.ok) {
+                console.log("List Renamed Successfully.");
+                LoadLists();
+            }
+        }
+        catch (error) {
+            console.log("Rename list failed.", error);
+        }
         setIsRenameOpen(false);
     }
+
+
 
     const inputRefs = useRef([]);
 
@@ -75,24 +96,7 @@ export default function App() {
                     setLoading(false);
                 }
 
-                const loadLists = async () => {
-                    try {
-                        const resp = await fetch("https://localhost:7262/api/shoplist", {
-                            method: "GET",
-                            credentials: "include"
-                        })
-                        if (resp.ok) {
-                            const data = await resp.json();
-                            setUserLists(data)
-                        } else {
-                            setUserLists(null);
-                        }
-                    }
-                    catch (error) {
-                        console.log(error);
-                    }
-                }
-                loadLists();
+                LoadLists();
             }
             checkLoginStatus();
         }
@@ -100,7 +104,23 @@ export default function App() {
     }, []);
 
 
-
+    const LoadLists = async () => {
+        try {
+            const resp = await fetch("https://localhost:7262/api/shoplist", {
+                method: "GET",
+                credentials: "include"
+            })
+            if (resp.ok) {
+                const data = await resp.json();
+                setUserLists(data)
+            } else {
+                setUserLists(null);
+            }
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
 
 
 
@@ -120,6 +140,7 @@ export default function App() {
                 if (resp.ok) {
                     const data = await resp.json();
                     setListId(data.id);
+                    setListTitle(data.title);
                     const safeData = Array.isArray(data.listedItems) ? data.listedItems : (data.listedItems?.items || []);
                     const mappedItems = safeData.map((itemDB: any, index: number) => ({
                         id: itemDB.id === 0 ? `temp-${index}-${Date.now()}` : itemDB.id,  //temp for unique ID
@@ -336,7 +357,7 @@ export default function App() {
                         <SidebarTrigger />
                         <div className="w-full">
                             <div className="flex flex-row md:flex justify-start gap-25 p-1">
-                                <h2>My Shopping List</h2>
+                                <h2>{listId? listTitle : "Temporary List"}</h2>
                                 <Button onClick={() => setIsRenameOpen(true) }>Rename</Button>
                             </div>
                             

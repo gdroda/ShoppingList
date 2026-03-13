@@ -11,6 +11,7 @@ namespace ShoppingList.Server.Services
         public Task<ShopListGetDTO> GetShopListId(int id, int userId);
         public Task<List<ShopListGetDTO>> GetAllShopLists(int userId);
         public Task<ShopListGetDTO> UpdateShopList(ItemCreateDTO[] itemDTO, int listId, int userId);
+        public Task<string> RenameList(int listId, int userId, string newName);
         public Task<string> DeleteList(int listId, int userId);
     }
     public class ShopListService: IShopListService
@@ -92,6 +93,23 @@ namespace ShoppingList.Server.Services
                 }
                 await _dbContext.SaveChangesAsync();
                 return new ShopListGetDTO { Title = currentList.Title };
+            }
+            else return null;
+        }
+
+        public async Task<string> RenameList(int listId, int userId, string newName)
+        {
+            var listToRename = _dbContext.ShopLists
+                .Where(s => s.Id == listId)
+                .Where(s => s.UserId == userId)
+                .Include(i => i.ListedItems)
+                .FirstOrDefault();
+            
+            if (listToRename != null)
+            {
+                listToRename.Title = newName;
+                await _dbContext.SaveChangesAsync();
+                return ($"{listToRename} has changed name to {newName}");
             }
             else return null;
         }

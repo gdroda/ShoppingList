@@ -77,6 +77,25 @@ namespace ShoppingList.Server.Controllers
         }
 
         [Authorize]
+        [HttpPut("rename/{listId}")]
+        public async Task<ActionResult<ShopList>> RenameShopList(int listId, [FromBody] ShopListCreateDTO titleOnly)
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+                var user = await _userService.GetUser(email);
+                if (user != null)
+                {
+                    var response = await _shopListService.RenameList(listId, user.Id, titleOnly.Title);
+                    if (response != null) return Ok(response);
+                    else return BadRequest();
+                }
+                else return NotFound();
+            }
+            return Unauthorized();
+        }
+
+        [Authorize]
         [HttpPut("{listId}")]
         public async Task<ActionResult<ShopList>> UpdateShopList([FromBody] ItemCreateDTO[] itemDTO, int listId)
         {
