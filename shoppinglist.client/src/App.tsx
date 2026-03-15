@@ -20,8 +20,7 @@ export function CustomTrigger({
 }: React.ComponentProps<typeof Button>) {
     const { toggleSidebar } = useSidebar()
 
-    return <div className="flex flex-row md:flex-row">
-        <Button
+    return <Button
             className={className}
             onClick={(event) => {
                 onClick?.(event)
@@ -29,8 +28,6 @@ export function CustomTrigger({
             }}
             {...props}
         >{children}</Button>
-        <Button>X</Button>
-    </div>
 }
 
 
@@ -45,7 +42,7 @@ export default function App() {
         { id: Date.now(), isChecked: false, name: '', quantity: '', price: '' }
     ]);
 
-    const debouncedSave = useDebounce(items, 1000)
+    const debouncedSave = useDebounce(items, 500)
 
 
 
@@ -129,7 +126,12 @@ export default function App() {
 
     useEffect(() => {
         if (!isLoading) {
-            LoadList(userLists[0].id)
+            if (listId != null) {
+                LoadList(listId);
+            } else {
+                LoadList(userLists[0].id)
+            }
+            
         }
     }, [userLists])
 
@@ -150,7 +152,7 @@ export default function App() {
                         name: itemDB.name || '',
                         quantity: itemDB.quantity || '',
                         price: itemDB.price || '',
-                        isChecked: false
+                        isChecked: itemDB.isChecked || false
                     }));
                     const emptyRow = {
                         id: Date.now(),
@@ -324,6 +326,8 @@ export default function App() {
             });
             if (response.ok) {
                 console.log("Successfully deleted.");
+                setListId(null);
+                LoadLists();
             }
         }
         catch (error) {
@@ -332,17 +336,6 @@ export default function App() {
     }
 
 
-
-
-    /* Set the width of the side navigation to 250px */
-    function openNav() {
-        document.getElementById("mySidenav").style.width = "250px";
-    }
-
-    /* Set the width of the side navigation to 0 */
-    function closeNav() {
-        document.getElementById("mySidenav").style.width = "0";
-    } 
 
 
     if (items) {
@@ -453,7 +446,10 @@ export default function App() {
                             <ul className="list-disc pl-5 space-y-2">
                                 {userLists.map((list) => (
                                     <li key={list.id}>
-                                        <CustomTrigger children={list.title } onClick={() => LoadList(list.id)}></CustomTrigger>
+                                        <div className="flex flex-row md:flex-row">
+                                        <CustomTrigger children={list.title} onClick={() => LoadList(list.id)}></CustomTrigger>
+                                            <Button onClick={() => DeleteList(list.id)}>X</Button>
+                                        </div>
                                     </li>
                                 )) }
                             </ul>
