@@ -385,7 +385,7 @@ export default function App() {
                                         <input
                                             type="text"
                                             placeholder="Qty"
-                                            maxLength="2"
+                                            maxLength="3"
                                             inputMode="decimal"
                                             value={item.quantity}
                                             onChange={(e) => updateItem(item.id, 'quantity', e.target.value)}
@@ -398,7 +398,7 @@ export default function App() {
                                         />
                                         <input
                                             type="text"
-                                            maxLength="2"
+                                            maxLength="4"
                                             placeholder="$"
                                             value={item.price}
                                             inputMode="decimal"
@@ -417,19 +417,13 @@ export default function App() {
 
 
 
-                        <div>
-                            <Button onClick={() => CreateList()}>Create List</Button>
-                            <Button onClick={() => DeleteList()}>Delete List</Button>
-                        </div>
-
-
 
                         <div>
-                            <button onClick={() => Login()}>Log in with Google</button>
+                            {userData ? 
+                                <Button onClick={() => Logout()}>Log out</Button>
+                                : <Button onClick={() => Login()}>Log in with Google</Button>}
+                            
                             <h2>{userData?.name}, {userData?.email}</h2>
-                        </div>
-                        <div>
-                            <button onClick={() => Logout()}>Log out</button>
                         </div>
 
 
