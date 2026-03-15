@@ -20,14 +20,17 @@ export function CustomTrigger({
 }: React.ComponentProps<typeof Button>) {
     const { toggleSidebar } = useSidebar()
 
-    return <Button
-        className={className}
-        onClick={(event) => {
-            onClick?.(event)
-            toggleSidebar()
-        }}
-        {...props }
-    >{children}</Button>
+    return <div className="flex flex-row md:flex-row">
+        <Button
+            className={className}
+            onClick={(event) => {
+                onClick?.(event)
+                toggleSidebar()
+            }}
+            {...props}
+        >{children}</Button>
+        <Button>X</Button>
+    </div>
 }
 
 
@@ -289,7 +292,7 @@ export default function App() {
     const CreateList = async () => {
         try {
             const payload = {
-                Title: "Testlist"
+                Title: "New List"
             }
             const response = await fetch('https://localhost:7262/api/shoplist/', {
                 method: "POST",
@@ -301,6 +304,7 @@ export default function App() {
             });
             if (response.ok) {
                 console.log("List Created Successfully.");
+                LoadLists();
             }
         }
         catch (error) {
@@ -312,9 +316,9 @@ export default function App() {
 
     
 
-    const DeleteList = async () => {
+    const DeleteList = async (id: Number) => {
         try {
-            const response = await fetch(`https://localhost:7262/api/shoplist/${listId}`, {
+            const response = await fetch(`https://localhost:7262/api/shoplist/${id}`, {
                 method: "DELETE",
                 credentials: "include",
             });
@@ -352,9 +356,9 @@ export default function App() {
 
 
 
-
-
                         <SidebarTrigger />
+
+                        
                         <div className="w-full">
                             <div className="flex flex-row md:flex justify-start gap-25 p-1">
                                 <h2>{listId? listTitle : "Temporary List"}</h2>
@@ -441,8 +445,11 @@ export default function App() {
 
                         </SidebarInset>
                         <Sidebar>
-                            <main>
-                            <SidebarTrigger className="flex items-end"/>
+                        <main>
+                            <div className="flex flex-row md:flex-row">
+                                <SidebarTrigger className="flex items-end" />
+                                <Button onClick={() => CreateList() }>Create List</Button>
+                            </div>
                             <ul className="list-disc pl-5 space-y-2">
                                 {userLists.map((list) => (
                                     <li key={list.id}>
