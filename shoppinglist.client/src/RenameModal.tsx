@@ -1,14 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button.js';
 
 interface NameModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (name: string) => void;
+    currentValue: string
 }
 
-export function NameModal({ isOpen, onClose, onSubmit }: NameModalProps) {
-    const [inputValue, setInputValue] = useState('');
+export function NameModal({ isOpen, onClose, onSubmit, currentValue }: NameModalProps) {
+    const [inputValue, setInputValue] = useState(currentValue || '');
+
+    useEffect(() => {
+        if (isOpen) {
+            setInputValue(currentValue);
+        }
+    }, [isOpen, currentValue]);
 
     if (!isOpen) return null;
 

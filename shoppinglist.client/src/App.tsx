@@ -34,6 +34,7 @@ export function CustomTrigger({
 export default function App() {
     const [userData, setUserData] = useState < User | null > (null);
     const [isLoading, setLoading] = useState(true);
+    const [isGuest, setIsGuest] = useState(true);
     const [listId, setListId] = useState();
     const [listTitle, setListTitle] = useState();
     const [userLists, setUserLists] = useState([]);
@@ -85,8 +86,10 @@ export default function App() {
                     if (resp.ok) {
                         const data = await resp.json();
                         setUserData(data);
+                        setIsGuest(false);
                     } else {
                         setUserData(null);
+                        setIsGuest(true);
                     }
                 }
                 catch (error) {
@@ -95,8 +98,6 @@ export default function App() {
                 finally {
                     setLoading(false);
                 }
-
-                LoadLists();
             }
             checkLoginStatus();
         }
@@ -123,7 +124,16 @@ export default function App() {
     }
 
 
+    //Runs at start to load lists depending on if is guest or not.
+    useEffect(() => {
+        if (!isLoading && !isGuest) {
+            LoadLists();
+        }
+    }, [isGuest])
 
+
+
+    //Runs when all lists need to be loaded
     useEffect(() => {
         if (!isLoading) {
             if (listId != null) {
@@ -131,7 +141,6 @@ export default function App() {
             } else {
                 LoadList(userLists[0].id)
             }
-            
         }
     }, [userLists])
 
@@ -210,7 +219,7 @@ export default function App() {
     
 
     useEffect(() => {
-        if (debouncedSave && !isLoading) {
+        if (debouncedSave && !isLoading && !isGuest) {
             SaveList();
         }
     }, [debouncedSave])
@@ -283,6 +292,7 @@ export default function App() {
             });
             if (response.ok) {
                 setUserData(null);
+                setIsGuest(true);
                 window.location.href = "https://localhost:64099";
             }
         }
@@ -340,11 +350,11 @@ export default function App() {
 
     if (items) {
         return (
-            <div>
+            <div className="fixed">
                 
                 
 
-                <SidebarProvider className='flex'>
+                <SidebarProvider defaultOpen={false}>
                     <SidebarInset>
 
 
@@ -355,7 +365,7 @@ export default function App() {
                         <div className="w-full">
                             <div className="flex flex-row md:flex justify-start gap-25 p-1">
                                 <h2>{listId? listTitle : "Temporary List"}</h2>
-                                <Button onClick={() => setIsRenameOpen(true) }>Rename</Button>
+                                <Button disabled={isGuest? true: false } onClick={() => setIsRenameOpen(true) }>Rename</Button>
                             </div>
                             
                             <div className="flex flex-col md:flex-col items-center py-10 " >
@@ -391,7 +401,7 @@ export default function App() {
                                             onChange={(e) => updateItem(item.id, 'quantity', e.target.value)}
                                             onKeyDown={(e) => {
                                                 if (!/[0-9]/.test(e.key) && e.key !== 'Tab' && e.key !== 'Backspace') { e.preventDefault(); }
-                                                handleKeyDown(e, index)
+                                                //handleKeyDown(e, index)
                                             }}
                                             className="w-1/8 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
 
@@ -405,7 +415,7 @@ export default function App() {
                                             onChange={(e) => updateItem(item.id, 'price', e.target.value)}
                                             onKeyDown={(e) => {
                                                 if (!/[0-9]/.test(e.key) && e.key !== 'Backspace') { e.preventDefault(); }
-                                                handleKeyDown(e, index)
+                                                //handleKeyDown(e, index)
                                             }}
                                             className="w-1/8 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
 
@@ -419,6 +429,8 @@ export default function App() {
 
 
                         <div>
+                            {isGuest ? <h2>Log in to save your lists!</h2> : ""}
+                            <br/>
                             {userData ? 
                                 <Button onClick={() => Logout()}>Log out</Button>
                                 : <Button onClick={() => Login()}>Log in with Google</Button>}
@@ -435,7 +447,7 @@ export default function App() {
                         <main>
                             <div className="flex flex-row md:flex-row">
                                 <SidebarTrigger className="flex items-end" />
-                                <Button onClick={() => CreateList() }>Create List</Button>
+                                <Button disabled={isGuest ? true : false} onClick={() => CreateList() }>Create List</Button>
                             </div>
                             <ul className="list-disc pl-5 space-y-2">
                                 {userLists.map((list) => (
@@ -454,7 +466,8 @@ export default function App() {
                 <NameModal
                     isOpen={isRenameOpen}
                     onClose={() => setIsRenameOpen(false)}
-                    onSubmit={handleNameSubmit }
+                    onSubmit={handleNameSubmit}
+                    currentValue={listTitle}
                 />
             </div>
         )
