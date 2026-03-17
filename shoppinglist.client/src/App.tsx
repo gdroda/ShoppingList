@@ -5,6 +5,8 @@ import { Sidebar, SidebarTrigger, SidebarProvider, useSidebar, SidebarInset } fr
 import { Input } from '@/components/ui/input.js';
 import { useDebounce } from './debounce.tsx';
 import { NameModal } from './RenameModal.js';
+import { ConfirmModal } from './ConfirmModal.js';
+import { Delete } from 'lucide-react';
 
 interface User { 
     name: string;
@@ -69,6 +71,12 @@ export default function App() {
         setIsRenameOpen(false);
     }
 
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [listIdToDelete, setListIdToDelete] = useState();
+    const handleConfirmSubmit = async (listId: number) => {
+        await DeleteList(listId);
+        setIsConfirmOpen(false);
+    }
 
 
     const inputRefs = useRef([]);
@@ -454,7 +462,7 @@ export default function App() {
                                     <li key={list.id}>
                                         <div className="flex flex-row md:flex-row">
                                         <CustomTrigger children={list.title} onClick={() => LoadList(list.id)}></CustomTrigger>
-                                            <Button onClick={() => DeleteList(list.id)}>X</Button>
+                                            <Button onClick={() => {setListIdToDelete(list.id); setIsConfirmOpen(true); }}>X</Button>
                                         </div>
                                     </li>
                                 )) }
@@ -468,6 +476,13 @@ export default function App() {
                     onClose={() => setIsRenameOpen(false)}
                     onSubmit={handleNameSubmit}
                     currentValue={listTitle}
+                />
+
+                <ConfirmModal
+                    isOpen={isConfirmOpen}
+                    onClose={() => setIsConfirmOpen(false)}
+                    onSubmit={handleConfirmSubmit}
+                    listId={listIdToDelete}
                 />
             </div>
         )
