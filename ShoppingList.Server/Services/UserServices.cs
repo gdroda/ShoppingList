@@ -6,7 +6,7 @@ namespace ShoppingList.Server.Services
 {
     public interface IUserServices
     {
-        public Task<UserGetDTO> GetUser(string name);
+        public Task<UserGetDTO> GetUser(string email);
         public Task<User> CreateUser(UserCreateDTO userDTO);
     }
 

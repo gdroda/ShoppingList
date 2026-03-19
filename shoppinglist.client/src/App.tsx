@@ -4,9 +4,8 @@ import { Button } from '@/components/ui/button.js';
 import { Sidebar, SidebarTrigger, SidebarProvider, useSidebar, SidebarInset } from '@/components/ui/sidebar.js';
 import { Input } from '@/components/ui/input.js';
 import { useDebounce } from './debounce.tsx';
-import { NameModal } from './RenameModal.js';
+import { NameModal, ShareModal } from './Modals.js';
 import { ConfirmModal } from './ConfirmModal.js';
-import { Delete } from 'lucide-react';
 
 interface User { 
     name: string;
@@ -48,7 +47,7 @@ export default function App() {
     const debouncedSave = useDebounce(items, 500)
 
 
-
+    //Renaming window modal function
     const [isRenameOpen, setIsRenameOpen] = useState(false);
     const handleNameSubmit = async (newName: string) => {
         try {
@@ -62,7 +61,7 @@ export default function App() {
             });
             if (response.ok) {
                 console.log("List Renamed Successfully.");
-                LoadLists();
+                LoadAllLists();
             }
         }
         catch (error) {
@@ -71,6 +70,7 @@ export default function App() {
         setIsRenameOpen(false);
     }
 
+    //Confirmation window modal function
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [listIdToDelete, setListIdToDelete] = useState();
     const handleConfirmSubmit = async (listId: number) => {
@@ -78,10 +78,17 @@ export default function App() {
         setIsConfirmOpen(false);
     }
 
+    //Sharing window modal function
+    const [isShareOpen, setIsShareOpen] = useState(false);
+    const handleShareSubmit = async () => {
+        console.log("handle share")
+        setIsShareOpen(false);
+    }
+
 
     const inputRefs = useRef([]);
 
-
+    //User fetch and authentication
     useEffect(() => {
         const initiateAuthorization = async () => {
 
@@ -113,7 +120,8 @@ export default function App() {
     }, []);
 
 
-    const LoadLists = async () => {
+
+    const LoadAllLists = async () => {
         try {
             const resp = await fetch("https://localhost:7262/api/shoplist", {
                 method: "GET",
@@ -121,7 +129,7 @@ export default function App() {
             })
             if (resp.ok) {
                 const data = await resp.json();
-                setUserLists(data)
+                setUserLists(data);
             } else {
                 setUserLists(null);
             }
@@ -132,64 +140,62 @@ export default function App() {
     }
 
 
-    //Runs at start to load lists depending on if is guest or not.
+    //Runs at start to load lists if not a guest
     useEffect(() => {
         if (!isLoading && !isGuest) {
-            LoadLists();
+            LoadAllLists();
         }
     }, [isGuest])
 
 
 
-    //Runs when all lists need to be loaded
+    //Refreshes the lists and picks current active or first
     useEffect(() => {
         if (!isLoading) {
             if (listId != null) {
                 LoadList(listId);
-            } else {
+            } else if (userLists.length > 0) {
                 LoadList(userLists[0].id)
+            } else {
+                CreateList();
             }
         }
     }, [userLists])
 
-    const LoadList = (id) => {
-        const getList = async () => {
-            try {
-                const resp = await fetch(`https://localhost:7262/api/shoplist/${id}`, {
-                    method: "GET",
-                    credentials: "include"
-                })
-                if (resp.ok) {
-                    const data = await resp.json();
-                    setListId(data.id);
-                    setListTitle(data.title);
-                    const safeData = Array.isArray(data.listedItems) ? data.listedItems : (data.listedItems?.items || []);
-                    const mappedItems = safeData.map((itemDB: any, index: number) => ({
-                        id: itemDB.id === 0 ? `temp-${index}-${Date.now()}` : itemDB.id,  //temp for unique ID
-                        name: itemDB.name || '',
-                        quantity: itemDB.quantity || '',
-                        price: itemDB.price || '',
-                        isChecked: itemDB.isChecked || false
-                    }));
-                    const emptyRow = {
-                        id: Date.now(),
-                        name: '',
-                        quantity: '',
-                        price: '',
-                        isChecked: false
-                    }
-                    setItems([...mappedItems, emptyRow]);
 
+    const LoadList = async (id) => {
+        try {
+            const resp = await fetch(`https://localhost:7262/api/shoplist/${id}`, {
+                method: "GET",
+                credentials: "include"
+            })
+            if (resp.ok) {
+                const data = await resp.json();
+                setListId(data.id);
+                setListTitle(data.title);
+                const safeData = Array.isArray(data.listedItems) ? data.listedItems : (data.listedItems?.items || []);
+                const mappedItems = safeData.map((itemDB: any, index: number) => ({
+                    id: itemDB.id === 0 ? `temp-${index}-${Date.now()}` : itemDB.id,  //temp for unique ID
+                    name: itemDB.name || '',
+                    quantity: itemDB.quantity || '',
+                    price: itemDB.price || '',
+                    isChecked: itemDB.isChecked || false
+                }));
+                const emptyRow = {
+                    id: Date.now(),
+                    name: '',
+                    quantity: '',
+                    price: '',
+                    isChecked: false
                 }
-            }
-            catch (error) {
-                console.log(error);
+                setItems([...mappedItems, emptyRow]);
+
             }
         }
-        getList();
-    };
-
-
+        catch (error) {
+            console.log(error);
+        }
+    }
 
 
 
@@ -324,7 +330,7 @@ export default function App() {
             });
             if (response.ok) {
                 console.log("List Created Successfully.");
-                LoadLists();
+                LoadAllLists();
             }
         }
         catch (error) {
@@ -345,7 +351,7 @@ export default function App() {
             if (response.ok) {
                 console.log("Successfully deleted.");
                 setListId(null);
-                LoadLists();
+                LoadAllLists();
             }
         }
         catch (error) {
@@ -371,9 +377,12 @@ export default function App() {
 
                         
                         <div className="w-full">
-                            <div className="flex flex-row md:flex justify-start gap-25 p-1">
-                                <h2>{listId? listTitle : "Temporary List"}</h2>
-                                <Button disabled={isGuest? true: false } onClick={() => setIsRenameOpen(true) }>Rename</Button>
+                            <div className="flex flex-row md:flex-row justify-start gap-25 p-1">
+                                <h2>{listId ? listTitle : "Temporary List"}</h2>
+                                <div className="flex flex-row md:flex-row gap-2">
+                                    <Button disabled={isGuest ? true : false} onClick={() => setIsRenameOpen(true)}>Rename</Button>
+                                    <Button disabled={isGuest ? true : false} onClick={() => setIsShareOpen(true) }>Share</Button>
+                                </div>
                             </div>
                             
                             <div className="flex flex-col md:flex-col items-center py-10 " >
@@ -483,6 +492,13 @@ export default function App() {
                     onClose={() => setIsConfirmOpen(false)}
                     onSubmit={handleConfirmSubmit}
                     listId={listIdToDelete}
+                />
+
+                <ShareModal
+                    isOpen={isShareOpen}
+                    onClose={() => setIsShareOpen(false)}
+                    onSubmit={handleShareSubmit}
+                    listId={listId}
                 />
             </div>
         )

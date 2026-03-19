@@ -96,6 +96,30 @@ namespace ShoppingList.Server.Controllers
         }
 
         [Authorize]
+        [HttpPut("share/{listId}")]
+        public async Task<ActionResult<UserGetDTO>> ShareShopList(int listId, [FromBody] UserEmailOnlyDTO emailOnly)
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+                var user = await _userService.GetUser(email);
+                var userToShare = await _userService.GetUser(emailOnly.Email);
+                if (user != null)
+                {
+                    if (userToShare != null)
+                    {
+                        var response = await _shopListService.ShareList(listId, user.Id, userToShare);
+                        if (response != null) return Ok(response);
+                        else return BadRequest();
+                    }
+                    else return NotFound();
+                }
+                else return NotFound();
+            }
+            return Unauthorized();
+        }
+
+        [Authorize]
         [HttpPut("{listId}")]
         public async Task<ActionResult<ShopList>> UpdateShopList([FromBody] ItemCreateDTO[] itemDTO, int listId)
         {

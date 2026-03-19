@@ -13,16 +13,19 @@ namespace ShoppingList.Server.Services
         public Task<ShopListGetDTO> UpdateShopList(ItemCreateDTO[] itemDTO, int listId, int userId);
         public Task<string> RenameList(int listId, int userId, string newName);
         public Task<string> DeleteList(int listId, int userId);
+        public Task<UserGetDTO> ShareList(int listId, int userId, UserGetDTO userShare);
     }
     public class ShopListService: IShopListService
     {
         private readonly ListDBContext _dbContext;
         private readonly IItemServices _itemServices;
+        private readonly IUserServices _userServices;
 
-        public ShopListService(ListDBContext dbContext, IItemServices itemServices)
+        public ShopListService(ListDBContext dbContext, IItemServices itemServices, IUserServices userServices)
         {
             _dbContext = dbContext;
             _itemServices = itemServices;
+            _userServices = userServices;
         }
 
         public async Task<ShopListGetDTO> GetShopListId(int id, int userId)
@@ -132,6 +135,28 @@ namespace ShoppingList.Server.Services
                 _dbContext.ShopLists.Remove(listToDelete);
                 await _dbContext.SaveChangesAsync();
                 return ($"{listToDelete.Title} has been deleted");
+            }
+            else return null;
+            
+        }
+
+        public async Task<UserGetDTO> ShareList(int listId, int userId, UserGetDTO userShare)
+        {
+            var listToShare = _dbContext.ShopLists
+                .Where(s => s.Id == listId)
+                .Where(s => s.UserId == userId)
+                .Include(i => i.ListedItems)
+                .FirstOrDefault();
+
+            var user = _dbContext.Users
+                .Where(u => u.Id == userShare.Id)
+                .FirstOrDefault();
+
+            if (user != null && listToShare != null)
+            {
+                user.ShopLists.Add(listToShare);
+                await _dbContext.SaveChangesAsync();
+                return userShare;
             }
             else return null;
             

@@ -24,4 +24,9 @@ namespace ShoppingList.Server.Models
         public string Email { get; set; } = string.Empty;
         public string GoogleId { get; set; } = string.Empty;
     }
+
+    public class UserEmailOnlyDTO
+    {
+        public string Email { get; set; } = string.Empty;
+    }
 }
