@@ -80,8 +80,8 @@ export default function App() {
 
     //Sharing window modal function
     const [isShareOpen, setIsShareOpen] = useState(false);
-    const handleShareSubmit = async () => {
-        console.log("handle share")
+    const handleShareSubmit = async (email: string) => {
+        console.log(email)
         setIsShareOpen(false);
     }
 
@@ -378,7 +378,7 @@ export default function App() {
                         
                         <div className="w-full">
                             <div className="flex flex-row md:flex-row justify-start gap-25 p-1">
-                                <h2>{listId ? listTitle : "Temporary List"}</h2>
+                                <h2>{listId ? listTitle : "New List"}</h2>
                                 <div className="flex flex-row md:flex-row gap-2">
                                     <Button disabled={isGuest ? true : false} onClick={() => setIsRenameOpen(true)}>Rename</Button>
                                     <Button disabled={isGuest ? true : false} onClick={() => setIsShareOpen(true) }>Share</Button>
@@ -412,7 +412,7 @@ export default function App() {
                                         <input
                                             type="text"
                                             placeholder="Qty"
-                                            maxLength="3"
+                                            maxLength={3}
                                             inputMode="decimal"
                                             value={item.quantity}
                                             onChange={(e) => updateItem(item.id, 'quantity', e.target.value)}
@@ -425,7 +425,7 @@ export default function App() {
                                         />
                                         <input
                                             type="text"
-                                            maxLength="4"
+                                            maxLength={4}
                                             placeholder="$"
                                             value={item.price}
                                             inputMode="decimal"

@@ -11,7 +11,7 @@ using ShoppingList.Server.Data;
 namespace ShoppingList.Server.Migrations
 {
     [DbContext(typeof(ListDBContext))]
-    [Migration("20260319174605_InitialCreate")]
+    [Migration("20260323225723_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -23,6 +23,21 @@ namespace ShoppingList.Server.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("ShopListUser", b =>
+                {
+                    b.Property<int>("ShopListsId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UsersId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ShopListsId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("ShopListUser");
+                });
 
             modelBuilder.Entity("ShoppingList.Server.Models.Item", b =>
                 {
@@ -72,8 +87,6 @@ namespace ShoppingList.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("ShopLists");
                 });
 
@@ -102,6 +115,21 @@ namespace ShoppingList.Server.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("ShopListUser", b =>
+                {
+                    b.HasOne("ShoppingList.Server.Models.ShopList", null)
+                        .WithMany()
+                        .HasForeignKey("ShopListsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShoppingList.Server.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("ShoppingList.Server.Models.Item", b =>
                 {
                     b.HasOne("ShoppingList.Server.Models.ShopList", "ShopList")
@@ -115,23 +143,7 @@ namespace ShoppingList.Server.Migrations
 
             modelBuilder.Entity("ShoppingList.Server.Models.ShopList", b =>
                 {
-                    b.HasOne("ShoppingList.Server.Models.User", "User")
-                        .WithMany("ShopLists")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ShoppingList.Server.Models.ShopList", b =>
-                {
                     b.Navigation("ListedItems");
-                });
-
-            modelBuilder.Entity("ShoppingList.Server.Models.User", b =>
-                {
-                    b.Navigation("ShopLists");
                 });
 #pragma warning restore 612, 618
         }

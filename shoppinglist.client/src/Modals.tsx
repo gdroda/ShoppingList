@@ -51,7 +51,11 @@ interface ShareModalProps {
 
 interface User {
     name: string;
-    email: string
+    email: string;
+}
+
+interface EmailToSend {
+    Email: string;
 }
 
 export function ShareModal({ isOpen, onClose, onSubmit, listId }: ShareModalProps) {
@@ -65,6 +69,7 @@ export function ShareModal({ isOpen, onClose, onSubmit, listId }: ShareModalProp
 
     const FetchUser = async (mail: string) => {
         setIsSearching(true);
+        const payload: EmailToSend = { Email: mail };
         try {
             const response = await fetch(`https://localhost:7262/api/shoplist/share/${listId}`, {
                 method: "PUT",
@@ -72,7 +77,7 @@ export function ShareModal({ isOpen, onClose, onSubmit, listId }: ShareModalProp
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(`Email:${mail}`)
+                body: JSON.stringify(payload)
             });
             if (response.ok) {
                 const data = await response.json();
@@ -81,6 +86,7 @@ export function ShareModal({ isOpen, onClose, onSubmit, listId }: ShareModalProp
             }
             else {
                 setUserFound(null);
+                console.log("User not found.");
             }
         }
         catch (error) {

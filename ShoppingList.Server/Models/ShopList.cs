@@ -6,7 +6,7 @@ namespace ShoppingList.Server.Models
     {
         public int Id { get; set; }
         public int UserId { get; set; }
-        public required User User { get; set; }
+        public List<User> Users { get; set; } = [];
         public string Title { get; set; } = string.Empty;
         public List<Item> ListedItems { get; set; } = [];
     }

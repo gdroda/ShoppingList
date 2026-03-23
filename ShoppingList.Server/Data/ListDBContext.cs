@@ -14,8 +14,8 @@ namespace ShoppingList.Server.Data
         {
             modelBuilder.Entity<User>()
                 .HasMany(s => s.ShopLists)
-                .WithOne(u => u.User)
-                .HasForeignKey(s => s.UserId);
+                .WithMany(u => u.Users);
+
 
             modelBuilder.Entity<ShopList>()
                 .HasMany(s => s.ListedItems)

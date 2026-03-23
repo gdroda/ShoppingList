@@ -27,11 +27,11 @@ namespace ShoppingList.Server.Controllers
             if (User.Identity?.IsAuthenticated == true)
             {
                 var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
-                var user = await _userService.GetUser(email);
-                if (user != null)
+                if (email != null)
                 {
-                    var response = await _shopListService.GetShopListId(id, user.Id);
+                    var response = await _shopListService.GetShopListId(id, email);
                     if (response != null) return Ok(response);
+                    else return NotFound();
                 }
                 else return NotFound();
             }
@@ -45,14 +45,12 @@ namespace ShoppingList.Server.Controllers
             if (User.Identity?.IsAuthenticated == true)
             {
                 var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
-                var user = await _userService.GetUser(email);
-                if (user != null)
+                if (email != null)
                 {
-                    var response = await _shopListService.GetAllShopLists(user.Id);
+                    var response = await _shopListService.GetAllShopLists(email);
                     if (response != null) return Ok(response);
-                    else return BadRequest();
+                    else return NotFound();
                 }
-                else return NotFound();
             }
             return Unauthorized();
         }
