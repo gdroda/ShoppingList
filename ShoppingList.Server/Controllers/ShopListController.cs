@@ -31,7 +31,7 @@ namespace ShoppingList.Server.Controllers
                 {
                     var response = await _shopListService.GetShopListId(id, email);
                     if (response != null) return Ok(response);
-                    else return NotFound();
+                    else return BadRequest();
                 }
                 else return NotFound();
             }
@@ -49,8 +49,9 @@ namespace ShoppingList.Server.Controllers
                 {
                     var response = await _shopListService.GetAllShopLists(email);
                     if (response != null) return Ok(response);
-                    else return NotFound();
+                    else return BadRequest();
                 }
+                else return NotFound();
             }
             return Unauthorized();
         }
@@ -62,10 +63,9 @@ namespace ShoppingList.Server.Controllers
             if (User.Identity?.IsAuthenticated == true)
             {
                 var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
-                var user = await _userService.GetUser(email);
-                if (user != null)
+                if (email != null)
                 {
-                    var response = await _shopListService.CreateShopList(shopListCreateDTO, user.Id);
+                    var response = await _shopListService.CreateShopList(shopListCreateDTO, email);
                     if (response != null) return Ok(response);
                     else return BadRequest();
                 }
@@ -81,10 +81,9 @@ namespace ShoppingList.Server.Controllers
             if (User.Identity?.IsAuthenticated == true)
             {
                 var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
-                var user = await _userService.GetUser(email);
-                if (user != null)
+                if (email != null)
                 {
-                    var response = await _shopListService.RenameList(listId, user.Id, titleOnly.Title);
+                    var response = await _shopListService.RenameList(listId, email, titleOnly.Title);
                     if (response != null) return Ok(response);
                     else return BadRequest();
                 }
@@ -100,17 +99,11 @@ namespace ShoppingList.Server.Controllers
             if (User.Identity?.IsAuthenticated == true)
             {
                 var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
-                var user = await _userService.GetUser(email);
-                var userToShare = await _userService.GetUser(emailOnly.Email);
-                if (user != null)
+                if (email != null)
                 {
-                    if (userToShare != null)
-                    {
-                        var response = await _shopListService.ShareList(listId, user.Id, userToShare);
-                        if (response != null) return Ok(response);
-                        else return BadRequest();
-                    }
-                    else return NotFound();
+                    var response = await _shopListService.ShareList(listId, email, emailOnly);
+                    if (response != null) return Ok(response);
+                    else return BadRequest();
                 }
                 else return NotFound();
             }
@@ -124,10 +117,9 @@ namespace ShoppingList.Server.Controllers
             if (User.Identity?.IsAuthenticated == true)
             {
                 var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
-                var user = await _userService.GetUser(email);
-                if (user != null)
+                if (email != null)
                 {
-                    var response = await _shopListService.UpdateShopList(itemDTO, listId, user.Id);
+                    var response = await _shopListService.UpdateShopList(itemDTO, listId, email);
                     if (response != null) return Ok(response);
                     else return BadRequest();
                 }
@@ -143,10 +135,9 @@ namespace ShoppingList.Server.Controllers
             if (User.Identity?.IsAuthenticated == true)
             {
                 var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
-                var user = await _userService.GetUser(email);
-                if (user != null)
+                if (email != null)
                 {
-                    var response = await _shopListService.DeleteList(listId, user.Id);
+                    var response = await _shopListService.DeleteList(listId, email);
                     if (response != null) return Ok(response);
                     else return BadRequest();
                 }
