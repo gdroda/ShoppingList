@@ -1,11 +1,9 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using ShoppingList.Server.Data;
 using ShoppingList.Server.Services;
-using System.Text;
+using ShoppingList.Server.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,10 +46,12 @@ builder.Services.AddCors(opt => opt.AddPolicy("MyCorsPolicy", policy =>
     policy.WithOrigins("https://localhost:64099").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
 }));
 
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
 app.UseDefaultFiles();
+app.UseStaticFiles();
 app.MapStaticAssets();
 
 
@@ -72,5 +72,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
+app.MapHub<NotificationHubService>("/hub");
 
 app.Run();

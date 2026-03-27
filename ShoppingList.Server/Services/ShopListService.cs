@@ -54,7 +54,7 @@ namespace ShoppingList.Server.Services
             }
             catch (Exception err)
             {
-                Console.WriteLine($"Error: {err}");
+                Console.WriteLine($"Error: {err.Message}");
                 throw;
             }
         }
@@ -80,7 +80,7 @@ namespace ShoppingList.Server.Services
             }
             catch (Exception err)
             {
-                Console.WriteLine($"Error: {err}");
+                Console.WriteLine($"Error: {err.Message}");
                 throw;
             }
         }
@@ -104,7 +104,7 @@ namespace ShoppingList.Server.Services
             }
             catch (Exception err)
             {
-                Console.WriteLine($"Error: {err}");
+                Console.WriteLine($"Error: {err.Message}");
                 throw;
             }
         }
@@ -145,7 +145,7 @@ namespace ShoppingList.Server.Services
             }
             catch (Exception err)
             {
-                Console.WriteLine($"Error: {err}");
+                Console.WriteLine($"Error: {err.Message}");
                 throw;
             }
         }
@@ -178,7 +178,7 @@ namespace ShoppingList.Server.Services
             }
             catch (Exception err)
             {
-                Console.WriteLine($"Error: {err}");
+                Console.WriteLine($"Error: {err.Message}");
                 throw;
             }
         }
@@ -217,7 +217,7 @@ namespace ShoppingList.Server.Services
             }
             catch (Exception err)
             {
-                Console.WriteLine($"Error: {err}");
+                Console.WriteLine($"Error: {err.Message}");
                 throw;
             }
 
@@ -255,7 +255,7 @@ namespace ShoppingList.Server.Services
             }
             catch (Exception err)
             {
-                Console.WriteLine($"Error: {err}");
+                Console.WriteLine($"Error: {err.Message}");
                 throw;
             }
             

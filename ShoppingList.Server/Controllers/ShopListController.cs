@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using ShoppingList.Server.Hubs;
 using ShoppingList.Server.Models;
 using ShoppingList.Server.Services;
 using System.Security.Claims;
-using static Google.Apis.Requests.BatchRequest;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ShoppingList.Server.Controllers
 {
@@ -13,11 +13,11 @@ namespace ShoppingList.Server.Controllers
     public class ShopListController : ControllerBase
     {
         private readonly IShopListService _shopListService;
-        private readonly IUserServices _userService;
-        public ShopListController(IShopListService shopListService, IUserServices userService)
+        private readonly IHubContext<NotificationHubService, INotificationHubService> _hubContext;
+        public ShopListController(IShopListService shopListService, IHubContext<NotificationHubService, INotificationHubService> notificationHubService)
         {
             _shopListService = shopListService;
-            _userService = userService;
+            _hubContext = notificationHubService;
         }
 
         [Authorize]
@@ -102,7 +102,10 @@ namespace ShoppingList.Server.Controllers
                 if (email != null)
                 {
                     var response = await _shopListService.ShareList(listId, email, emailOnly);
-                    if (response != null) return Ok(response);
+                    if (response != null)
+                    {
+                        return Ok(response);
+                    }
                     else return BadRequest();
                 }
                 else return NotFound();
@@ -120,7 +123,11 @@ namespace ShoppingList.Server.Controllers
                 if (email != null)
                 {
                     var response = await _shopListService.UpdateShopList(itemDTO, listId, email);
-                    if (response != null) return Ok(response);
+                    if (response != null)
+                    {
+                        await _hubContext.Clients.Group($"list_{listId}").NewNotification(email, listId);
+                        return Ok(response);
+                    }
                     else return BadRequest();
                 }
                 else return NotFound();

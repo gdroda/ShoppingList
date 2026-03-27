@@ -21,26 +21,44 @@ namespace ShoppingList.Server.Services
 
         public async Task<UserGetDTO> GetUser(string email)
         {
-            var user = await _dbContext.Users
-                .Where(u => u.Email == email)
-                .Select(u => new UserGetDTO {
-                    Id = u.Id,
-                    Name = u.Name, 
-                    Email = u.Email,
-                    ShopListsGetDTO = u.ShopLists.Select(s => new ShopListGetDTO { Title = s.Title, ListedItems = s.ListedItems}).ToList() }).FirstOrDefaultAsync();
-            if (user != null)
+            try
             {
-                return user;
+                var user = await _dbContext.Users
+                .Where(u => u.Email == email)
+                .Select(u => new UserGetDTO
+                {
+                    Id = u.Id,
+                    Name = u.Name,
+                    Email = u.Email,
+                    ShopListsGetDTO = u.ShopLists.Select(s => new ShopListGetDTO { Title = s.Title, ListedItems = s.ListedItems }).ToList()
+                }).FirstOrDefaultAsync();
+                if (user != null)
+                {
+                    return user;
+                }
+                else return null;
             }
-            else return null;
+            catch (Exception err)
+            {
+                Console.WriteLine($"Error: {err.Message}");
+                throw;
+            }
         }
 
         public async Task<User> CreateUser(UserCreateDTO userDTO)
         {
-            var user = new User { Name = userDTO.Name, Email = userDTO.Email, GoogleId = userDTO.GoogleId };
-            var userCreation = await _dbContext.Users.AddAsync(user);
-            await _dbContext.SaveChangesAsync();
-            return userCreation.Entity;
+            try
+            {
+                var user = new User { Name = userDTO.Name, Email = userDTO.Email, GoogleId = userDTO.GoogleId };
+                var userCreation = await _dbContext.Users.AddAsync(user);
+                await _dbContext.SaveChangesAsync();
+                return userCreation.Entity;
+            }
+            catch (Exception err)
+            {
+                Console.WriteLine($"Error: {err.Message}");
+                throw;
+            }
         }
     }
 }

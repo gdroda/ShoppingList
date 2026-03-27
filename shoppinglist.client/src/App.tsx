@@ -6,13 +6,14 @@ import { Input } from '@/components/ui/input.js';
 import { useDebounce } from './debounce.tsx';
 import { NameModal, ShareModal } from './Modals.js';
 import { ConfirmModal } from './ConfirmModal.js';
+import { useNotificationSocket } from './SignalRNotifications.js';
 
 interface User { 
     name: string;
     email: string
 }
 
-
+//CUSTOM TRIGGER FOR SIDEBAR BUTTON
 export function CustomTrigger({
     className,
     onClick,
@@ -46,8 +47,10 @@ export default function App() {
 
     const debouncedSave = useDebounce(items, 500)
 
+    useNotificationSocket(listId, debouncedSave);
 
-    //Renaming window modal function
+    //MODALS
+    //RENAMING SUBMIT
     const [isRenameOpen, setIsRenameOpen] = useState(false);
     const handleNameSubmit = async (newName: string) => {
         try {
@@ -70,7 +73,7 @@ export default function App() {
         setIsRenameOpen(false);
     }
 
-    //Confirmation window modal function
+    //CONFIRMATION SUBMIT
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [listIdToDelete, setListIdToDelete] = useState();
     const handleConfirmSubmit = async (listId: number) => {
@@ -78,7 +81,7 @@ export default function App() {
         setIsConfirmOpen(false);
     }
 
-    //Sharing window modal function
+    //SHARING SUBMIT
     const [isShareOpen, setIsShareOpen] = useState(false);
     const handleShareSubmit = async (email: string) => {
         console.log(email)
@@ -88,7 +91,7 @@ export default function App() {
 
     const inputRefs = useRef([]);
 
-    //User fetch and authentication
+    //USER FETCH AND AUTHORIZATION
     useEffect(() => {
         const initiateAuthorization = async () => {
 
@@ -121,6 +124,8 @@ export default function App() {
 
 
 
+
+    //LIST LOADING
     const LoadAllLists = async () => {
         try {
             const resp = await fetch("https://localhost:7262/api/shoplist", {
@@ -138,29 +143,6 @@ export default function App() {
             console.log(error);
         }
     }
-
-
-    //Runs at start to load lists if not a guest
-    useEffect(() => {
-        if (!isLoading && !isGuest) {
-            LoadAllLists();
-        }
-    }, [isGuest])
-
-
-
-    //Refreshes the lists and picks current active or first
-    useEffect(() => {
-        if (!isLoading) {
-            if (listId != null) {
-                LoadList(listId);
-            } else if (userLists.length > 0) {
-                LoadList(userLists[0].id)
-            } else {
-                CreateList();
-            }
-        }
-    }, [userLists])
 
 
     const LoadList = async (id) => {
@@ -197,8 +179,33 @@ export default function App() {
         }
     }
 
+    //Runs at start to load lists if not a guest
+    useEffect(() => {
+        if (!isLoading && !isGuest) {
+            LoadAllLists();
+        }
+    }, [isGuest])
 
 
+
+    //Refreshes the lists and picks current active or first
+    useEffect(() => {
+        if (!isLoading) {
+            if (listId != null) {
+                LoadList(listId);
+            } else if (userLists.length > 0) {
+                LoadList(userLists[0].id)
+            } else {
+                CreateList();
+            }
+        }
+    }, [userLists])
+
+
+
+
+
+    // SAVE FUNCTION AND DEBOUNCE
     interface ItemToSend {
         Name: string,
         Price: number,
@@ -222,12 +229,9 @@ export default function App() {
                 },
                 body: JSON.stringify(payload)
             });
-            if (response.ok) {
-                console.log("List Saved Successfully.");
-            }
         }
         catch (error) {
-            console.log("Create list failed.", error);
+            console.log("List Save Failed.", error);
         }
     }
     
@@ -242,8 +246,7 @@ export default function App() {
 
 
 
-
-
+    //ITEM AND KEY HANDLES
     const updateItem = (id, field, value) => {
         setItems(items.map(item =>
             item.id === id ? { ...item, [field]: value } : item
@@ -267,7 +270,6 @@ export default function App() {
             }, 10);
         }
 
-        
 
         if (e.key === 'Backspace' && items[index].name === '' && items.length > 1) {
             e.preventDefault();
@@ -281,7 +283,7 @@ export default function App() {
     };
 
     const handleChange = (e, index) => {
-        console.log(items[index].name.length)
+        //console.log(items[index].name.length)
         if (items[index].name.length === 1 && items.length <= 1) {
             items[index].quantity = '';
             items[index].price = '';
@@ -290,6 +292,7 @@ export default function App() {
 
 
 
+    // LOADING, LOGIN AND LOGOUT
     if (isLoading) {
         return <div>Checking authentication...</div>;
     }
@@ -315,6 +318,10 @@ export default function App() {
         }
     }
 
+
+
+
+    // CREATE AND DELETE LIST
     const CreateList = async () => {
         try {
             const payload = {
@@ -337,10 +344,6 @@ export default function App() {
             console.log("Create list failed.", error);
         }
     }
-
-
-
-    
 
     const DeleteList = async (id: Number) => {
         try {
@@ -460,7 +463,7 @@ export default function App() {
 
 
                         </SidebarInset>
-                        <Sidebar>
+                    <Sidebar>
                         <main>
                             <div className="flex flex-row md:flex-row">
                                 <SidebarTrigger className="flex items-end" />
