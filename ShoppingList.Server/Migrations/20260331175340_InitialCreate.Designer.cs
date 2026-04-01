@@ -11,7 +11,7 @@ using ShoppingList.Server.Data;
 namespace ShoppingList.Server.Migrations
 {
     [DbContext(typeof(ListDBContext))]
-    [Migration("20260323225723_InitialCreate")]
+    [Migration("20260331175340_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

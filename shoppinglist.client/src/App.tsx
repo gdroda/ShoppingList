@@ -7,10 +7,24 @@ import { useDebounce } from './debounce.tsx';
 import { NameModal, ShareModal } from './Modals.js';
 import { ConfirmModal } from './ConfirmModal.js';
 import { useNotificationSocket } from './SignalRNotifications.js';
+import { useQuery } from '@tanstack/react-query';
 
 interface User { 
     name: string;
     email: string
+}
+
+interface List {
+    id: number,
+    title: string
+}
+
+interface Item {
+    id: number,
+    isChecked: false,
+    name: string,
+    quantity: string,
+    price: string
 }
 
 //CUSTOM TRIGGER FOR SIDEBAR BUTTON
@@ -34,16 +48,19 @@ export function CustomTrigger({
 
 
 export default function App() {
-    const [userData, setUserData] = useState < User | null > (null);
-    const [isLoading, setLoading] = useState(true);
+    //const [userData, setUserData] = useState < User | null > (null);   REPLACED
+    //const [isLoadings, setLoading] = useState(true);   NOT USED
     const [isGuest, setIsGuest] = useState(true);
-    const [listId, setListId] = useState();
+    const [listId, setListId] = useState<number | null>();
     const [listTitle, setListTitle] = useState();
-    const [userLists, setUserLists] = useState([]);
+    //const [userLists, setUserLists] = useState([]);   REPLACED
 
-    const [items, setItems] = useState([
-        { id: Date.now(), isChecked: false, name: '', quantity: '', price: '' }
-    ]);
+    // REPLACED
+    //const [items, setItems] = useState([
+    //    { id: Date.now(), isChecked: false, name: '', quantity: '', price: '' }
+    //]);
+
+    const [items, setItems] = useState<Item[]>([]);
 
     const debouncedSave = useDebounce(items, 500)
 
@@ -64,7 +81,8 @@ export default function App() {
             });
             if (response.ok) {
                 console.log("List Renamed Successfully.");
-                LoadAllLists();
+                allListRefetch();
+                loadListRefetch();
             }
         }
         catch (error) {
@@ -75,7 +93,7 @@ export default function App() {
 
     //CONFIRMATION SUBMIT
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-    const [listIdToDelete, setListIdToDelete] = useState();
+    const [listIdToDelete, setListIdToDelete] = useState<number | null>();
     const handleConfirmSubmit = async (listId: number) => {
         await DeleteList(listId);
         setIsConfirmOpen(false);
@@ -84,18 +102,24 @@ export default function App() {
     //SHARING SUBMIT
     const [isShareOpen, setIsShareOpen] = useState(false);
     const handleShareSubmit = async (email: string) => {
-        console.log(email)
         setIsShareOpen(false);
     }
 
 
     const inputRefs = useRef([]);
 
-    //USER FETCH AND AUTHORIZATION
-    useEffect(() => {
-        const initiateAuthorization = async () => {
 
-            const checkLoginStatus = async () => {
+
+
+    
+
+
+    //TO BE REPLACED
+    //USER FETCH AND AUTHORIZATION
+    /*useEffect(() => {
+        const initiateAuthorization = async () => {
+            //UserSetting();
+            /*const checkLoginStatus = async () => {
                 try {
                     const resp = await fetch("https://localhost:7262/api/auth/user", {
                         method: "GET",
@@ -117,27 +141,29 @@ export default function App() {
                     setLoading(false);
                 }
             }
-            checkLoginStatus();
+            checkLoginStatus();/
         }
         initiateAuthorization();
-    }, []);
+    }, []); */
 
 
 
 
     //LIST LOADING
-    const LoadAllLists = async () => {
+    const loadAllLists = async (): Promise<List[]> => {
         try {
             const resp = await fetch("https://localhost:7262/api/shoplist", {
                 method: "GET",
                 credentials: "include"
             })
-            if (resp.ok) {
-                const data = await resp.json();
-                setUserLists(data);
+            const data = await resp.json();
+            if (data[0] != null) {
+                setListId(listId ? listId : data[0].id);
             } else {
-                setUserLists(null);
+                CreateList();
+                return;
             }
+            return data;
         }
         catch (error) {
             console.log(error);
@@ -145,61 +171,51 @@ export default function App() {
     }
 
 
-    const LoadList = async (id) => {
+    const loadList = async (id): Promise<Item[]> => {
         try {
             const resp = await fetch(`https://localhost:7262/api/shoplist/${id}`, {
                 method: "GET",
                 credentials: "include"
             })
-            if (resp.ok) {
-                const data = await resp.json();
-                setListId(data.id);
-                setListTitle(data.title);
-                const safeData = Array.isArray(data.listedItems) ? data.listedItems : (data.listedItems?.items || []);
-                const mappedItems = safeData.map((itemDB: any, index: number) => ({
-                    id: itemDB.id === 0 ? `temp-${index}-${Date.now()}` : itemDB.id,  //temp for unique ID
-                    name: itemDB.name || '',
-                    quantity: itemDB.quantity || '',
-                    price: itemDB.price || '',
-                    isChecked: itemDB.isChecked || false
-                }));
-                const emptyRow = {
-                    id: Date.now(),
-                    name: '',
-                    quantity: '',
-                    price: '',
-                    isChecked: false
-                }
-                setItems([...mappedItems, emptyRow]);
 
+            const emptyRow: Item = {
+                id: Date.now(),
+                name: '',
+                quantity: '',
+                price: '',
+                isChecked: false
+            }
+
+            const data = await resp.json();
+            
+            setListId(data.id);
+            setListTitle(data.title);
+
+            const safeData = Array.isArray(data.listedItems) ? data.listedItems : (data.listedItems?.items || []);
+            const mappedItems = safeData.map((itemDB: any, index: number) => ({
+                id: itemDB.id === 0 ? `temp-${index}-${Date.now()}` : itemDB.id,  //temp for unique ID
+                name: itemDB.name || '',
+                quantity: itemDB.quantity || '',
+                price: itemDB.price || '',
+                isChecked: itemDB.isChecked || false
+            }));
+            
+
+            if ([...mappedItems].length > 0) {
+                setItems([...mappedItems]);
+                const list: Item[] = [...mappedItems];
+                return list;
+            }
+            else {
+                setItems([...mappedItems, emptyRow]);
+                const list: Item[] = [...mappedItems, emptyRow];
+                return list;
             }
         }
         catch (error) {
             console.log(error);
         }
     }
-
-    //Runs at start to load lists if not a guest
-    useEffect(() => {
-        if (!isLoading && !isGuest) {
-            LoadAllLists();
-        }
-    }, [isGuest])
-
-
-
-    //Refreshes the lists and picks current active or first
-    useEffect(() => {
-        if (!isLoading) {
-            if (listId != null) {
-                LoadList(listId);
-            } else if (userLists.length > 0) {
-                LoadList(userLists[0].id)
-            } else {
-                CreateList();
-            }
-        }
-    }, [userLists])
 
 
 
@@ -237,7 +253,7 @@ export default function App() {
     
 
     useEffect(() => {
-        if (debouncedSave && !isLoading && !isGuest) {
+        if (debouncedSave && !isGuest) {
             SaveList();
         }
     }, [debouncedSave])
@@ -256,7 +272,7 @@ export default function App() {
     const handleKeyDown = (e, index) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            const newItem = { id: Date.now(), isChecked: false, name: '', quantity: '', price: '' };
+            const newItem: Item = { id: Date.now(), isChecked: false, name: '', quantity: '', price: '' };
 
             const newItems = [...items];
             newItems.splice(index + 1, 0, newItem);
@@ -292,10 +308,10 @@ export default function App() {
 
 
 
-    // LOADING, LOGIN AND LOGOUT
+    /* LOADING, LOGIN AND LOGOUT
     if (isLoading) {
         return <div>Checking authentication...</div>;
-    }
+    }*/
 
     const Login = async () => {
         window.location.href = "https://localhost:7262/api/auth/login";
@@ -308,7 +324,7 @@ export default function App() {
                 credentials: "include"
             });
             if (response.ok) {
-                setUserData(null);
+                //setUserData(null);
                 setIsGuest(true);
                 window.location.href = "https://localhost:64099";
             }
@@ -337,7 +353,7 @@ export default function App() {
             });
             if (response.ok) {
                 console.log("List Created Successfully.");
-                LoadAllLists();
+                allListRefetch();
             }
         }
         catch (error) {
@@ -353,8 +369,8 @@ export default function App() {
             });
             if (response.ok) {
                 console.log("Successfully deleted.");
-                setListId(null);
-                LoadAllLists();
+                //setListId(null);
+                allListRefetch();
             }
         }
         catch (error) {
@@ -362,6 +378,64 @@ export default function App() {
         }
     }
 
+
+
+    const fetchUser = async () => {
+        try {
+            const response = await fetch("https://localhost:7262/api/auth/user", {
+                method: "GET",
+                credentials: "include"
+            })
+            if (response.ok) {
+                setIsGuest(false);
+                return response.json();
+            }
+            else {
+                setIsGuest(true);
+            }
+            
+        }
+        catch (error) {
+            console.log("Fetch error.", error);
+        }
+    };
+
+
+    const { data: user } = useQuery({
+        queryKey: ['user'],
+        queryFn: fetchUser,
+        enabled: !!isGuest
+    });
+
+
+    const { data: allLists, refetch: allListRefetch } = useQuery({
+        queryKey: ['allLists'],
+        queryFn: loadAllLists,
+        enabled: user != null
+    });
+
+
+    const { data: listData, refetch: loadListRefetch } = useQuery({
+        queryKey: ['list', listId],
+        queryFn: () => loadList(listId),
+        enabled: listId != null
+    });
+
+
+
+    //ADDS 1 LINE FOR GUESTS
+    useEffect(() => {
+        if (isGuest) {
+            const emptyRow: Item = {
+                id: Date.now(),
+                name: '',
+                quantity: '',
+                price: '',
+                isChecked: false
+            }
+            setItems([emptyRow]);
+        }
+    },[user])
 
 
 
@@ -389,7 +463,7 @@ export default function App() {
                             </div>
                             
                             <div className="flex flex-col md:flex-col items-center py-10 " >
-                                {items.map((item, index) => (
+                                {items?.map((item, index) => (
                                     <div
                                         key={item.id}
                                         className={`flex flex-row md:flex-row items-center gap-1 p-0.5 
@@ -451,11 +525,11 @@ export default function App() {
                         <div>
                             {isGuest ? <h2>Log in to save your lists!</h2> : ""}
                             <br/>
-                            {userData ? 
+                            {user ? 
                                 <Button onClick={() => Logout()}>Log out</Button>
                                 : <Button onClick={() => Login()}>Log in with Google</Button>}
                             
-                            <h2>{userData?.name}, {userData?.email}</h2>
+                            <h2>{user?.name}, {user?.email}</h2>
                         </div>
 
 
@@ -470,10 +544,10 @@ export default function App() {
                                 <Button disabled={isGuest ? true : false} onClick={() => CreateList() }>Create List</Button>
                             </div>
                             <ul className="list-disc pl-5 space-y-2">
-                                {userLists.map((list) => (
+                                {allLists?.map((list) => (
                                     <li key={list.id}>
                                         <div className="flex flex-row md:flex-row">
-                                        <CustomTrigger children={list.title} onClick={() => LoadList(list.id)}></CustomTrigger>
+                                        <CustomTrigger children={list.title} onClick={() => setListId(list.id)}></CustomTrigger>
                                             <Button onClick={() => {setListIdToDelete(list.id); setIsConfirmOpen(true); }}>X</Button>
                                         </div>
                                     </li>
