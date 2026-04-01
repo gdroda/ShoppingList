@@ -14,7 +14,9 @@ namespace ShoppingList.Server.Controllers
     {
         private readonly IShopListService _shopListService;
         private readonly IHubContext<NotificationHubService, INotificationHubService> _hubContext;
-        public ShopListController(IShopListService shopListService, IHubContext<NotificationHubService, INotificationHubService> notificationHubService)
+        
+        public ShopListController(IShopListService shopListService, IHubContext<NotificationHubService
+            , INotificationHubService> notificationHubService)
         {
             _shopListService = shopListService;
             _hubContext = notificationHubService;

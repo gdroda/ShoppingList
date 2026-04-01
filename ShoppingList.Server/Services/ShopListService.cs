@@ -1,5 +1,4 @@
-﻿using Google.Apis.Logging;
-using Microsoft.AspNetCore.OutputCaching;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using ShoppingList.Server.Data;
 using ShoppingList.Server.Models;
@@ -20,13 +19,15 @@ namespace ShoppingList.Server.Services
     {
         private readonly ListDBContext _dbContext;
         private readonly IItemServices _itemServices;
-        private readonly IUserServices _userServices;
+        private readonly ILogger<ShopListService> _logger;
 
-        public ShopListService(ListDBContext dbContext, IItemServices itemServices, IUserServices userServices)
+        public ShopListService(ListDBContext dbContext, IItemServices itemServices
+            , IUserServices userServices
+            , ILogger<ShopListService> logger)
         {
             _dbContext = dbContext;
             _itemServices = itemServices;
-            _userServices = userServices;
+            _logger = logger;
         }
 
         public async Task<ShopListGetDTO> GetShopListId(int id, string userEmail)
@@ -48,13 +49,21 @@ namespace ShoppingList.Server.Services
                     {
                         return value;
                     }
-                    else return null!;
+                    else
+                    {
+                        _logger.LogWarning("List was not found with id: {Id}, user: {Email}", id, userEmail);
+                        return null!;
+                    }
                 }
-                else return null!;
+                else
+                {
+                    _logger.LogWarning("User was not found when getting list by id: {Id}, user: {Email}", id, userEmail);
+                    return null!;
+                }
             }
             catch (Exception err)
             {
-                Console.WriteLine($"Error: {err.Message}");
+                _logger.LogError(err, "Error retrieving list by id: {Id}, user: {Email}", id, userEmail);
                 throw;
             }
         }
@@ -69,18 +78,21 @@ namespace ShoppingList.Server.Services
                 if (user != null)
                 {
                     var value = await _dbContext.ShopLists
-                    //.Where(s => s.UserId == userId)
                     .Where(s => s.Users.Contains(user))
                     .Include(s => s.Users)
                     .Select(s => new ShopListGetDTO { Id = s.Id, Title = s.Title, ListedItems = s.ListedItems })
                     .ToListAsync();
                     return value;
                 }
-                return null!;
+                else
+                {
+                    _logger.LogWarning("User was not found when getting all lists of user: {Email}", userEmail);
+                    return null!;
+                }
             }
             catch (Exception err)
             {
-                Console.WriteLine($"Error: {err.Message}");
+                _logger.LogError(err, "Error retrieving all lists of user: {Email}", userEmail);
                 throw;
             }
         }
@@ -100,11 +112,15 @@ namespace ShoppingList.Server.Services
                     await _dbContext.SaveChangesAsync();
                     return new ShopListGetDTO { Title = newList.Title };
                 }
-                else return null!;
+                else
+                {
+                    _logger.LogWarning("User was not found when creating a list for user: {Email}", userEmail);
+                    return null!;
+                }
             }
             catch (Exception err)
             {
-                Console.WriteLine($"Error: {err.Message}");
+                _logger.LogError(err, "Error creating a shoplist. User: {Email}, shoplist: {ShoplistDTO}", userEmail, shopListCreateDTO);
                 throw;
             }
         }
@@ -139,13 +155,21 @@ namespace ShoppingList.Server.Services
                         await _dbContext.SaveChangesAsync();
                         return new ShopListGetDTO { Title = currentList.Title };
                     }
-                    else return null;
+                    else
+                    {
+                        _logger.LogWarning("List not found when updating list. User: {Email}, Id: {ListId}, Items: {ItemsDTO}", userEmail, listId, itemDTO);
+                        return null!;
+                    }
                 }
-                else return null;
+                else
+                {
+                    _logger.LogWarning("User not found when updating list. User: {Email}, Id: {ListId}, Items: {ItemsDTO}", userEmail, listId, itemDTO);
+                    return null!;
+                }
             }
             catch (Exception err)
             {
-                Console.WriteLine($"Error: {err.Message}");
+                _logger.LogError(err, "Error when updating a list. User: {Email}, List Id: {ListId}, Items: {ItemDTO}", userEmail, listId, itemDTO);
                 throw;
             }
         }
@@ -170,15 +194,23 @@ namespace ShoppingList.Server.Services
                     {
                         listToRename.Title = newName;
                         await _dbContext.SaveChangesAsync();
-                        return ($"{listToRename} has changed name to {newName}");
+                        return ($"{listToRename.Title} has changed name to {newName}");
                     }
-                    else return null;
+                    else
+                    {
+                        _logger.LogWarning("List not found when renaming list. User: {Email}, Id: {ListId}, New Name: {NewName}", userEmail, listId, newName);
+                        return null!;
+                    }
                 }
-                else return null;
+                else
+                {
+                    _logger.LogWarning("User not found when renaming list. User: {Email}, Id: {ListId}, New Name: {NewName}", userEmail, listId, newName);
+                    return null!;
+                }
             }
             catch (Exception err)
             {
-                Console.WriteLine($"Error: {err.Message}");
+                _logger.LogError(err, "Error when renaming a list. User: {Email}, List Id: {ListId}, New Name: {NewName}", userEmail, listId, newName);
                 throw;
             }
         }
@@ -211,13 +243,21 @@ namespace ShoppingList.Server.Services
                         await _dbContext.SaveChangesAsync();
                         return ($"{listToDelete.Title} has been deleted");
                     }
-                    else return null;
+                    else
+                    {
+                        _logger.LogWarning("List not found when deleting said list. User: {Email}, Id: {ListId}", userEmail, listId);
+                        return null!;
+                    }
                 }
-                else return null;
+                else
+                {
+                    _logger.LogWarning("User not found when deleting list. User: {Email}, Id: {ListId}", userEmail, listId);
+                    return null!;
+                }
             }
             catch (Exception err)
             {
-                Console.WriteLine($"Error: {err.Message}");
+                _logger.LogError(err, "Error when deleting a list. User: {Email}, List Id: {ListId}", userEmail, listId);
                 throw;
             }
 
@@ -247,15 +287,23 @@ namespace ShoppingList.Server.Services
                     {
                         userToShare.ShopLists.Add(listToShare);
                         await _dbContext.SaveChangesAsync();
-                        return new UserGetDTO { Email= userToShare.Email, Name = userToShare.Name};
+                        return new UserGetDTO { Email = userToShare.Email, Name = userToShare.Name };
                     }
-                    else return null;
+                    else
+                    {
+                        _logger.LogWarning("List not found when sharing said list. User: {Email}, Share User: {UserToShare}, Id: {ListId}", userEmail, userToShareDTO, listId);
+                        return null!;
+                    }
                 }
-                else return null;
+                else
+                {
+                    _logger.LogWarning("User not found when sharing a list. User: {Email}, Share User: {UserToShare}, Id: {ListId}", userEmail, userToShareDTO, listId);
+                    return null!;
+                }
             }
             catch (Exception err)
             {
-                Console.WriteLine($"Error: {err.Message}");
+                _logger.LogError(err, "Error when sharing a list. User: {Email}, Share User: {UserToShare}, List Id: {ListId}", userEmail, userToShareDTO,listId);
                 throw;
             }
             
