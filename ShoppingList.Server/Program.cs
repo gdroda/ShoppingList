@@ -51,10 +51,12 @@ builder.Services.AddAuthentication(opt =>
 builder.Services.AddAuthorization();
 
 var allowed = builder.Configuration["AllowedOrigins"];
-string[] origins = null;
+string[] origins = null!;
 if (!string.IsNullOrWhiteSpace(allowed))
 {
-    origins = allowed.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    origins = allowed.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+        .Select(o => o.TrimEnd('/'))
+        .ToArray();
 }
 
 builder.Services.AddCors(opt => opt.AddPolicy("MyCorsPolicy", policy =>
