@@ -17,6 +17,15 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+var connString = builder.Configuration.GetConnectionString("DefaultConnection");
+Console.WriteLine($"DEBUG: ConnectionString = {(string.IsNullOrEmpty(connString) ? "NULL/EMPTY" : "SET")}");
+Console.WriteLine($"DEBUG: Environment = {builder.Environment.EnvironmentName}");
+
+if (string.IsNullOrEmpty(connString))
+{
+    throw new InvalidOperationException("ConnectionStrings__DefaultConnection is not set!");
+}
+
 builder.Services.AddDbContext<ListDBContext>(opt => opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IShopListService, ShopListService>();
 builder.Services.AddScoped<IItemServices, ItemServices>();
