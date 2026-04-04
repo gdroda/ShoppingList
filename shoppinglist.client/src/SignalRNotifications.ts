@@ -1,13 +1,15 @@
 import * as signalR from "@microsoft/signalr";
 import { useEffect, useState, useRef } from "react";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export const useNotificationSocket = (listId: number | null, debounce) => {
     const connectionRef = useRef<signalR.HubConnection | null>(null);
     const [isReady, setIsReady] = useState(false);
 
     useEffect(() => {
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl("https://localhost:7262/hub")
+            .withUrl(`${API_URL}/hub`)
             .withAutomaticReconnect()
             .build();
 

@@ -47,7 +47,10 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddCors(opt => opt.AddPolicy("MyCorsPolicy", policy =>
 {
-    policy.WithOrigins("https://localhost:64099").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+    policy
+    .WithOrigins(builder.Configuration["AllowedOrigins"]?.Split(";") ?? ["*"])
+    .AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+    //policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().AllowCredentials();
 }));
 
 builder.Services.AddSignalR();
@@ -77,5 +80,11 @@ app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
 app.MapHub<NotificationHubService>("/hub");
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ListDBContext>();
+    db.Database.Migrate();
+}
 
 app.Run();

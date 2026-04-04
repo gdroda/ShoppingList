@@ -369,3 +369,5 @@ appsettings.Development.json
 secrets.json
 .idea
 .DS_Store
+*.env
+.env
