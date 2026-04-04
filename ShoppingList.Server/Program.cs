@@ -18,7 +18,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 var connString = builder.Configuration.GetConnectionString("DefaultConnection");
-Console.WriteLine($"DEBUG: ConnectionString = {(string.IsNullOrEmpty(connString) ? "NULL/EMPTY" : "SET")}");
+Console.WriteLine($"DEBUG: ConnectionString = {connString}");
 Console.WriteLine($"DEBUG: Environment = {builder.Environment.EnvironmentName}");
 
 if (string.IsNullOrEmpty(connString))
