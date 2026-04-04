@@ -328,7 +328,7 @@ export default function App() {
             if (response.ok) {
                 //setUserData(null);
                 setIsGuest(true);
-                window.location.href = "https://localhost:3000";
+                window.location.href = window.location.origin;
             }
         }
         catch (error) {

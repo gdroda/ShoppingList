@@ -17,10 +17,6 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-var connString = builder.Configuration.GetConnectionString("DefaultConnection");
-Console.WriteLine($"DEBUG: ConnectionString = {connString}");
-Console.WriteLine($"DEBUG: Environment = {builder.Environment.EnvironmentName}");
-
 if (string.IsNullOrEmpty(connString))
 {
     throw new InvalidOperationException("ConnectionStrings__DefaultConnection is not set!");
