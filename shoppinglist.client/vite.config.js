@@ -44,7 +44,7 @@ export default ({ mode }) => {
     }
 
     const viteEnv = loadEnv(mode, process.cwd(), '');
-    const API_URL = viteEnv.VITE_API_URL || 'http://localhost:7262';
+    const API_URL = Object.prototype.hasOwnProperty.call(viteEnv, 'VITE_API_URL') ? viteEnv.VITE_API_URL : 'http://localhost:7262';
 
     return defineConfig({
         plugins: [plugin(), tailwindcss()],

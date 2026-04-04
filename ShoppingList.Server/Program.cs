@@ -50,13 +50,27 @@ builder.Services.AddAuthentication(opt =>
     });
 builder.Services.AddAuthorization();
 
+var allowed = builder.Configuration["AllowedOridings"];
+string[] origins = null;
+if (!string.IsNullOrWhiteSpace(allowed))
+{
+    origins = allowed.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+}
 
 builder.Services.AddCors(opt => opt.AddPolicy("MyCorsPolicy", policy =>
 {
-    policy
-    .WithOrigins(builder.Configuration["AllowedOrigins"]?.Split(";") ?? ["*"])
-    .AllowAnyMethod().AllowAnyHeader().AllowCredentials();
-    //policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+    if (origins == null || origins.Length == 0)
+    {
+        policy.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin();
+    }
+    else if (origins.Length ==1 && origins[0] == "*")
+    {
+        policy.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin();
+    }
+    else
+    {
+        policy.WithOrigins(origins).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+    }
 }));
 
 builder.Services.AddSignalR();
