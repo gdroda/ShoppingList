@@ -50,7 +50,7 @@ builder.Services.AddAuthentication(opt =>
     });
 builder.Services.AddAuthorization();
 
-var allowed = builder.Configuration["AllowedOridings"];
+var allowed = builder.Configuration["AllowedOrigins"];
 string[] origins = null;
 if (!string.IsNullOrWhiteSpace(allowed))
 {
