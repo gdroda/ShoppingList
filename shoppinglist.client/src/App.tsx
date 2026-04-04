@@ -73,7 +73,7 @@ export default function App() {
     const [isRenameOpen, setIsRenameOpen] = useState(false);
     const handleNameSubmit = async (newName: string) => {
         try {
-            const response = await fetch(`${API_URL}/api/shoplist/rename/${listId}`, {
+            const response = await fetch(`/api/shoplist/rename/${listId}`, {
                 method: "PUT",
                 credentials: "include",
                 headers: {
@@ -123,7 +123,7 @@ export default function App() {
             //UserSetting();
             /*const checkLoginStatus = async () => {
                 try {
-                    const resp = await fetch(`${API_URL}/api/auth/user`, {
+                    const resp = await fetch(`/api/auth/user`, {
                         method: "GET",
                         credentials: "include"
                     })
@@ -154,7 +154,7 @@ export default function App() {
     //LIST LOADING
     const loadAllLists = async (): Promise<List[]> => {
         try {
-            const resp = await fetch(`${API_URL}/api/shoplist`, {
+            const resp = await fetch(`/api/shoplist`, {
                 method: "GET",
                 credentials: "include"
             })
@@ -175,7 +175,7 @@ export default function App() {
 
     const loadList = async (id): Promise<Item[]> => {
         try {
-            const resp = await fetch(`${API_URL}/api/shoplist/${id}`, {
+            const resp = await fetch(`/api/shoplist/${id}`, {
                 method: "GET",
                 credentials: "include"
             })
@@ -239,7 +239,7 @@ export default function App() {
                 Quantity: Number(item.quantity) || 0,
                 IsChecked: item.isChecked
             }));
-            const response = await fetch(`${API_URL}/api/shoplist/${listId}`, {
+            const response = await fetch(`/api/shoplist/${listId}`, {
                 method: "PUT",
                 credentials: "include",
                 headers: {
@@ -316,12 +316,12 @@ export default function App() {
     }*/
 
     const Login = async () => {
-        window.location.href = "${API_URL}/api/auth/login";
+        window.location.href = `/api/auth/login`;
     }
 
     const Logout = async () => {
         try {
-            const response = await fetch("${API_URL}/api/auth/logout", {
+            const response = await fetch(`/api/auth/logout`, {
                 method: "POST",
                 credentials: "include"
             });
@@ -345,7 +345,7 @@ export default function App() {
             const payload = {
                 Title: "New List"
             }
-            const response = await fetch(`${API_URL}/api/shoplist/`, {
+            const response = await fetch(`/api/shoplist/`, {
                 method: "POST",
                 credentials: "include",
                 headers: {
@@ -365,7 +365,7 @@ export default function App() {
 
     const DeleteList = async (id: Number) => {
         try {
-            const response = await fetch(`${API_URL}/api/shoplist/${id}`, {
+            const response = await fetch(`/api/shoplist/${id}`, {
                 method: "DELETE",
                 credentials: "include",
             });
@@ -384,7 +384,7 @@ export default function App() {
 
     const fetchUser = async () => {
         try {
-            const response = await fetch(`${API_URL}/api/auth/user`, {
+            const response = await fetch(`/api/auth/user`, {
                 method: "GET",
                 credentials: "include"
             })
