@@ -13,9 +13,11 @@ namespace ShoppingList.Server.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUserServices _userServices;
-        public AuthController(IUserServices userServices)
+        private readonly IConfiguration _config;
+        public AuthController(IUserServices userServices, IConfiguration config)
         {
             _userServices = userServices;
+            _config = config;
         }
 
         [HttpGet("login")]
@@ -32,7 +34,7 @@ namespace ShoppingList.Server.Controllers
         {
             var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             if (!result.Succeeded) return Unauthorized();
-            return Redirect("https://localhost:64099/");
+            return Redirect($"{_config["VITE_API_URL"]}");
         }
 
         [HttpGet("user")]
