@@ -9,7 +9,8 @@ import { ConfirmModal } from './ConfirmModal.js';
 import { useNotificationSocket } from './SignalRNotifications.js';
 import { useQuery } from '@tanstack/react-query';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 interface User { 
     name: string;
@@ -239,7 +240,7 @@ export default function App() {
                 Quantity: Number(item.quantity) || 0,
                 IsChecked: item.isChecked
             }));
-            const response = await fetch(`/api/shoplist/${listId}`, {
+            const response = await fetch(`${BACKEND_URL}/api/shoplist/${listId}`, {
                 method: "PUT",
                 credentials: "include",
                 headers: {
@@ -384,7 +385,7 @@ export default function App() {
 
     const fetchUser = async () => {
         try {
-            const response = await fetch(`${import.meta.env.BACKEND_URL}/api/auth/user`, {
+            const response = await fetch(`${BACKEND_URL}/api/auth/user`, {
                 method: "GET",
                 credentials: "include"
             })

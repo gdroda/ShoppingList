@@ -1,7 +1,7 @@
 import * as signalR from "@microsoft/signalr";
 import { useEffect, useState, useRef } from "react";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 
 export const useNotificationSocket = (listId: number | null, debounce) => {
     const connectionRef = useRef<signalR.HubConnection | null>(null);
@@ -9,7 +9,7 @@ export const useNotificationSocket = (listId: number | null, debounce) => {
 
     useEffect(() => {
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl(`${API_URL}/hub`)
+            .withUrl(`${FRONTEND_URL}/hub`)
             .withAutomaticReconnect()
             .build();
 
