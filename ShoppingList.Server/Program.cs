@@ -99,6 +99,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapGet("/debug-config", () => new {
+    UrlInConfig = builder.Configuration["VITE_API_URL"]
+});
 app.MapFallbackToFile("/index.html");
 app.MapHub<NotificationHubService>("/hub");
 
