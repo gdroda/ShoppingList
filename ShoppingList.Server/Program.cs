@@ -61,7 +61,7 @@ if (!string.IsNullOrWhiteSpace(allowed))
 
 builder.Services.AddCors(opt => opt.AddPolicy("MyCorsPolicy", policy =>
 {
-    policy.WithOrigins("https://shoppinglist-production-c992.up.railway.app/").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+    policy.WithOrigins("https://shoppinglist-production-c992.up.railway.app").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
     //policy.SetIsOriginAllowed(origin => true).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
 }));
 /*
