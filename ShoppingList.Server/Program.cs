@@ -99,6 +99,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.Use(async (context, next) =>
+{
+    Console.WriteLine($"CORS: '{context.Request.Headers["Origin"]}'");
+    await next();
+});
 app.UseCors("MyCorsPolicy");
 
 app.UseAuthentication();
