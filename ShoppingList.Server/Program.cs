@@ -59,12 +59,12 @@ if (!string.IsNullOrWhiteSpace(allowed))
         .ToArray();
 }
 
-builder.Services.AddCors(opt => opt.AddPolicy("MyCorsPolicy", policy =>
+/*builder.Services.AddCors(opt => opt.AddPolicy("MyCorsPolicy", policy =>
 {
     policy.WithOrigins("https://shoppinglist-production-c992.up.railway.app").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
     //policy.SetIsOriginAllowed(origin => true).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
-}));
-/*
+}));*/
+
 builder.Services.AddCors(opt => opt.AddPolicy("MyCorsPolicy", policy =>
 {
     if (origins == null || origins.Length == 0)
@@ -79,7 +79,7 @@ builder.Services.AddCors(opt => opt.AddPolicy("MyCorsPolicy", policy =>
     {
         policy.WithOrigins(origins).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
     }
-}));*/
+}));
 
 builder.Services.AddSignalR();
 
@@ -99,11 +99,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
-app.Use(async (context, next) =>
-{
-    Console.WriteLine($"CORS: '{context.Request.Headers["Origin"]}'");
-    await next();
-});
 app.UseCors("MyCorsPolicy");
 
 app.UseAuthentication();
