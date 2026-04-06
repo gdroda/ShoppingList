@@ -58,13 +58,6 @@ if (!string.IsNullOrWhiteSpace(allowed))
         .Select(o => o.TrimEnd('/'))
         .ToArray();
 }
-
-/*builder.Services.AddCors(opt => opt.AddPolicy("MyCorsPolicy", policy =>
-{
-    policy.WithOrigins("https://shoppinglist-production-c992.up.railway.app").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
-    //policy.SetIsOriginAllowed(origin => true).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
-}));*/
-
 builder.Services.AddCors(opt => opt.AddPolicy("MyCorsPolicy", policy =>
 {
     if (origins == null || origins.Length == 0)
