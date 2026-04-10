@@ -58,6 +58,8 @@ builder.Services.AddAuthentication(opt =>
         var googleAuth = builder.Configuration.GetSection("Authentication:Google");
         opt.ClientId = googleAuth["ClientId"];
         opt.ClientSecret = googleAuth["ClientSecret"];
+
+        opt.CallbackPath = "/api/signin-google";
     });
 builder.Services.AddAuthorization();
 
