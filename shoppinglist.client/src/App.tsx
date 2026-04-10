@@ -535,7 +535,15 @@ export default function App() {
                             <h2>{user?.name}, {user?.email}</h2>
                         </div>
 
-
+                        <div className="fixed flex flex-row items-center justify-between gap-4 bottom-0 left-0 w-full p-5 border rounded-t-lg shadow-sm">
+                            <div>
+                                 <Button className="m-2">Btn</Button>
+                            </div>
+                            <div className="flex items-center gap-2 w-auto">
+                                <input placeholder="a" className="border"/>
+                                <Button className="m-2">Btn2</Button>
+                            </div>
+                        </div>
 
 
 

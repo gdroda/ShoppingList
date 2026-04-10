@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using ShoppingList.Server.Services;
 using System.Security.Claims;
 
@@ -10,6 +11,7 @@ namespace ShoppingList.Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [EnableRateLimiting("fixed")]
     public class AuthController : ControllerBase
     {
         private readonly IUserServices _userServices;

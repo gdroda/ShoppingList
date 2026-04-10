@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using ShoppingList.Server.Models;
 using ShoppingList.Server.Services;
 
@@ -7,6 +8,7 @@ namespace ShoppingList.Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [EnableRateLimiting("fixed")]
     public class UserController: ControllerBase
     {
         private readonly IUserServices _userServices;

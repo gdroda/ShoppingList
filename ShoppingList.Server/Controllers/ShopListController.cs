@@ -5,11 +5,13 @@ using ShoppingList.Server.Models;
 using ShoppingList.Server.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ShoppingList.Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [EnableRateLimiting("fixed")]
     public class ShopListController : ControllerBase
     {
         private readonly IShopListService _shopListService;

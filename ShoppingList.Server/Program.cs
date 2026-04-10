@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ShoppingList.Server.Data;
 using ShoppingList.Server.Services;
 using ShoppingList.Server.Hubs;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,16 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 builder.Logging.SetMinimumLevel(LogLevel.Information);
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter(policyName: "fixed", options =>
+    {
+        options.PermitLimit = 30;
+        options.Window = TimeSpan.FromSeconds(60);
+        options.QueueLimit = 0;
+    });
+});
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -96,6 +107,8 @@ app.UseCors("MyCorsPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseRateLimiter();
 
 app.MapControllers();
 

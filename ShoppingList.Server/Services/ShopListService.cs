@@ -106,11 +106,24 @@ namespace ShoppingList.Server.Services
 
                 if (user != null)
                 {
-                    var newList = new ShopList { Title = shopListCreateDTO.Title};
-                    newList.Users.Add(user);
-                    await _dbContext.ShopLists.AddAsync(newList);
-                    await _dbContext.SaveChangesAsync();
-                    return new ShopListGetDTO { Title = newList.Title };
+                    var userLists = await _dbContext.ShopLists
+                        .Include(u => u.Users)
+                        .Where(s => s.Users.Contains(user))
+                        .ToListAsync();
+
+                    if (userLists.Count < 20) //Add UI indication for this
+                    {
+                        var newList = new ShopList { Title = shopListCreateDTO.Title };
+                        newList.Users.Add(user);
+                        await _dbContext.ShopLists.AddAsync(newList);
+                        await _dbContext.SaveChangesAsync();
+                        return new ShopListGetDTO { Title = newList.Title };
+                    }
+                    else
+                    {
+                        _logger.LogWarning("List cap reached for user: {Email}", userEmail);
+                        return null!;
+                    }
                 }
                 else
                 {
@@ -129,6 +142,11 @@ namespace ShoppingList.Server.Services
         {
             try
             {
+                if (itemDTO.Length > 100)
+                {
+                    _logger.LogWarning("Item cap of 100 reached. User: {Email}, Id: {ListId}, Items: {ItemsDTO}", userEmail, listId, itemDTO);
+                    return null!;
+                }
                 var user = await _dbContext.Users
                 .FirstOrDefaultAsync(u => u.Email == userEmail);
 
