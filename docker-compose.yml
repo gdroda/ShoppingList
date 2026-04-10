@@ -24,7 +24,7 @@ services:
       - ASPNETCORE_URLS=http://+:8080
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__DefaultConnection=${BACKEND_CONNECTION_STRING}
-      - AllowedOrigins=http://localhost:5000
+      - AllowedOrigins=https://shoppinglist-production-c992.up.railway.app/
     depends_on:
       db:
         condition: service_healthy
