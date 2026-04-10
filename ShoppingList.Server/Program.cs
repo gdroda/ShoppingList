@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using ShoppingList.Server.Data;
-using ShoppingList.Server.Services;
 using ShoppingList.Server.Hubs;
-using Microsoft.AspNetCore.RateLimiting;
+using ShoppingList.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -87,9 +88,18 @@ builder.Services.AddCors(opt => opt.AddPolicy("MyCorsPolicy", policy =>
     }
 }));
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 builder.Services.AddSignalR();
 
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
