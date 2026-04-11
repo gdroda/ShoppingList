@@ -317,12 +317,12 @@ export default function App() {
     }*/
 
     const Login = async () => {
-        window.location.href = `${BACKEND_URL}/api/auth/login`;
+        window.location.href = `/api/auth/login`;
     }
 
     const Logout = async () => {
         try {
-            const response = await fetch(`${BACKEND_URL}/api/auth/logout`, {
+            const response = await fetch(`/api/auth/logout`, {
                 method: "POST",
                 credentials: "include"
             });
