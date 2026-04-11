@@ -102,8 +102,6 @@ var app = builder.Build();
 app.Use((context, next) =>
 {
     context.Request.Scheme = "https";
-    context.Request.Host = new HostString("shoppinglist-production-c992.up.railway.app");
-
     return next();
 });
 
