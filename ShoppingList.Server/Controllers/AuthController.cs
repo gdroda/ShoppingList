@@ -42,7 +42,7 @@ namespace ShoppingList.Server.Controllers
         [HttpGet("user")]
         public async Task<IActionResult> GetUser()
         {
-            var cookieHeader = Request.Headers["Cookie"].ToString();
+            var cookieHeader = Request.Headers.Cookie.ToString();
             Console.WriteLine($"DEBUG: Received Cookies: {cookieHeader}");
             if (User.Identity?.IsAuthenticated == true)
             {
