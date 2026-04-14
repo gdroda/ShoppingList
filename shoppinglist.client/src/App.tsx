@@ -385,7 +385,7 @@ export default function App() {
 
     const fetchUser = async () => {
         try {
-            const response = await fetch(`${BACKEND_URL}/api/auth/user`, {
+            const response = await fetch(`/api/auth/user`, {
                 method: "GET",
                 credentials: "include"
             })
