@@ -51,7 +51,7 @@ builder.Services.AddAuthentication(opt =>
     {
         opt.Cookie.Name = "Auth";
         opt.Cookie.HttpOnly = true;
-        opt.Cookie.SameSite = SameSiteMode.None;
+        opt.Cookie.SameSite = SameSiteMode.Lax;
         opt.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     })
     .AddGoogle(opt =>
