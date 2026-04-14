@@ -240,7 +240,7 @@ export default function App() {
                 Quantity: Number(item.quantity) || 0,
                 IsChecked: item.isChecked
             }));
-            const response = await fetch(`${BACKEND_URL}/api/shoplist/${listId}`, {
+            const response = await fetch(`/api/shoplist/${listId}`, {
                 method: "PUT",
                 credentials: "include",
                 headers: {
