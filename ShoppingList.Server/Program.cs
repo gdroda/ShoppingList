@@ -51,7 +51,7 @@ builder.Services.AddAuthentication(opt =>
     {
         opt.Cookie.Name = "Auth";
         opt.Cookie.HttpOnly = true;
-        opt.Cookie.SameSite = SameSiteMode.Lax;
+        opt.Cookie.SameSite = SameSiteMode.None;
         opt.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     })
     .AddGoogle(opt =>
@@ -130,9 +130,7 @@ app.UseRateLimiter();
 
 app.MapControllers();
 
-app.MapGet("/api/debug-config", () => new {
-    UrlInConfig = builder.Configuration["VITE_API_URL"]
-});
+
 app.MapFallbackToFile("/index.html");
 app.MapHub<NotificationHubService>("/hub");
 
