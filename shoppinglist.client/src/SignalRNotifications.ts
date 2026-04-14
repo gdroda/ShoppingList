@@ -10,7 +10,7 @@ export const useNotificationSocket = (listId: number | null, debounce) => {
 
     useEffect(() => {
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl(`${BACKEND_URL}/hub`)
+            .withUrl(`/hub`)
             .withAutomaticReconnect()
             .build();
 
