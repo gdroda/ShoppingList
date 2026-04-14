@@ -462,19 +462,19 @@ export default function App() {
 
                         
                         <div className="w-full">
-                            <div className="flex flex-row md:flex-row justify-start gap-25 p-1">
-                                <h2>{listId ? listTitle : "New List"}</h2>
-                                <div className="flex flex-row md:flex-row gap-2">
+                            <div className="flex flex-row md:flex-row items-center justify-between gap-4 p-1">
+                                <h2 className="whitespace-nowrap">{listId ? listTitle : "New List"}</h2>
+                                <div className="flex flex-row gap-2">
                                     <Button disabled={isGuest ? true : false} onClick={() => setIsRenameOpen(true)}>Rename</Button>
                                     <Button disabled={isGuest ? true : false} onClick={() => setIsShareOpen(true) }>Share</Button>
                                 </div>
                             </div>
                             
-                            <div className="flex flex-col md:flex-col items-center py-10 " >
+                            <div className="flex flex-col items-center py-10 " >
                                 {items?.map((item, index) => (
                                     <div
                                         key={item.id}
-                                        className={`flex flex-row md:flex-row items-center gap-1 p-0.5 
+                                        className={`flex flex-row items-center gap-1 p-0.5 
                                 ${item.isChecked ? `line-through text-gray-400 bg-gray-50` : `text-gray-900`}`}
                                     >
                                         <input
