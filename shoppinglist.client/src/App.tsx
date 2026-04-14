@@ -66,6 +66,7 @@ export default function App() {
     const [items, setItems] = useState<Item[]>([]);
 
     const debouncedSave = useDebounce(items, 500)
+    const [needSave, setNeedSave] = useState(false);
 
     useNotificationSocket(listId, debouncedSave);
 
@@ -258,8 +259,9 @@ export default function App() {
     useEffect(() => {
         if (debouncedSave && !isGuest) {
             SaveList();
+            setNeedSave(false);
         }
-    }, [debouncedSave])
+    }, [debouncedSave, needSave])
 
 
 
@@ -270,6 +272,7 @@ export default function App() {
         setItems(items.map(item =>
             item.id === id ? { ...item, [field]: value } : item
         ));
+        setNeedSave(true);
     };
 
     const handleKeyDown = (e, index) => {
