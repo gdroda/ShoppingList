@@ -257,11 +257,11 @@ export default function App() {
     
 
     useEffect(() => {
-        if (debouncedSave && !isGuest) {
+        if (debouncedSave && !isGuest && needSave) {
             SaveList();
             setNeedSave(false);
         }
-    }, [debouncedSave, needSave])
+    }, [debouncedSave])
 
 
 
@@ -417,14 +417,16 @@ export default function App() {
     const { data: allLists, refetch: allListRefetch } = useQuery({
         queryKey: ['allLists'],
         queryFn: loadAllLists,
-        enabled: user != null
+        enabled: user != null,
+        staleTime: 300000 //5 minutes
     });
 
 
     const { data: listData, refetch: loadListRefetch } = useQuery({
         queryKey: ['list', listId],
         queryFn: () => loadList(listId),
-        enabled: listId != null
+        enabled: listId != null,
+        staleTime: 300000 //5 minutes
     });
 
 
