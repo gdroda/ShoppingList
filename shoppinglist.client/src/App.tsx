@@ -418,7 +418,7 @@ export default function App() {
         queryKey: ['allLists'],
         queryFn: loadAllLists,
         enabled: user != null,
-        staleTime: 300000 //5 minutes
+        refetchOnWindowFocus: false
     });
 
 
@@ -426,7 +426,7 @@ export default function App() {
         queryKey: ['list', listId],
         queryFn: () => loadList(listId),
         enabled: listId != null,
-        staleTime: 300000 //5 minutes
+        refetchOnWindowFocus: false
     });
 
 
