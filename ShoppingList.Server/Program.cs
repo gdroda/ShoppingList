@@ -49,9 +49,9 @@ builder.Services.AddAuthentication(opt =>
 })
     .AddCookie(opt =>
     {
-        opt.Cookie.Name = "NAME";
+        opt.Cookie.Name = "Auth";
         opt.Cookie.HttpOnly = true;
-        opt.Cookie.SameSite = SameSiteMode.Lax;
+        opt.Cookie.SameSite = SameSiteMode.None;
         opt.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     })
     .AddGoogle(opt =>
@@ -78,7 +78,7 @@ builder.Services.AddCors(opt => opt.AddPolicy("MyCorsPolicy", policy =>
     {
         policy.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin();
     }
-    else if (origins.Length ==1 && origins[0] == "*")
+    else if (origins.Length == 1 && origins[0] == "*")
     {
         policy.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin();
     }
