@@ -71,7 +71,7 @@ export function ShareModal({ isOpen, onClose, onSubmit, listId }: ShareModalProp
         setIsSearching(true);
         const payload: EmailToSend = { Email: mail };
         try {
-            const response = await fetch(`https://localhost:7262/api/shoplist/share/${listId}`, {
+            const response = await fetch(`/api/shoplist/share/${listId}`, {
                 method: "PUT",
                 credentials: "include",
                 headers: {
