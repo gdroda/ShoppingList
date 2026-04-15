@@ -34,6 +34,12 @@ namespace ShoppingList.Server.Controllers
         [HttpGet("callback")]
         public async Task<IActionResult> GoogleCallback()
         {
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = true,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30)
+            };
+
             var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             if (!result.Succeeded) return Unauthorized();
             return Redirect($"{_config["VITE_API_URL"]}");
