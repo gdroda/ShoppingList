@@ -56,7 +56,7 @@ export default function App() {
     const [isGuest, setIsGuest] = useState(true);
     const [listId, setListId] = useState<number | null>();
     const [listTitle, setListTitle] = useState();
-    const [userLists, setUserLists] = useState([]);
+    //const [userLists, setUserLists] = useState([]);   REPLACED
 
     // REPLACED
     //const [items, setItems] = useState([
@@ -387,6 +387,84 @@ export default function App() {
 
 
 
+    const firstLoad = async () => {
+        try {
+            const resp = await fetch(`/api/shoplist/init`, {
+                method: "GET",
+                credentials: "include"
+            })
+
+            if (resp.status != 200) {
+                setIsGuest(true);
+                return;
+            }
+            const data = resp.json();
+            console.log(data);
+            let user = null;
+            let allLists = null;
+            let currentList = null;
+
+            if (data[1] != null) {
+                user = data[0];
+                allLists = data[1];
+            }
+            else {
+                user = data;
+            }
+            if (data[2] != null) {
+                currentList = data[2];
+            }
+
+
+            if (allLists != null) {
+                if (allLists[0] != null) {
+                    setListId(listId ? listId : allLists[0].id);
+                } else {
+                    CreateList();
+                }
+                setUserLists(allLists);
+            }
+
+
+
+            if (currentList != null) {
+                const emptyRow: Item = {
+                    id: Date.now(),
+                    name: '',
+                    quantity: '',
+                    price: '',
+                    isChecked: false
+                }
+
+                setListId(currentList.id);
+                setListTitle(currentList.title);
+
+                const safeData = Array.isArray(currentList.listedItems) ? currentList.listedItems : (currentList.listedItems?.items || []);
+                const mappedItems = safeData.map((itemDB: any, index: number) => ({
+                    id: itemDB.id === 0 ? `temp-${index}-${Date.now()}` : itemDB.id,  //temp for unique ID
+                    name: itemDB.name || '',
+                    quantity: itemDB.quantity || '',
+                    price: itemDB.price || '',
+                    isChecked: itemDB.isChecked || false
+                }));
+
+
+                if ([...mappedItems].length > 0) {
+                    setItems([...mappedItems]);
+                }
+                else {
+                    setItems([...mappedItems, emptyRow]);
+                }
+            }
+
+            setIsGuest(false);
+            return user;
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+
     const fetchUser = async () => {
         try {
             const response = await fetch(`/api/auth/user`, {
@@ -407,7 +485,13 @@ export default function App() {
         }
     };
 
+    const { data: user } = useQuery({
+        queryKey: ['user'],
+        queryFn: firstLoad,
+        enabled: !!isGuest
+    });
 
+    /*
     const { data: user } = useQuery({
         queryKey: ['user'],
         queryFn: fetchUser,
@@ -561,7 +645,7 @@ export default function App() {
                                 <Button disabled={isGuest ? true : false} onClick={() => CreateList() }>Create List</Button>
                             </div>
                             <ul className="list-disc pl-5 space-y-2">
-                                {userLists?.map((list) => (
+                                {allLists?.map((list) => (
                                     <li key={list.id}>
                                         <div className="flex flex-row md:flex-row">
                                         <CustomTrigger children={list.title} onClick={() => setListId(list.id)}></CustomTrigger>

@@ -38,11 +38,14 @@ namespace ShoppingList.Server.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GoogleCallback()
         {
-            var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            if (!result.Succeeded) return Unauthorized();
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = true,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30),
+                AllowRefresh = true
+            };
 
-            //await HttpContext.SignInAsync(
-                //CookieAuthenticationDefaults.AuthenticationScheme, result.Principal, authProperties);
+            var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             return Redirect($"{_config["VITE_API_URL"]}");
         }

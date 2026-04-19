@@ -40,7 +40,6 @@ builder.Services.AddDbContext<ListDBContext>(opt => opt.UseNpgsql(builder.Config
 builder.Services.AddScoped<IShopListService, ShopListService>();
 builder.Services.AddScoped<IItemServices, ItemServices>();
 builder.Services.AddScoped<IUserServices, UserServices>();
-builder.Services.AddDataProtection().PersistKeysToDbContext<ListDBContext>();
 
 
 builder.Services.AddAuthentication(opt =>
@@ -51,7 +50,7 @@ builder.Services.AddAuthentication(opt =>
 })
     .AddCookie(opt =>
     {
-        opt.Cookie.Name = "Auth";
+        opt.Cookie.Name = "ShoppingList_Auth";
         opt.Cookie.HttpOnly = true;
         opt.Cookie.SameSite = SameSiteMode.None;
         opt.Cookie.SecurePolicy = CookieSecurePolicy.Always;
@@ -62,13 +61,7 @@ builder.Services.AddAuthentication(opt =>
         opt.ClientId = googleAuth["ClientId"];
         opt.ClientSecret = googleAuth["ClientSecret"];
 
-        /*opt.CallbackPath = "/api/signin-google";
-
-        opt.Events.OnRedirectToAuthorizationEndpoint = context =>
-        {
-            context.Properties.IsPersistent = true;
-            return Task.CompletedTask;
-        };*/
+        opt.CallbackPath = "/api/signin-google";
     });
 builder.Services.AddAuthorization();
 

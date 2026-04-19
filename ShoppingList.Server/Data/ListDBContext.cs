@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using ShoppingList.Server.Models;
+using System.Reflection.Metadata;
 
 namespace ShoppingList.Server.Data
 {
-    public class ListDBContext :DbContext, IDataProtectionKeyContext
+    public class ListDBContext :DbContext
     {
         public ListDBContext(DbContextOptions options) : base(options)
         {
@@ -27,6 +27,5 @@ namespace ShoppingList.Server.Data
         public DbSet<Item> Items { get; set; }
         public DbSet<ShopList> ShopLists { get; set; }
         public DbSet<User> Users { get; set; }
-        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
     }
 }
