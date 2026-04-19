@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -39,7 +40,7 @@ builder.Services.AddDbContext<ListDBContext>(opt => opt.UseNpgsql(builder.Config
 builder.Services.AddScoped<IShopListService, ShopListService>();
 builder.Services.AddScoped<IItemServices, ItemServices>();
 builder.Services.AddScoped<IUserServices, UserServices>();
-builder.Services.AddScoped<ListDBContext>();
+builder.Services.AddDataProtection().PersistKeysToDbContext<ListDBContext>();
 
 
 builder.Services.AddAuthentication(opt =>
