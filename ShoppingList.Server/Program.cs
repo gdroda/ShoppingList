@@ -54,7 +54,6 @@ builder.Services.AddAuthentication(opt =>
         opt.Cookie.Name = "ShoppingList_Auth";
         opt.ExpireTimeSpan = TimeSpan.FromDays(30);
         opt.SlidingExpiration = true;
-        opt.TicketDataFormat = opt.TicketDataFormat;
         opt.Cookie.HttpOnly = true;
         opt.Cookie.SameSite = SameSiteMode.None;
         opt.Cookie.SecurePolicy = CookieSecurePolicy.Always;
@@ -110,13 +109,21 @@ builder.Services.AddSignalR();
 
 var app = builder.Build();
 
+app.UseForwardedHeaders();
+
 app.Use((context, next) =>
 {
     context.Request.Scheme = "https";
     return next();
 });
 
-app.UseForwardedHeaders();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ListDBContext>();
+    db.Database.Migrate();
+}
+
+
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
@@ -145,10 +152,5 @@ app.MapControllers();
 app.MapFallbackToFile("/index.html");
 app.MapHub<NotificationHubService>("/hub");
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<ListDBContext>();
-    db.Database.Migrate();
-}
 
 app.Run();
