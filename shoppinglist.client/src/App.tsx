@@ -7,7 +7,7 @@ import { useDebounce } from './debounce.tsx';
 import { NameModal, ShareModal } from './Modals.js';
 import { ConfirmModal } from './ConfirmModal.js';
 import { useNotificationSocket } from './SignalRNotifications.js';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
@@ -69,6 +69,7 @@ export default function App() {
     const [needSave, setNeedSave] = useState(false);
 
     useNotificationSocket(listId, debouncedSave);
+    const queryClient = useQueryClient();
 
     //MODALS
     //RENAMING SUBMIT
@@ -442,7 +443,7 @@ export default function App() {
                 }));
 
                 setItems([...mappedItems, emptyRow]);
-                /*
+                /* ADD EMPTY ROW AT ALL TIMES?
                 if ([...mappedItems].length > 0) {
                     setItems([...mappedItems]);
                 }
@@ -452,7 +453,7 @@ export default function App() {
             }
 
             setIsGuest(false);
-
+            
             return [user, allLists]
         }
         catch (error) {
@@ -480,29 +481,35 @@ export default function App() {
         }
     };
 
-    const { data: user } = useQuery({
-        queryKey: ['user'],
-        queryFn: firstLoad,
-        enabled: !!isGuest
+    const { isLoading: isGuestLoading } = useQuery({
+        queryKey: ['startup'],
+        queryFn: async () => {
+            const loadedData = await firstLoad();
+            queryClient.setQueryData(['user'], loadedData[0]);
+            queryClient.setQueryData(['allLists'], loadedData[1]);
+            return loadedData;
+        },
+        enabled: !!isGuest,
+        staleTime: Infinity
     });
 
-    /*
+    
     const { data: user } = useQuery({
         queryKey: ['user'],
         queryFn: fetchUser,
-        enabled: !!isGuest
-    }); */
+        enabled: !isGuestLoading
+    });
 
 
     const { data: allLists, refetch: allListRefetch } = useQuery({
         queryKey: ['allLists'],
         queryFn: loadAllLists,
-        enabled: user[0] != null,
+        enabled: !isGuestLoading && user != null,
         refetchOnWindowFocus: false
     });
 
 
-    const { data: listData, refetch: loadListRefetch } = useQuery({
+    const {refetch: loadListRefetch } = useQuery({
         queryKey: ['list', listId],
         queryFn: () => loadList(listId),
         enabled: listId != null,
@@ -523,7 +530,7 @@ export default function App() {
             }
             setItems([emptyRow]);
         }
-    },[user[0]])
+    },[user])
 
 
 
@@ -613,11 +620,11 @@ export default function App() {
                         <div>
                             {isGuest ? <h2>Log in to save your lists!</h2> : ""}
                             <br/>
-                            {user[0] ? 
+                            {user ? 
                                 <Button onClick={() => Logout()}>Log out</Button>
                                 : <Button onClick={() => Login()}>Log in with Google</Button>}
                             
-                            <h2>{user[0]?.name}, {user[0]?.email}</h2>
+                            <h2>{user?.name}, {user?.email}</h2>
                         </div>
 
                         <div className="fixed flex flex-row items-center justify-between gap-4 bottom-0 left-0 w-full p-5 border rounded-t-lg shadow-sm">
@@ -640,7 +647,7 @@ export default function App() {
                                 <Button disabled={isGuest ? true : false} onClick={() => CreateList() }>Create List</Button>
                             </div>
                             <ul className="list-disc pl-5 space-y-2">
-                                {user[1]?.map((list) => (
+                                {allLists?.map((list) => (
                                     <li key={list.id}>
                                         <div className="flex flex-row md:flex-row">
                                         <CustomTrigger children={list.title} onClick={() => setListId(list.id)}></CustomTrigger>
