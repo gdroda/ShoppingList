@@ -64,7 +64,7 @@ builder.Services.AddAuthentication(opt =>
         opt.ClientId = googleAuth["ClientId"];
         opt.ClientSecret = googleAuth["ClientSecret"];
 
-        opt.CallbackPath = "/api/signin-google";
+        //opt.CallbackPath = "/api/signin-google";
 
         opt.Events.OnRedirectToAuthorizationEndpoint = context =>
         {
