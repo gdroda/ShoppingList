@@ -48,8 +48,8 @@ namespace ShoppingList.Server.Controllers
             var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             if (!result.Succeeded) return Unauthorized();
 
-            await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme, result.Principal, authProperties);
+            //await HttpContext.SignInAsync(
+                //CookieAuthenticationDefaults.AuthenticationScheme, result.Principal, authProperties);
 
             return Redirect($"{_config["VITE_API_URL"]}");
         }
