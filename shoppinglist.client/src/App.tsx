@@ -481,11 +481,10 @@ export default function App() {
         }
     };
 
-    const { data: user, isLoading: isGuestLoading } = useQuery({
-        queryKey: ['startup'],
+    const { data: user } = useQuery({
+        queryKey: ['user'],
         queryFn: firstLoad,
-        enabled: !!isGuest,
-        refetchOnWindowFocus: false
+        enabled: !!isGuest
     });
 
     
@@ -500,7 +499,7 @@ export default function App() {
     const { data: allLists, refetch: allListRefetch } = useQuery({
         queryKey: ['allLists'],
         queryFn: loadAllLists,
-        enabled: !isGuestLoading && user != null,
+        enabled: user != null,
         refetchOnWindowFocus: false
     });
 
