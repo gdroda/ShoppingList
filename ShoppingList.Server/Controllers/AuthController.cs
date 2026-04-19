@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using ShoppingList.Server.Services;
@@ -12,6 +13,7 @@ namespace ShoppingList.Server.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [EnableRateLimiting("fixed")]
+    [AllowAnonymous]
     public class AuthController : ControllerBase
     {
         private readonly IUserServices _userServices;
@@ -23,6 +25,7 @@ namespace ShoppingList.Server.Controllers
         }
 
         [HttpGet("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> GoogleLogin()
         {
             return Challenge(new AuthenticationProperties
@@ -32,6 +35,7 @@ namespace ShoppingList.Server.Controllers
         }
 
         [HttpGet("callback")]
+        [AllowAnonymous]
         public async Task<IActionResult> GoogleCallback()
         {
             var authProperties = new AuthenticationProperties
