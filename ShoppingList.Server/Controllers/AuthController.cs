@@ -37,11 +37,16 @@ namespace ShoppingList.Server.Controllers
             var authProperties = new AuthenticationProperties
             {
                 IsPersistent = true,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30)
+                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30),
+                AllowRefresh = true
             };
 
             var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             if (!result.Succeeded) return Unauthorized();
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme, result.Principal, authProperties);
+
             return Redirect($"{_config["VITE_API_URL"]}");
         }
 

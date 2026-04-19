@@ -56,7 +56,7 @@ export default function App() {
     const [isGuest, setIsGuest] = useState(true);
     const [listId, setListId] = useState<number | null>();
     const [listTitle, setListTitle] = useState();
-    //const [userLists, setUserLists] = useState([]);   REPLACED
+    const [userLists, setUserLists] = useState([]);
 
     // REPLACED
     //const [items, setItems] = useState([
@@ -394,7 +394,6 @@ export default function App() {
                 return;
             }
             const data = resp.json();
-            console.log(data);
             let user = null;
             let allLists = null;
             let currentList = null;
@@ -417,6 +416,7 @@ export default function App() {
                 } else {
                     CreateList();
                 }
+                //setUserLists(allLists); if user[1] doesnt work uncomment
             }
 
 
@@ -441,17 +441,19 @@ export default function App() {
                     isChecked: itemDB.isChecked || false
                 }));
 
-
+                setItems([...mappedItems, emptyRow]);
+                /*
                 if ([...mappedItems].length > 0) {
                     setItems([...mappedItems]);
                 }
                 else {
                     setItems([...mappedItems, emptyRow]);
-                }
+                }*/
             }
 
             setIsGuest(false);
-            return user;
+
+            return [user, allLists]
         }
         catch (error) {
             console.log(error);
@@ -495,7 +497,7 @@ export default function App() {
     const { data: allLists, refetch: allListRefetch } = useQuery({
         queryKey: ['allLists'],
         queryFn: loadAllLists,
-        enabled: user != null,
+        enabled: user[0] != null,
         refetchOnWindowFocus: false
     });
 
@@ -521,7 +523,7 @@ export default function App() {
             }
             setItems([emptyRow]);
         }
-    },[user])
+    },[user[0]])
 
 
 
@@ -611,11 +613,11 @@ export default function App() {
                         <div>
                             {isGuest ? <h2>Log in to save your lists!</h2> : ""}
                             <br/>
-                            {user ? 
+                            {user[0] ? 
                                 <Button onClick={() => Logout()}>Log out</Button>
                                 : <Button onClick={() => Login()}>Log in with Google</Button>}
                             
-                            <h2>{user?.name}, {user?.email}</h2>
+                            <h2>{user[0]?.name}, {user[0]?.email}</h2>
                         </div>
 
                         <div className="fixed flex flex-row items-center justify-between gap-4 bottom-0 left-0 w-full p-5 border rounded-t-lg shadow-sm">
@@ -638,7 +640,7 @@ export default function App() {
                                 <Button disabled={isGuest ? true : false} onClick={() => CreateList() }>Create List</Button>
                             </div>
                             <ul className="list-disc pl-5 space-y-2">
-                                {allLists?.map((list) => (
+                                {user[1]?.map((list) => (
                                     <li key={list.id}>
                                         <div className="flex flex-row md:flex-row">
                                         <CustomTrigger children={list.title} onClick={() => setListId(list.id)}></CustomTrigger>
