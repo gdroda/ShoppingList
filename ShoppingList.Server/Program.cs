@@ -51,9 +51,7 @@ builder.Services.AddAuthentication(opt =>
 })
     .AddCookie(opt =>
     {
-        opt.Cookie.Name = "ShoppingList_Auth";
-        opt.ExpireTimeSpan = TimeSpan.FromDays(30);
-        opt.SlidingExpiration = true;
+        opt.Cookie.Name = "Auth";
         opt.Cookie.HttpOnly = true;
         opt.Cookie.SameSite = SameSiteMode.None;
         opt.Cookie.SecurePolicy = CookieSecurePolicy.Always;

@@ -41,8 +41,7 @@ namespace ShoppingList.Server.Controllers
             var authProperties = new AuthenticationProperties
             {
                 IsPersistent = true,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30),
-                AllowRefresh = true
+                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30)
             };
 
             var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);

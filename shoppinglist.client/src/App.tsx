@@ -152,7 +152,7 @@ export default function App() {
     }, []); */
 
 
-    
+
 
     //LIST LOADING
     const loadAllLists = async (): Promise<List[]> => {
@@ -273,7 +273,7 @@ export default function App() {
         setItems(items.map(item =>
             item.id === id ? { ...item, [field]: value } : item
         ));
-        
+        setNeedSave(true);
     };
 
     const handleKeyDown = (e, index) => {
@@ -284,8 +284,6 @@ export default function App() {
             const newItems = [...items];
             newItems.splice(index + 1, 0, newItem);
             setItems(newItems);
-
-            setNeedSave(true);
 
             // Focus the new input on the next render
             setTimeout(() => {
@@ -316,6 +314,11 @@ export default function App() {
     }
 
 
+
+    /* LOADING, LOGIN AND LOGOUT
+    if (isLoading) {
+        return <div>Checking authentication...</div>;
+    }*/
 
     const Login = async () => {
         window.location.href = `/api/auth/login`;
@@ -373,6 +376,7 @@ export default function App() {
             });
             if (response.ok) {
                 console.log("Successfully deleted.");
+                //setListId(null);
                 allListRefetch();
             }
         }
@@ -382,84 +386,6 @@ export default function App() {
     }
 
 
-
-    const firstLoad = async () => {
-        try {
-            const resp = await fetch(`/api/shoplist/init`, {
-                method: "GET",
-                credentials: "include"
-            })
-
-            if (resp.status != 200) {
-                setIsGuest(true);
-                return;
-            }
-            const data = resp.json();
-            let user = null;
-            let allLists = null;
-            let currentList = null;
-
-            if (data[1] != null) {
-                user = data[0];
-                allLists = data[1];
-            }
-            else {
-                user = data;
-            }
-            if (data[2] != null) {
-                currentList = data[2];
-            }
-
-
-            if (allLists != null) {
-                if (allLists[0] != null) {
-                    setListId(listId ? listId : allLists[0].id);
-                } else {
-                    CreateList();
-                }
-                setUserLists(allLists);
-            }
-
-
-            if (currentList != null) {
-                const emptyRow: Item = {
-                    id: Date.now(),
-                    name: '',
-                    quantity: '',
-                    price: '',
-                    isChecked: false
-                }
-
-                setListId(currentList.id);
-                setListTitle(currentList.title);
-
-                const safeData = Array.isArray(currentList.listedItems) ? currentList.listedItems : (currentList.listedItems?.items || []);
-                const mappedItems = safeData.map((itemDB: any, index: number) => ({
-                    id: itemDB.id === 0 ? `temp-${index}-${Date.now()}` : itemDB.id,  //temp for unique ID
-                    name: itemDB.name || '',
-                    quantity: itemDB.quantity || '',
-                    price: itemDB.price || '',
-                    isChecked: itemDB.isChecked || false
-                }));
-
-                setItems([...mappedItems, emptyRow]);
-                /* ADD EMPTY ROW AT ALL TIMES?
-                if ([...mappedItems].length > 0) {
-                    setItems([...mappedItems]);
-                }
-                else {
-                    setItems([...mappedItems, emptyRow]);
-                }*/
-            }
-
-            setIsGuest(false);
-            
-            return user;
-        }
-        catch (error) {
-            console.log(error);
-        }
-    }
 
     const fetchUser = async () => {
         try {
@@ -481,19 +407,12 @@ export default function App() {
         }
     };
 
+
     const { data: user } = useQuery({
         queryKey: ['user'],
-        queryFn: firstLoad,
+        queryFn: fetchUser,
         enabled: !!isGuest
     });
-
-    
-    /*const { data: user } = useQuery({
-        queryKey: ['user'],
-        queryFn: fetchUser,
-        enabled: !isGuestLoading,
-        refetchOnWindowFocus: false
-    }); */
 
 
     const { data: allLists, refetch: allListRefetch } = useQuery({
