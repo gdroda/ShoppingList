@@ -417,7 +417,7 @@ export default function App() {
                 } else {
                     CreateList();
                 }
-                //setUserLists(allLists); if user[1] doesnt work uncomment
+                setUserLists(allLists);
             }
 
 
@@ -454,7 +454,7 @@ export default function App() {
 
             setIsGuest(false);
             
-            return [user, allLists]
+            return user;
         }
         catch (error) {
             console.log(error);
@@ -481,24 +481,20 @@ export default function App() {
         }
     };
 
-    const { isLoading: isGuestLoading } = useQuery({
+    const { data: user, isLoading: isGuestLoading } = useQuery({
         queryKey: ['startup'],
-        queryFn: async () => {
-            const loadedData = await firstLoad();
-            queryClient.setQueryData(['user'], loadedData[0]);
-            queryClient.setQueryData(['allLists'], loadedData[1]);
-            return loadedData;
-        },
+        queryFn: firstLoad,
         enabled: !!isGuest,
-        staleTime: Infinity
+        refetchOnWindowFocus: false
     });
 
     
-    const { data: user } = useQuery({
+    /*const { data: user } = useQuery({
         queryKey: ['user'],
         queryFn: fetchUser,
-        enabled: !isGuestLoading
-    });
+        enabled: !isGuestLoading,
+        refetchOnWindowFocus: false
+    }); */
 
 
     const { data: allLists, refetch: allListRefetch } = useQuery({
@@ -647,7 +643,7 @@ export default function App() {
                                 <Button disabled={isGuest ? true : false} onClick={() => CreateList() }>Create List</Button>
                             </div>
                             <ul className="list-disc pl-5 space-y-2">
-                                {allLists?.map((list) => (
+                                {userLists?.map((list) => (
                                     <li key={list.id}>
                                         <div className="flex flex-row md:flex-row">
                                         <CustomTrigger children={list.title} onClick={() => setListId(list.id)}></CustomTrigger>
