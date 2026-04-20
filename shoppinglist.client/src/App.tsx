@@ -321,7 +321,7 @@ export default function App() {
     }*/
 
     const Login = async () => {
-        window.location.href = `/api/auth/login`;
+        window.location.href = `https://shoppinglistbackend-production-e843.up.railway.app/api/auth/login`;
     }
 
     const Logout = async () => {
