@@ -15,13 +15,15 @@ namespace ShoppingList.Server.Controllers
     public class ShopListController : ControllerBase
     {
         private readonly IShopListService _shopListService;
+        private readonly IUserServices _userServices;
         private readonly IHubContext<NotificationHubService, INotificationHubService> _hubContext;
         
-        public ShopListController(IShopListService shopListService, IHubContext<NotificationHubService
+        public ShopListController(IShopListService shopListService, IUserServices userServices, IHubContext<NotificationHubService
             , INotificationHubService> notificationHubService)
         {
             _shopListService = shopListService;
             _hubContext = notificationHubService;
+            _userServices = userServices;
         }
 
         [Authorize]
@@ -35,6 +37,38 @@ namespace ShoppingList.Server.Controllers
                 {
                     var response = await _shopListService.GetShopListId(id, email);
                     if (response != null) return Ok(response);
+                    else return BadRequest();
+                }
+                else return NotFound();
+            }
+            return Unauthorized();
+        }
+
+        [Authorize]
+        [HttpGet("init")]
+        public async Task<ActionResult> GetInitialData()
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var name = User.Identity.Name;
+                var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+                var googleId = User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                if (email != null)
+                {
+                    var user = await _userServices.GetUser(email);
+                    if (user == null)
+                    {
+                        await _userServices.CreateUser(new UserCreateDTO { Name = name, Email = email, GoogleId = googleId });
+                        user = await _userServices.GetUser(email);
+                        return Ok(user);
+                    }
+                    var allLists = await _shopListService.GetAllShopLists(email);
+                    var firstList = allLists[0];
+                    if (user != null && allLists != null && firstList != null)
+                    {
+                        var resp = new { User = user, Lists = allLists, currentList = firstList };
+                        return Ok(resp);
+                    }
                     else return BadRequest();
                 }
                 else return NotFound();
