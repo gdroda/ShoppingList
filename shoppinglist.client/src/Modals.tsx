@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button.js';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 interface NameModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -71,7 +73,7 @@ export function ShareModal({ isOpen, onClose, onSubmit, listId }: ShareModalProp
         setIsSearching(true);
         const payload: EmailToSend = { Email: mail };
         try {
-            const response = await fetch(`/api/shoplist/share/${listId}`, {
+            const response = await fetch(`${BACKEND_URL}/api/shoplist/share/${listId}`, {
                 method: "PUT",
                 credentials: "include",
                 headers: {

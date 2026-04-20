@@ -76,7 +76,7 @@ export default function App() {
     const [isRenameOpen, setIsRenameOpen] = useState(false);
     const handleNameSubmit = async (newName: string) => {
         try {
-            const response = await fetch(`/api/shoplist/rename/${listId}`, {
+            const response = await fetch(`${BACKEND_URL}/api/shoplist/rename/${listId}`, {
                 method: "PUT",
                 credentials: "include",
                 headers: {
@@ -157,7 +157,7 @@ export default function App() {
     //LIST LOADING
     const loadAllLists = async (): Promise<List[]> => {
         try {
-            const resp = await fetch(`/api/shoplist`, {
+            const resp = await fetch(`${BACKEND_URL}/api/shoplist`, {
                 method: "GET",
                 credentials: "include"
             })
@@ -178,7 +178,7 @@ export default function App() {
 
     const loadList = async (id): Promise<Item[]> => {
         try {
-            const resp = await fetch(`/api/shoplist/${id}`, {
+            const resp = await fetch(`${BACKEND_URL}/api/shoplist/${id}`, {
                 method: "GET",
                 credentials: "include"
             })
@@ -242,7 +242,7 @@ export default function App() {
                 Quantity: Number(item.quantity) || 0,
                 IsChecked: item.isChecked
             }));
-            const response = await fetch(`/api/shoplist/${listId}`, {
+            const response = await fetch(`${BACKEND_URL}/api/shoplist/${listId}`, {
                 method: "PUT",
                 credentials: "include",
                 headers: {
@@ -321,12 +321,12 @@ export default function App() {
     }*/
 
     const Login = async () => {
-        window.location.href = `https://shoppinglistbackend-production-e843.up.railway.app/api/auth/login`;
+        window.location.href = `${BACKEND_URL}/api/auth/login`;
     }
 
     const Logout = async () => {
         try {
-            const response = await fetch(`/api/auth/logout`, {
+            const response = await fetch(`${BACKEND_URL}/api/auth/logout`, {
                 method: "POST",
                 credentials: "include"
             });
@@ -350,7 +350,7 @@ export default function App() {
             const payload = {
                 Title: "New List"
             }
-            const response = await fetch(`/api/shoplist/`, {
+            const response = await fetch(`${BACKEND_URL}/api/shoplist/`, {
                 method: "POST",
                 credentials: "include",
                 headers: {
@@ -370,7 +370,7 @@ export default function App() {
 
     const DeleteList = async (id: Number) => {
         try {
-            const response = await fetch(`/api/shoplist/${id}`, {
+            const response = await fetch(`${BACKEND_URL}/api/shoplist/${id}`, {
                 method: "DELETE",
                 credentials: "include",
             });
@@ -389,15 +389,15 @@ export default function App() {
 
     const firstLoad = async () => {
         try {
-            const backend_url = "https://shoppinglistbackend-production-e843.up.railway.app";
+            //const backend_url = "https://shoppinglistbackend-production-e843.up.railway.app";
 
-            const resp = await fetch(`${backend_url}/api/shoplist/init`, {
+            const resp = await fetch(`${BACKEND_URL}/api/shoplist/init`, {
                 method: "GET",
                 credentials: "include"
             })
 
             if (resp.status === 401) {
-                window.location.href = `${backend_url}/api/auth/login`;
+                window.location.href = `${BACKEND_URL}/api/auth/login`;
                 return;
             }else if (!resp.ok) {
                 setIsGuest(true);
