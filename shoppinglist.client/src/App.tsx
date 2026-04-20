@@ -389,12 +389,17 @@ export default function App() {
 
     const firstLoad = async () => {
         try {
-            const resp = await fetch(`/api/shoplist/init`, {
+            const backend_url = "https://shoppinglistbackend-production-e843.up.railway.app";
+
+            const resp = await fetch(`${backend_url}/api/shoplist/init`, {
                 method: "GET",
                 credentials: "include"
             })
 
-            if (resp.status != 200) {
+            if (resp.status === 401) {
+                window.location.href = `${backend_url}/api/auth/login`;
+                return;
+            }else if (!resp.ok) {
                 setIsGuest(true);
                 return;
             }
