@@ -40,6 +40,7 @@ builder.Services.AddDbContext<ListDBContext>(opt => opt.UseNpgsql(builder.Config
 builder.Services.AddScoped<IShopListService, ShopListService>();
 builder.Services.AddScoped<IItemServices, ItemServices>();
 builder.Services.AddScoped<IUserServices, UserServices>();
+builder.Services.AddDataProtection().PersistKeysToDbContext<ListDBContext>();
 
 
 builder.Services.AddAuthentication(opt =>
@@ -51,6 +52,8 @@ builder.Services.AddAuthentication(opt =>
     .AddCookie(opt =>
     {
         opt.Cookie.Name = "ShoppingList_Auth";
+        opt.ExpireTimeSpan = TimeSpan.FromDays(30);
+        opt.SlidingExpiration = true;
         opt.Cookie.HttpOnly = true;
         opt.Cookie.SameSite = SameSiteMode.None;
         opt.Cookie.SecurePolicy = CookieSecurePolicy.Always;

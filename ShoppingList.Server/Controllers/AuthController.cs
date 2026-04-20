@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.VisualBasic;
 using ShoppingList.Server.Services;
 using System.Security.Claims;
 
@@ -13,7 +14,6 @@ namespace ShoppingList.Server.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [EnableRateLimiting("fixed")]
-    [AllowAnonymous]
     public class AuthController : ControllerBase
     {
         private readonly IUserServices _userServices;
@@ -30,7 +30,9 @@ namespace ShoppingList.Server.Controllers
         {
             return Challenge(new AuthenticationProperties
             {
-                RedirectUri = "/api/auth/callback"
+                RedirectUri = "/api/auth/callback",
+                IsPersistent = true,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30)
             }, GoogleDefaults.AuthenticationScheme);
         }
 
@@ -46,8 +48,15 @@ namespace ShoppingList.Server.Controllers
             };
 
             var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            if (!result.Succeeded) return Unauthorized();
 
-            return Redirect($"{_config["VITE_API_URL"]}");
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                result.Principal,
+                authProperties
+                );
+
+            return Redirect($"{_config["VITE_FRONTEND_URL"]}");
         }
 
         [HttpGet("user")]

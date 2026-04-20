@@ -56,7 +56,7 @@ export default function App() {
     const [isGuest, setIsGuest] = useState(true);
     const [listId, setListId] = useState<number | null>();
     const [listTitle, setListTitle] = useState();
-    //const [userLists, setUserLists] = useState([]);   REPLACED
+    const [userLists, setUserLists] = useState([]);
 
     // REPLACED
     //const [items, setItems] = useState([
@@ -496,7 +496,7 @@ export default function App() {
         queryKey: ['user'],
         queryFn: fetchUser,
         enabled: !!isGuest
-    });
+    }); */
 
 
     const { data: allLists, refetch: allListRefetch } = useQuery({
@@ -645,7 +645,7 @@ export default function App() {
                                 <Button disabled={isGuest ? true : false} onClick={() => CreateList() }>Create List</Button>
                             </div>
                             <ul className="list-disc pl-5 space-y-2">
-                                {allLists?.map((list) => (
+                                {userLists?.map((list) => (
                                     <li key={list.id}>
                                         <div className="flex flex-row md:flex-row">
                                         <CustomTrigger children={list.title} onClick={() => setListId(list.id)}></CustomTrigger>
