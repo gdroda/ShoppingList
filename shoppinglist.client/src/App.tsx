@@ -410,9 +410,11 @@ export default function App() {
             console.log(data.allLists)
             console.log(data.name)
             console.log(data.email)
+            console.log(data.allLists[0])
+            console.log(data.allLists[0].id)
 
 
-            if (data.allLists != null) {
+            if (data.allLists.length > 0) {
                 if (data.allLists[0] != null) {
                     setListId(listId ? listId : data.allLists[0].id);
                 } else {
