@@ -407,6 +407,9 @@ export default function App() {
             }
             const data = resp.json() as unknown as User;
             console.log(data);
+            console.log(data.allLists)
+            console.log(data.name)
+            console.log(data.email)
 
 
             if (data.allLists != null) {
