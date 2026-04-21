@@ -62,14 +62,7 @@ namespace ShoppingList.Server.Controllers
                         user = await _userServices.GetUser(email);
                         return Ok(user);
                     }
-                    var allLists = await _shopListService.GetAllShopLists(email);
-                    var firstList = allLists[0];
-                    if (user != null && allLists != null && firstList != null)
-                    {
-                        var resp = new { User = user, Lists = allLists, currentList = firstList };
-                        return Ok(resp);
-                    }
-                    else return BadRequest();
+                    else return Ok(user);
                 }
                 else return NotFound();
             }

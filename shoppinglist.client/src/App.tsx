@@ -15,11 +15,13 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 interface User { 
     name: string;
     email: string
+    allLists: List[]
 }
 
 interface List {
     id: number,
-    title: string
+    title: string,
+    listedItems: Item[]
 }
 
 interface Item {
@@ -55,7 +57,7 @@ export default function App() {
     //const [isLoadings, setLoading] = useState(true);   NOT USED
     const [isGuest, setIsGuest] = useState(true);
     const [listId, setListId] = useState<number | null>();
-    const [listTitle, setListTitle] = useState();
+    const [listTitle, setListTitle] = useState<string>();
     const [userLists, setUserLists] = useState([]);
 
     // REPLACED
@@ -196,7 +198,7 @@ export default function App() {
             setListId(data.id);
             setListTitle(data.title);
 
-            const safeData = Array.isArray(data.listedItems) ? data.listedItems : (data.listedItems?.items || []);
+            const safeData = Array.isArray(data.listedItems) ? data.listedItems : [];
             const mappedItems = safeData.map((itemDB: any, index: number) => ({
                 id: itemDB.id === 0 ? `temp-${index}-${Date.now()}` : itemDB.id,  //temp for unique ID
                 name: itemDB.name || '',
@@ -403,48 +405,27 @@ export default function App() {
                 setIsGuest(true);
                 return;
             }
-            const data = resp.json();
+            const data = resp.json() as unknown as User;
             console.log(data);
-            let user = null;
-            let allLists = null;
-            let currentList = null;
-
-            if (data[1] != null) {
-                user = data[0];
-                allLists = data[1];
-            }
-            else {
-                user = data;
-            }
-            if (data[2] != null) {
-                currentList = data[2];
-            }
 
 
-            if (allLists != null) {
-                if (allLists[0] != null) {
-                    setListId(listId ? listId : allLists[0].id);
+            if (data.allLists != null) {
+                if (data.allLists[0] != null) {
+                    setListId(listId ? listId : data.allLists[0].id);
                 } else {
                     CreateList();
                 }
-                setUserLists(allLists);
+                setUserLists(data.allLists);
             }
 
 
 
-            if (currentList != null) {
-                const emptyRow: Item = {
-                    id: Date.now(),
-                    name: '',
-                    quantity: '',
-                    price: '',
-                    isChecked: false
-                }
-
+            if (data.allLists[0] != null) {
+                const currentList: List = data.allLists[0];
                 setListId(currentList.id);
                 setListTitle(currentList.title);
 
-                const safeData = Array.isArray(currentList.listedItems) ? currentList.listedItems : (currentList.listedItems?.items || []);
+                const safeData = Array.isArray(currentList.listedItems) ? currentList.listedItems : [];
                 const mappedItems = safeData.map((itemDB: any, index: number) => ({
                     id: itemDB.id === 0 ? `temp-${index}-${Date.now()}` : itemDB.id,  //temp for unique ID
                     name: itemDB.name || '',
@@ -453,13 +434,23 @@ export default function App() {
                     isChecked: itemDB.isChecked || false
                 }));
 
+                const emptyRow: Item = {
+                    id: Date.now(),
+                    name: '',
+                    quantity: '',
+                    price: '',
+                    isChecked: false
+                }
 
+                setItems([...mappedItems, emptyRow]);
+
+                /*
                 if ([...mappedItems].length > 0) {
                     setItems([...mappedItems]);
                 }
                 else {
                     setItems([...mappedItems, emptyRow]);
-                }
+                }*/
             }
 
             setIsGuest(false);
@@ -507,7 +498,7 @@ export default function App() {
     const { data: allLists, refetch: allListRefetch } = useQuery({
         queryKey: ['allLists'],
         queryFn: loadAllLists,
-        enabled: user != null,
+        enabled: false,
         refetchOnWindowFocus: false
     });
 
@@ -515,7 +506,7 @@ export default function App() {
     const {refetch: loadListRefetch } = useQuery({
         queryKey: ['list', listId],
         queryFn: () => loadList(listId),
-        enabled: listId != null,
+        enabled: false,
         refetchOnWindowFocus: false
     });
 
