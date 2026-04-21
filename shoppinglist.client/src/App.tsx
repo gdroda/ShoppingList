@@ -405,7 +405,7 @@ export default function App() {
                 setIsGuest(true);
                 return;
             }
-            const data = resp.json() as unknown as User;
+            const data = await resp.json() as unknown as User;
             console.log(data);
             console.log(data.allLists)
             console.log(data.name)
