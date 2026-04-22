@@ -459,7 +459,7 @@ export default function App() {
             }
 
             setIsGuest(false);
-            return user;
+            return data;
         }
         catch (error) {
             console.log(error);
@@ -486,7 +486,7 @@ export default function App() {
         }
     };
 
-    const { data: user } = useQuery({
+    const { data: userData } = useQuery({
         queryKey: ['user'],
         queryFn: firstLoad,
         enabled: !!isGuest
@@ -529,7 +529,7 @@ export default function App() {
             }
             setItems([emptyRow]);
         }
-    },[user])
+    }, [userData])
 
 
 
@@ -619,11 +619,11 @@ export default function App() {
                         <div>
                             {isGuest ? <h2>Log in to save your lists!</h2> : ""}
                             <br/>
-                            {user ? 
+                            {userData ? 
                                 <Button onClick={() => Logout()}>Log out</Button>
                                 : <Button onClick={() => Login()}>Log in with Google</Button>}
                             
-                            <h2>{user?.name}, {user?.email}</h2>
+                            <h2>{userData?.name}, {userData?.email}</h2>
                         </div>
 
                         <div className="fixed flex flex-row items-center justify-between gap-4 bottom-0 left-0 w-full p-5 border rounded-t-lg shadow-sm">
