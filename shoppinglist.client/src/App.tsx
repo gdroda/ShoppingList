@@ -251,6 +251,7 @@ export default function App() {
 
     const patchItem = useMutation({
         mutationFn: async (patchItem: Item) => {
+            console.log("Mutation Patch started with:", patchItem)
             const payload: ItemToSendWithId = {
                 Id: Number(patchItem.id),
                 Name: patchItem.name,
@@ -269,7 +270,7 @@ export default function App() {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            return response;
+            return await response.json();
         },
         onMutate: async (patchItem) => {
             await queryClient.cancelQueries({ queryKey: ['list', listId] })
@@ -292,6 +293,7 @@ export default function App() {
 
     const addItem = useMutation({
         mutationFn: async (newItem: Item) => {
+            console.log("Mutation Add started with:", newItem)
             const payload: ItemToSend = {
                 Name: newItem.name,
                 Price: Number(newItem.price) || 0,
@@ -309,7 +311,7 @@ export default function App() {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            return response;
+            return await response.json();
         },
         onMutate: async (newItem) => {
             await queryClient.cancelQueries({ queryKey: ['list', listId] })
@@ -330,6 +332,7 @@ export default function App() {
 
     const removeItem = useMutation({
         mutationFn: async (deleteItem: Item) => {
+            console.log("Mutation Delete started with:", deleteItem)
             if (deleteItem.id.toString().startsWith("temp")) return;
 
             const payload: ItemToSend = {
@@ -349,7 +352,7 @@ export default function App() {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            return response;
+            return await response.json();
         },
         onMutate: async (deleteItem) => {
             await queryClient.cancelQueries({ queryKey: ['list', listId] })
