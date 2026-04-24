@@ -392,7 +392,7 @@ export default function App() {
 
         const updatedItem = updatedList.find(item => item.id == id);
 
-        //setItems(updatedList);
+        setItems(updatedList);
         console.log("patch code here")
         if (updatedItem && !id.toString().startsWith("temp")) {
             console.log(`patch code with ${updatedItem}`)
@@ -413,7 +413,7 @@ export default function App() {
             const newItem: Item = { id: `temp-${index}-${Date.now()}`, isChecked: false, name: '', quantity: '', price: '' };
             const newItems = [...items];
             newItems.splice(index + 1, 0, newItem);
-            setItems(newItems);
+            //setItems(newItems);
 
             // Focus the new input on the next render
             setTimeout(() => {
