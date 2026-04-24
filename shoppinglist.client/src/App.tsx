@@ -374,6 +374,7 @@ export default function App() {
 
     useEffect(() => {
         if (debouncedSave && !isGuest && needSave) {
+            console.log(`just before mutate ${itemToUpdate}`)
             patchItem.mutate(itemToUpdate);
             setNeedSave(false);
         }
@@ -392,8 +393,9 @@ export default function App() {
         const updatedItem = updatedList.find(item => item.id == id);
 
         setItems(updatedList);
-
+        console.log("patch code here")
         if (updatedItem && !id.toString().startsWith("temp")) {
+            console.log(`patch code with ${updatedItem}`)
             setItemToUpdate(updatedItem);
             setNeedSave(true);
         }
@@ -403,7 +405,9 @@ export default function App() {
         if (e.key === 'Enter') {
             e.preventDefault();
 
+            console.log("enter pressed")
             if (items[index].name && items[index].name.trim() !== "") {
+                console.log(`enter pressed for ${items[index]}`)
                 addItem.mutate(items[index]); //is this fine?
             }
 
@@ -423,6 +427,8 @@ export default function App() {
 
         if (e.key === 'Backspace' && items[index].name === '' && items.length > 1) {
             e.preventDefault();
+            console.log("backspaced pressed")
+            console.log(`backspaced pressed for ${items[index]}`)
             removeItem.mutate(items[index]);
             const newItems = items.filter((_, i) => i !== index);
             setItems(newItems);
