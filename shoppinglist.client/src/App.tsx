@@ -395,7 +395,7 @@ export default function App() {
         setItems(updatedList);
         console.log("patch code here")
         if (updatedItem && !id.toString().startsWith("temp")) {
-            console.log(`patch code with, updatedItem`)
+            console.log(`patch code with`, updatedItem)
             setItemToUpdate(updatedItem);
             setNeedSave(true);
         }
@@ -409,7 +409,10 @@ export default function App() {
                 console.log(`enter pressed for `, items[index])
                 addItem.mutate(items[index]); //is this fine?
             }
-
+            console.log("Attempting Async Mutate");
+            addItem.mutateAsync(items[index])
+                .then(() => console.log("Mutation Resolved"))
+                .catch((err) => console.error("Mutation Rejected:", err));
             const newItem: Item = { id: `temp-${index}-${Date.now()}`, isChecked: false, name: '', quantity: '', price: '' };
             const newItems = [...items];
             newItems.splice(index + 1, 0, newItem);
