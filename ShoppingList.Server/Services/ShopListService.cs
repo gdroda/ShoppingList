@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using ShoppingList.Server.Data;
 using ShoppingList.Server.Models;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+using System.Collections.Immutable;
 
 namespace ShoppingList.Server.Services
 {
@@ -10,7 +12,10 @@ namespace ShoppingList.Server.Services
         public Task<ShopListGetDTO> GetShopListId(int id, string userEmail);
         public Task<List<ShopListGetDTO>> GetAllShopLists(string userEmail);
         public Task<ShopListGetDTO> CreateShopList(ShopListCreateDTO shopListCreateDTO, string userEmail);
-        public Task<ShopListGetDTO> UpdateShopList(ItemCreateDTO[] itemDTO, int listId, string userEmail);
+        public Task<ShopListGetDTO> UpdateShopList(ItemCreateDTO[] itemDTO, int listId, string userEmail); //to be removed
+        public Task<ShopListGetDTO>  UpdateShopListAddItem(ItemPatchDTO itemDTO, int listId, string userEmail);
+        public Task<ShopListGetDTO>  UpdateShopListRemoveItem(ItemPatchDTO itemDTO, int listId, string userEmail);
+        public Task<ShopListGetDTO> UpdateShopListItemById(ItemPatchDTO itemDTO, int listId, string userEmail);
         public Task<string> RenameList(int listId, string userEmail, string newName);
         public Task<string> DeleteList(int listId, string userEmail);
         public Task<UserGetDTO> ShareList(int listId, string userEmail, UserEmailOnlyDTO userToShareDTO);
@@ -152,14 +157,19 @@ namespace ShoppingList.Server.Services
 
                 if (user != null)
                 {
-                    var currentList = _dbContext.ShopLists
+                    var currentList = await _dbContext.ShopLists
                         .Where(s => s.Id == listId)
                         .Include(s => s.Users)
                         .Where(s => s.Users.Contains(user))
-                        .FirstOrDefault();
+                        .FirstOrDefaultAsync();
 
                     if (currentList != null)
                     {
+                        
+                        await _dbContext.SaveChangesAsync();
+                        return new ShopListGetDTO { Title = currentList.Title, ListedItems = currentList.ListedItems, Id = currentList.Id };
+
+                        /*
                         var itemsToDelete = _dbContext.Items
                             .Where(i => i.ListId == listId)
                             .Include(s => s.ShopList).ToList();
@@ -171,7 +181,7 @@ namespace ShoppingList.Server.Services
                             await _itemServices.CreateItem(item, listId);
                         }
                         await _dbContext.SaveChangesAsync();
-                        return new ShopListGetDTO { Title = currentList.Title };
+                        return new ShopListGetDTO { Title = currentList.Title };*/
                     }
                     else
                     {
@@ -192,6 +202,175 @@ namespace ShoppingList.Server.Services
             }
         }
 
+        public async Task<ShopListGetDTO> UpdateShopListAddItem(ItemPatchDTO itemDTO, int listId, string userEmail)
+        {
+            try
+            {
+                var user = await _dbContext.Users
+                .FirstOrDefaultAsync(u => u.Email == userEmail);
+
+                if (user != null)
+                {
+                    var currentList = await _dbContext.ShopLists
+                        .Where(s => s.Id == listId)
+                        .Include(s => s.Users)
+                        .Where(s => s.Users.Contains(user))
+                        .FirstOrDefaultAsync();
+
+                    if (currentList != null)
+                    {
+                        if (currentList.ListedItems.Count > 100)
+                        {
+                            _logger.LogWarning("Item cap of 100 reached. User: {Email}, Id: {ListId}, Items: {ItemDTO}", userEmail, listId, itemDTO);
+                            return null!;
+                        }
+
+                        bool exists = await _dbContext.Items
+                            .Where(i => i.Id == itemDTO.Id)
+                            .Include(i => i.ShopList)
+                            .AnyAsync();
+
+                        if (!exists)
+                        {
+                            await _itemServices.CreateItem(new ItemCreateDTO { Name = itemDTO.Name, IsChecked = itemDTO.IsChecked, Price = itemDTO.Price, Quantity = itemDTO.Quantity }, listId);
+                            await _dbContext.SaveChangesAsync();
+                            return new ShopListGetDTO { Title = currentList.Title, ListedItems = currentList.ListedItems, Id = currentList.Id };
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Item already exists when adding item to list. User: {Email}, Id: {ListId}, Items: {ItemsDTO}", userEmail, listId, itemDTO);
+                            return null!;
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("List not found when adding item to list. User: {Email}, Id: {ListId}, Items: {ItemsDTO}", userEmail, listId, itemDTO);
+                        return null!;
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("User not found when adding item to list. User: {Email}, Id: {ListId}, Items: {ItemsDTO}", userEmail, listId, itemDTO);
+                    return null!;
+                }
+            }
+            catch (Exception err)
+            {
+                _logger.LogError(err, "Error when adding item to list. User: {Email}, List Id: {ListId}, Items: {ItemDTO}", userEmail, listId, itemDTO);
+                throw;
+            }
+        }
+
+        public async Task<ShopListGetDTO> UpdateShopListRemoveItem(ItemPatchDTO itemDTO, int listId, string userEmail)
+        {
+            try
+            {
+                var user = await _dbContext.Users
+                .FirstOrDefaultAsync(u => u.Email == userEmail);
+
+                if (user != null)
+                {
+                    var currentList = await _dbContext.ShopLists
+                        .Where(s => s.Id == listId)
+                        .Include(s => s.Users)
+                        .Where(s => s.Users.Contains(user))
+                        .FirstOrDefaultAsync();
+
+                    if (currentList != null)
+                    {
+                        var item = await _dbContext.Items
+                            .Where(i => i.Id == itemDTO.Id)
+                            .Include(i => i.ShopList)
+                            .FirstAsync();
+                        if (item != null)
+                        {
+                            _dbContext.Items.Remove(item);
+                            await _dbContext.SaveChangesAsync();
+                            return new ShopListGetDTO { Title = currentList.Title, ListedItems = currentList.ListedItems, Id = currentList.Id };
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Item not found when removing item from list. User: {Email}, Id: {ListId}, Items: {ItemsDTO}", userEmail, listId, itemDTO);
+                            return null!;
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("List not found when removing item from list. User: {Email}, Id: {ListId}, Items: {ItemsDTO}", userEmail, listId, itemDTO);
+                        return null!;
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("User not found when removing item from list. User: {Email}, Id: {ListId}, Items: {ItemsDTO}", userEmail, listId, itemDTO);
+                    return null!;
+                }
+            }
+            catch (Exception err)
+            {
+                _logger.LogError(err, "Error when removing item from list. User: {Email}, List Id: {ListId}, Items: {ItemDTO}", userEmail, listId, itemDTO);
+                throw;
+            }
+        }
+
+        public async Task<ShopListGetDTO> UpdateShopListItemById(ItemPatchDTO itemDTO, int listId, string userEmail)
+        {
+            try
+            {
+                var user = await _dbContext.Users
+                .FirstOrDefaultAsync(u => u.Email == userEmail);
+
+                if (user != null)
+                {
+                    var currentList = await _dbContext.ShopLists
+                        .Where(s => s.Id == listId)
+                        .Include(s => s.Users)
+                        .Where(s => s.Users.Contains(user))
+                        .FirstOrDefaultAsync();
+
+                    if (currentList != null)
+                    {
+                        var itemToChange = await _dbContext.Items
+                        .Where(i => i.Id == itemDTO.Id)
+                        .Include(i => i.ShopList)
+                        .Where(i => i.ShopList.Id == currentList.Id)
+                        .FirstOrDefaultAsync();
+
+                        if (itemToChange != null)
+                        {
+                            itemToChange.Name = itemDTO.Name;
+                            itemToChange.Price = itemDTO.Price;
+                            itemToChange.Quantity = itemDTO.Quantity;
+                            itemToChange.IsChecked = itemDTO.IsChecked;
+
+                            await _dbContext.SaveChangesAsync();
+                            return new ShopListGetDTO { Id = currentList.Id, Title = currentList.Title, ListedItems = currentList.ListedItems };
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Item not found when updating a list item by id. User: {Email}, Id: {ListId}, Item: {ItemDTO}", userEmail, listId, itemDTO);
+                            return null!;
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("List not found when updating a list item by id. User: {Email}, Id: {ListId}, Item: {ItemDTO}", userEmail, listId, itemDTO);
+                        return null!;
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("User not found when updating a list item by id. User: {Email}, Id: {ListId}, Item: {ItemDTO}", userEmail, listId, itemDTO);
+                    return null!;
+                }
+            }
+            catch (Exception err)
+            {
+                _logger.LogError(err, "Error when updating a list item by id. User: {Email}, List Id: {ListId}, Item: {itemDTO}", userEmail, listId, itemDTO);
+                throw;
+            }
+        }
+
         public async Task<string> RenameList(int listId, string userEmail, string newName)
         {
             try
@@ -201,12 +380,12 @@ namespace ShoppingList.Server.Services
 
                 if (user != null)
                 {
-                    var listToRename = _dbContext.ShopLists
+                    var listToRename = await _dbContext.ShopLists
                         .Where(s => s.Id == listId)
                         .Include(s => s.Users)
                         .Where(s => s.Users.Contains(user))
                         .Include(i => i.ListedItems)
-                        .FirstOrDefault();
+                        .FirstOrDefaultAsync();
 
                     if (listToRename != null)
                     {
@@ -243,12 +422,12 @@ namespace ShoppingList.Server.Services
 
                 if (user != null)
                 {
-                    var listToDelete = _dbContext.ShopLists
+                    var listToDelete = await _dbContext.ShopLists
                 .Where(s => s.Id == listId)
                 .Include(s => s.Users)
                 .Where(s => s.Users.Contains(user))
                 .Include(i => i.ListedItems)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
                     if (listToDelete != null)
                     {
@@ -290,12 +469,12 @@ namespace ShoppingList.Server.Services
 
                 if (currentUser != null)
                 {
-                    var listToShare = _dbContext.ShopLists
+                    var listToShare =  await _dbContext.ShopLists
                                 .Where(s => s.Id == listId)
                                 .Include(s => s.Users)
                                 .Where(s => s.Users.Contains(currentUser))
                                 .Include(i => i.ListedItems)
-                                .FirstOrDefault();
+                                .FirstOrDefaultAsync();
 
                     var userToShare = await _dbContext.Users
                     .FirstOrDefaultAsync(u => u.Email == userToShareDTO.Email);

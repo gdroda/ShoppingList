@@ -146,17 +146,89 @@ namespace ShoppingList.Server.Controllers
 
         [Authorize]
         [HttpPut("{listId}")]
-        public async Task<ActionResult<ShopList>> UpdateShopList([FromBody] ItemCreateDTO[] itemDTO, int listId)
+        public async Task<ActionResult<ShopListGetDTO>> UpdateShopList([FromBody] ItemCreateDTO[] itemDTO, int listId)
         {
             if (User.Identity?.IsAuthenticated == true)
             {
                 var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
                 if (email != null)
                 {
+                    //moved notification here for faster reaction
+                    await _hubContext.Clients.Group($"list_{listId}").NewNotification(email, listId);
+
                     var response = await _shopListService.UpdateShopList(itemDTO, listId, email);
                     if (response != null)
                     {
-                        await _hubContext.Clients.Group($"list_{listId}").NewNotification(email, listId);
+                        //moved notification up ^
+                        return Ok(response);
+                    }
+                    else return BadRequest();
+                }
+                else return NotFound();
+            }
+            return Unauthorized();
+        }
+
+        [Authorize]
+        [HttpPost("add/{listId}")]
+        public async Task<ActionResult<ShopListGetDTO>> PatchItemAdd([FromBody] ItemPatchDTO itemDTO, int listId)
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+                if (email != null)
+                {
+                    await _hubContext.Clients.Group($"list_{listId}").NewNotification(email, listId);
+
+                    var response = await _shopListService.UpdateShopListAddItem(itemDTO, listId, email);
+                    if (response != null)
+                    {
+                        return Ok(response);
+                    }
+                    else return BadRequest();
+                }
+                else return NotFound();
+            }
+            return Unauthorized();
+        }
+
+        [Authorize]
+        [HttpDelete("remove/{listId}")]
+        public async Task<ActionResult<ShopListGetDTO>> PatchItemRemove([FromBody] ItemPatchDTO itemDTO, int listId)
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+                if (email != null)
+                {
+                    await _hubContext.Clients.Group($"list_{listId}").NewNotification(email, listId);
+
+                    var response = await _shopListService.UpdateShopListRemoveItem(itemDTO, listId, email);
+                    if (response != null)
+                    {
+                        return Ok(response);
+                    }
+                    else return BadRequest();
+                }
+                else return NotFound();
+            }
+            return Unauthorized();
+        }
+
+        [Authorize]
+        [HttpPatch("{listId}")]
+        public async Task<ActionResult<ShopListGetDTO>> PatchItemEdit([FromBody] ItemPatchDTO itemDTO, int listId)
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+                if (email != null)
+                {
+                    await _hubContext.Clients.Group($"list_{listId}").NewNotification(email, listId);
+
+                    var response = await _shopListService.UpdateShopListItemById(itemDTO, listId, email);
+                    if (response != null)
+                    {
                         return Ok(response);
                     }
                     else return BadRequest();

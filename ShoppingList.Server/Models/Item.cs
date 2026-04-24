@@ -18,4 +18,9 @@
         public int Quantity { get; set; }
         public bool IsChecked { get; set; }
     }
+    
+    public class ItemPatchDTO(): ItemCreateDTO
+    { 
+        public int Id { get; set; }
+    }
 }

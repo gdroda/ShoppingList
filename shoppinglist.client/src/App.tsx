@@ -7,7 +7,7 @@ import { useDebounce } from './debounce.tsx';
 import { NameModal, ShareModal } from './Modals.js';
 import { ConfirmModal } from './ConfirmModal.js';
 import { useNotificationSocket } from './SignalRNotifications.js';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
@@ -25,7 +25,7 @@ interface List {
 }
 
 interface Item {
-    id: number,
+    id: string,
     isChecked: false,
     name: string,
     quantity: string,
@@ -66,6 +66,7 @@ export default function App() {
     //]);
 
     const [items, setItems] = useState<Item[]>([]);
+    const [itemToUpdate, setItemToUpdate] = useState<Item>();
 
     const debouncedSave = useDebounce(items, 500)
     const [needSave, setNeedSave] = useState(false);
@@ -178,7 +179,7 @@ export default function App() {
     }
 
 
-    const loadList = async (id): Promise<Item[]> => {
+    const loadList = async (id): Promise<List> => {
         try {
             const resp = await fetch(`${BACKEND_URL}/api/shoplist/${id}`, {
                 method: "GET",
@@ -186,7 +187,7 @@ export default function App() {
             })
 
             const emptyRow: Item = {
-                id: Date.now(),
+                id: `temp-${Date.now()}`,
                 name: '',
                 quantity: '',
                 price: '',
@@ -206,8 +207,11 @@ export default function App() {
                 price: itemDB.price || '',
                 isChecked: itemDB.isChecked || false
             }));
-            
 
+            const list: List = { id: data.id, title: data.title, listedItems: [...mappedItems, emptyRow] };
+
+            return list;
+            /*
             if ([...mappedItems].length > 0) {
                 setItems([...mappedItems]);
                 const list: Item[] = [...mappedItems];
@@ -217,7 +221,7 @@ export default function App() {
                 setItems([...mappedItems, emptyRow]);
                 const list: Item[] = [...mappedItems, emptyRow];
                 return list;
-            }
+            }*/
         }
         catch (error) {
             console.log(error);
@@ -228,7 +232,7 @@ export default function App() {
 
 
 
-    // SAVE FUNCTION AND DEBOUNCE
+    // SAVE AND DEBOUNCE
     interface ItemToSend {
         Name: string,
         Price: number,
@@ -236,32 +240,138 @@ export default function App() {
         IsChecked: boolean
     }
 
-    const SaveList = async () => {
-        try {
-            const payload: ItemToSend[] = items.filter(item => item.name && item.name.trim() !== "").map(item => ({
-                Name: item.name,
-                Price: Number(item.price) || 0,
-                Quantity: Number(item.quantity) || 0,
-                IsChecked: item.isChecked
-            }));
+    interface ItemToSendWithId {
+        Id: number,
+        Name: string,
+        Price: number,
+        Quantity: number,
+        IsChecked: boolean
+    }
+
+
+    const patchItem = useMutation({
+        mutationFn: async (patchItem: Item) => {
+            const payload: ItemToSendWithId = {
+                Id: Number(patchItem.id),
+                Name: patchItem.name,
+                Price: Number(patchItem.price) || 0,
+                Quantity: Number(patchItem.quantity) || 0,
+                IsChecked: patchItem.isChecked
+            };
             const response = await fetch(`${BACKEND_URL}/api/shoplist/${listId}`, {
-                method: "PUT",
+                method: "PATCH",
                 credentials: "include",
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(payload)
             });
-        }
-        catch (error) {
-            console.log("List Save Failed.", error);
-        }
-    }
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response;
+        },
+        onMutate: async (patchItem) => {
+            await queryClient.cancelQueries({ queryKey: ['list', listId] })
+            const previousList = queryClient.getQueryData(['list', listId])
+            queryClient.setQueryData(['list', listId], (old: any) => {
+                return old?.map((item) =>
+                    item.id === patchItem.id ? { ...item, ...patchItem } : item
+                );
+            });
+            return { previousList };
+        },
+        onError: (err, patchItem, context) => {
+            if (context?.previousList) {
+                queryClient.setQueryData(['list', listId], context.previousList);
+            }
+        },
+        onSettled: () =>
+            queryClient.invalidateQueries({ queryKey: ['list', listId] })
+    })
+
+    const addItem = useMutation({
+        mutationFn: async (newItem: Item) => {
+            const payload: ItemToSend = {
+                Name: newItem.name,
+                Price: Number(newItem.price) || 0,
+                Quantity: Number(newItem.quantity) || 0,
+                IsChecked: newItem.isChecked
+            };
+            const response = await fetch(`${BACKEND_URL}/api/shoplist/add/${listId}`, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response;
+        },
+        onMutate: async (newItem) => {
+            await queryClient.cancelQueries({ queryKey: ['list', listId] })
+            const previousList = queryClient.getQueryData(['list', listId])
+            queryClient.setQueryData(['list', listId], (old: any) => {
+                return old ? [...old, newItem] : [newItem];
+            });
+            return { previousList };
+        },
+        onError: (err, newItem, context) => {
+            if (context?.previousList) {
+                queryClient.setQueryData(['list', listId], context.previousList);
+            }
+        },
+        onSettled: () =>
+            queryClient.invalidateQueries({queryKey:['list', listId]})
+    })
+
+    const removeItem = useMutation({
+        mutationFn: async (deleteItem: Item) => {
+            if (deleteItem.id.toString().startsWith("temp")) return;
+
+            const payload: ItemToSend = {
+                Name: deleteItem.name,
+                Price: Number(deleteItem.price) || 0,
+                Quantity: Number(deleteItem.quantity) || 0,
+                IsChecked: deleteItem.isChecked
+            };
+            const response = await fetch(`${BACKEND_URL}/api/shoplist/remove/${listId}`, {
+                method: "DELETE",
+                credentials: "include",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response;
+        },
+        onMutate: async (deleteItem) => {
+            await queryClient.cancelQueries({ queryKey: ['list', listId] })
+            const previousList = queryClient.getQueryData(['list', listId])
+            queryClient.setQueryData(['list', listId], (old: any) => {
+                return old?.filter((item) => item.id !== deleteItem.id);
+            });
+            return { previousList };
+        },
+        onError: (err, deleteItem, context) => {
+            if (context?.previousList) {
+                queryClient.setQueryData(['list', listId], context.previousList);
+            }
+        },
+        onSettled: () =>
+            queryClient.invalidateQueries({ queryKey: ['list', listId] })
+    })
     
 
     useEffect(() => {
         if (debouncedSave && !isGuest && needSave) {
-            SaveList();
+            patchItem.mutate(itemToUpdate);
             setNeedSave(false);
         }
     }, [debouncedSave])
@@ -270,19 +380,31 @@ export default function App() {
 
 
 
-    //ITEM AND KEY HANDLES
+    //ITEM UPDATES AND KEY HANDLES
     const updateItem = (id, field, value) => {
-        setItems(items.map(item =>
+        const updatedList = items.map(item =>
             item.id === id ? { ...item, [field]: value } : item
-        ));
-        setNeedSave(true);
+        );
+
+        const updatedItem = updatedList.find(item => item.id == id);
+
+        setItems(updatedList);
+
+        if (updatedItem && !id.toString().startsWith("temp")) {
+            setItemToUpdate(updatedItem);
+            setNeedSave(true);
+        }
     };
 
     const handleKeyDown = (e, index) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            const newItem: Item = { id: Date.now(), isChecked: false, name: '', quantity: '', price: '' };
 
+            if (items[index].name && items[index].name.trim() !== "") {
+                addItem.mutate(items[index]); //is this fine?
+            }
+
+            const newItem: Item = { id: `temp-${index}-${Date.now()}`, isChecked: false, name: '', quantity: '', price: '' };
             const newItems = [...items];
             newItems.splice(index + 1, 0, newItem);
             setItems(newItems);
@@ -298,6 +420,7 @@ export default function App() {
 
         if (e.key === 'Backspace' && items[index].name === '' && items.length > 1) {
             e.preventDefault();
+            removeItem.mutate(items[index]);
             const newItems = items.filter((_, i) => i !== index);
             setItems(newItems);
             // Focus previous line
@@ -317,10 +440,7 @@ export default function App() {
 
 
 
-    /* LOADING, LOGIN AND LOGOUT
-    if (isLoading) {
-        return <div>Checking authentication...</div>;
-    }*/
+
 
     const Login = async () => {
         window.location.href = `${BACKEND_URL}/api/auth/login`;
@@ -440,7 +560,7 @@ export default function App() {
                 }));
 
                 const emptyRow: Item = {
-                    id: Date.now(),
+                    id: `temp-${Date.now()}`,
                     name: '',
                     quantity: '',
                     price: '',
@@ -508,20 +628,27 @@ export default function App() {
     });
 
 
-    const {refetch: loadListRefetch } = useQuery({
+    const {data: serverList, refetch: loadListRefetch } = useQuery({
         queryKey: ['list', listId],
         queryFn: () => loadList(listId),
-        enabled: false,
+        enabled: !!listId,
         refetchOnWindowFocus: false
     });
 
+    useEffect(() => {
+        const isUserTyping = addItem.isPending || removeItem.isPending || patchItem.isPending;
+
+        if (serverList && !isUserTyping) {
+            setItems(serverList.listedItems);
+        }
+    },[serverList, addItem.isPending, removeItem.isPending, patchItem.isPending])
 
 
     //ADDS 1 LINE FOR GUESTS
     useEffect(() => {
         if (isGuest) {
             const emptyRow: Item = {
-                id: Date.now(),
+                id: `temp-${Date.now()}`,
                 name: '',
                 quantity: '',
                 price: '',
@@ -649,7 +776,7 @@ export default function App() {
                                 {userLists?.map((list) => (
                                     <li key={list.id}>
                                         <div className="flex flex-row md:flex-row">
-                                        <CustomTrigger children={list.title} onClick={() => setListId(list.id)}></CustomTrigger>
+                                            <CustomTrigger children={list.title} onClick={() => { setListId(list.id); loadListRefetch(); }}></CustomTrigger>
                                             <Button onClick={() => {setListIdToDelete(list.id); setIsConfirmOpen(true); }}>X</Button>
                                         </div>
                                     </li>
