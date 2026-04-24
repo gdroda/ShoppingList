@@ -395,7 +395,7 @@ export default function App() {
         setItems(updatedList);
         console.log("patch code here")
         if (updatedItem && !id.toString().startsWith("temp")) {
-            console.log(`patch code with ${updatedItem}`)
+            console.log(`patch code with, updatedItem`)
             setItemToUpdate(updatedItem);
             setNeedSave(true);
         }
@@ -406,14 +406,14 @@ export default function App() {
             e.preventDefault();
             console.log("enter pressed")
             if (items[index].name && items[index].name.trim() !== "") {
-                console.log(`enter pressed for ${items[index]}`)
+                console.log(`enter pressed for `, items[index])
                 addItem.mutate(items[index]); //is this fine?
             }
 
             const newItem: Item = { id: `temp-${index}-${Date.now()}`, isChecked: false, name: '', quantity: '', price: '' };
             const newItems = [...items];
             newItems.splice(index + 1, 0, newItem);
-            //setItems(newItems);
+            setItems(newItems);
 
             // Focus the new input on the next render
             setTimeout(() => {
@@ -427,10 +427,10 @@ export default function App() {
         if (e.key === 'Backspace' && items[index].name === '' && items.length > 1) {
             e.preventDefault();
             console.log("backspaced pressed")
-            console.log(`backspaced pressed for ${items[index]}`)
+            console.log(`backspaced pressed for `, items[index])
             removeItem.mutate(items[index]);
             const newItems = items.filter((_, i) => i !== index);
-            //setItems(newItems);
+            setItems(newItems);
             // Focus previous line
             if (inputRefs.current[index - 1]) {
                 inputRefs.current[index - 1].focus();
