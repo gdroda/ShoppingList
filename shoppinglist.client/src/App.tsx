@@ -404,7 +404,7 @@ export default function App() {
     const handleKeyDown = (e, index) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-
+            console.log(items);
             console.log("enter pressed")
             if (items[index].name && items[index].name.trim() !== "") {
                 console.log(`enter pressed for ${items[index]}`)
@@ -667,7 +667,7 @@ export default function App() {
         }
     }, [userData])
 
-
+    console.log(items);
 
     if (items) {
         return (
