@@ -392,7 +392,7 @@ export default function App() {
 
         const updatedItem = updatedList.find(item => item.id == id);
 
-        setItems(updatedList);
+        //setItems(updatedList);
         console.log("patch code here")
         if (updatedItem && !id.toString().startsWith("temp")) {
             console.log(`patch code with ${updatedItem}`)
@@ -404,7 +404,6 @@ export default function App() {
     const handleKeyDown = (e, index) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            console.log(items);
             console.log("enter pressed")
             if (items[index].name && items[index].name.trim() !== "") {
                 console.log(`enter pressed for ${items[index]}`)
@@ -431,7 +430,7 @@ export default function App() {
             console.log(`backspaced pressed for ${items[index]}`)
             removeItem.mutate(items[index]);
             const newItems = items.filter((_, i) => i !== index);
-            setItems(newItems);
+            //setItems(newItems);
             // Focus previous line
             if (inputRefs.current[index - 1]) {
                 inputRefs.current[index - 1].focus();
@@ -667,7 +666,6 @@ export default function App() {
         }
     }, [userData])
 
-    console.log(items);
 
     if (items) {
         return (
