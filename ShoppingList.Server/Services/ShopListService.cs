@@ -290,25 +290,25 @@ namespace ShoppingList.Server.Services
                         }
                         else
                         {
-                            _logger.LogWarning("Item not found when removing item from list. User: {Email}, Id: {ListId}, Items: {ItemsDTO}", userEmail, listId, itemDTO);
+                            _logger.LogWarning("Item not found when removing item from list. User: {Email}, Id: {ListId}, ItemId: {itemId}", userEmail, listId, itemId);
                             return null!;
                         }
                     }
                     else
                     {
-                        _logger.LogWarning("List not found when removing item from list. User: {Email}, Id: {ListId}, Items: {ItemsDTO}", userEmail, listId, itemDTO);
+                        _logger.LogWarning("List not found when removing item from list. User: {Email}, Id: {ListId}, ItemId: {itemId}", userEmail, listId, itemId);
                         return null!;
                     }
                 }
                 else
                 {
-                    _logger.LogWarning("User not found when removing item from list. User: {Email}, Id: {ListId}, Items: {ItemsDTO}", userEmail, listId, itemDTO);
+                    _logger.LogWarning("User not found when removing item from list. User: {Email}, Id: {ListId}, ItemId: {itemId}", userEmail, listId, itemId);
                     return null!;
                 }
             }
             catch (Exception err)
             {
-                _logger.LogError(err, "Error when removing item from list. User: {Email}, List Id: {ListId}, Items: {ItemDTO}", userEmail, listId, itemDTO);
+                _logger.LogError(err, "Error when removing item from list. User: {Email}, List Id: {ListId}, ItemId: {itemId}", userEmail, listId, itemId);
                 throw;
             }
         }
