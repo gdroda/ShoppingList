@@ -276,9 +276,13 @@ export default function App() {
             await queryClient.cancelQueries({ queryKey: ['list', listId] })
             const previousList = queryClient.getQueryData(['list', listId])
             queryClient.setQueryData(['list', listId], (old: any) => {
-                return old?.map((item) =>
-                    item.id === patchItem.id ? { ...item, ...patchItem } : item
-                );
+                const safeOld = old?.listedItems || [];
+                return {
+                    ...old,
+                    listedItems: safeOld?.map((item: Item) =>
+                        item.id === patchItem.id ? { ...item, ...patchItem } : item
+                    )
+                }
             });
             return { previousList };
         },
@@ -317,7 +321,11 @@ export default function App() {
             await queryClient.cancelQueries({ queryKey: ['list', listId] })
             const previousList = queryClient.getQueryData(['list', listId])
             queryClient.setQueryData(['list', listId], (old: any) => {
-                return old ? [...old, newItem] : [newItem];
+                const safeOld = old?.listedItems || [];
+                return {
+                    ...old,
+                    listedItems: [...safeOld, newItem]
+                }
             });
             return { previousList };
         },
@@ -358,7 +366,12 @@ export default function App() {
             await queryClient.cancelQueries({ queryKey: ['list', listId] })
             const previousList = queryClient.getQueryData(['list', listId])
             queryClient.setQueryData(['list', listId], (old: any) => {
-                return old?.filter((item) => item.id !== deleteItem.id);
+                const safeOld = old?.listedItems || [];
+                const filteredData = safeOld.filter((item: Item) => item.id !== deleteItem.id);
+                return {
+                    ...old,
+                    listedItems: filteredData
+                }
             });
             return { previousList };
         },
