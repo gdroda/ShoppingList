@@ -408,6 +408,9 @@ export default function App() {
         setItems(updatedList);
         console.log("patch code here")
         if (updatedItem && !id.toString().startsWith("temp")) {
+            if (updatedItem.name.trim() === "") {
+                return;
+            }
             console.log(`patch code with`, updatedItem)
             setItemToUpdate(updatedItem);
             setNeedSave(true);
@@ -417,6 +420,7 @@ export default function App() {
     const handleKeyDown = (e, index) => {
         if (e.key === 'Enter') {
             e.preventDefault();
+            e.stopPropagation();
             console.log("enter pressed")
             if (items[index].name && items[index].name.trim() !== "") {
                 console.log(`enter pressed for `, items[index])
