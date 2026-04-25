@@ -14,7 +14,7 @@ namespace ShoppingList.Server.Services
         public Task<ShopListGetDTO> CreateShopList(ShopListCreateDTO shopListCreateDTO, string userEmail);
         public Task<ShopListGetDTO> UpdateShopList(ItemCreateDTO[] itemDTO, int listId, string userEmail); //to be removed
         public Task<ShopListGetDTO>  UpdateShopListAddItem(ItemPatchDTO itemDTO, int listId, string userEmail);
-        public Task<ShopListGetDTO>  UpdateShopListRemoveItem(ItemPatchDTO itemDTO, int listId, string userEmail);
+        public Task<ShopListGetDTO>  UpdateShopListRemoveItem(int listId, int itemId, string userEmail);
         public Task<ShopListGetDTO> UpdateShopListItemById(ItemPatchDTO itemDTO, int listId, string userEmail);
         public Task<string> RenameList(int listId, string userEmail, string newName);
         public Task<string> DeleteList(int listId, string userEmail);
@@ -261,7 +261,7 @@ namespace ShoppingList.Server.Services
             }
         }
 
-        public async Task<ShopListGetDTO> UpdateShopListRemoveItem(ItemPatchDTO itemDTO, int listId, string userEmail)
+        public async Task<ShopListGetDTO> UpdateShopListRemoveItem(int listId, int itemId, string userEmail)
         {
             try
             {
@@ -279,7 +279,7 @@ namespace ShoppingList.Server.Services
                     if (currentList != null)
                     {
                         var item = await _dbContext.Items
-                            .Where(i => i.Id == itemDTO.Id)
+                            .Where(i => i.Id == itemId)
                             .Include(i => i.ShopList)
                             .FirstAsync();
                         if (item != null)

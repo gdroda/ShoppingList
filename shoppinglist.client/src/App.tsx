@@ -343,19 +343,12 @@ export default function App() {
             console.log("Mutation Delete started with:", deleteItem)
             if (deleteItem.id.toString().startsWith("temp")) return;
 
-            const payload: ItemToSend = {
-                Name: deleteItem.name,
-                Price: Number(deleteItem.price) || 0,
-                Quantity: Number(deleteItem.quantity) || 0,
-                IsChecked: deleteItem.isChecked
-            };
-            const response = await fetch(`${BACKEND_URL}/api/shoplist/remove/${listId}`, {
+            const response = await fetch(`${BACKEND_URL}/api/shoplist/remove/${listId}/${deleteItem.id}`, {
                 method: "DELETE",
                 credentials: "include",
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(payload)
             });
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -367,7 +360,7 @@ export default function App() {
             const previousList = queryClient.getQueryData(['list', listId])
             queryClient.setQueryData(['list', listId], (old: any) => {
                 const safeOld = old?.listedItems || [];
-                const filteredData = safeOld.filter((item: Item) => item.id !== deleteItem.id);
+                const filteredData = safeOld.filter(i => i.id !== deleteItem.id);
                 return {
                     ...old,
                     listedItems: filteredData
@@ -426,10 +419,7 @@ export default function App() {
                 console.log(`enter pressed for `, items[index])
                 addItem.mutate(items[index]); //is this fine?
             }
-            console.log("Attempting Async Mutate");
-            addItem.mutateAsync(items[index])
-                .then(() => console.log("Mutation Resolved"))
-                .catch((err) => console.error("Mutation Rejected:", err));
+
             const newItem: Item = { id: `temp-${index}-${Date.now()}`, isChecked: false, name: '', quantity: '', price: '' };
             const newItems = [...items];
             newItems.splice(index + 1, 0, newItem);

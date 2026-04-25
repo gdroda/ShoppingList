@@ -193,8 +193,8 @@ namespace ShoppingList.Server.Controllers
         }
 
         [Authorize]
-        [HttpDelete("remove/{listId}")]
-        public async Task<ActionResult<ShopListGetDTO>> PatchItemRemove([FromBody] ItemPatchDTO itemDTO, int listId)
+        [HttpDelete("remove/{listId}/{itemId}")]
+        public async Task<ActionResult<ShopListGetDTO>> PatchItemRemove(int listId, int itemId)
         {
             if (User.Identity?.IsAuthenticated == true)
             {
@@ -203,7 +203,7 @@ namespace ShoppingList.Server.Controllers
                 {
                     await _hubContext.Clients.Group($"list_{listId}").NewNotification(email, listId);
 
-                    var response = await _shopListService.UpdateShopListRemoveItem(itemDTO, listId, email);
+                    var response = await _shopListService.UpdateShopListRemoveItem(listId, itemId, email);
                     if (response != null)
                     {
                         return Ok(response);
