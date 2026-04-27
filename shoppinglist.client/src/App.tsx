@@ -298,7 +298,8 @@ export default function App() {
     const addItem = useMutation({
         mutationFn: async (newItem: Item) => {
             console.log("Mutation Add started with:", newItem)
-            const payload: ItemToSend = {
+            const payload: ItemToSendWithId = {
+                Id: Number(newItem.id) || -1,
                 Name: newItem.name,
                 Price: Number(newItem.price) || 0,
                 Quantity: Number(newItem.quantity) || 0,
@@ -348,7 +349,7 @@ export default function App() {
                 credentials: "include",
                 headers: {
                     'Content-Type': 'application/json'
-                },
+                }
             });
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -401,9 +402,9 @@ export default function App() {
         setItems(updatedList);
         console.log("patch code here")
         if (updatedItem && !id.toString().startsWith("temp")) {
-            if (updatedItem.name.trim() === "") {
-                return;
-            }
+            //if (updatedItem.name.trim() === "") {
+            //    return;
+            //}
             console.log(`patch code with`, updatedItem)
             setItemToUpdate(updatedItem);
             setNeedSave(true);
@@ -418,19 +419,20 @@ export default function App() {
             if (items[index].name && items[index].name.trim() !== "") {
                 console.log(`enter pressed for `, items[index])
                 addItem.mutate(items[index]); //is this fine?
+
+
+                const newItem: Item = { id: `temp-${index}-${Date.now()}`, isChecked: false, name: '', quantity: '', price: '' };
+                const newItems = [...items];
+                newItems.splice(index + 1, 0, newItem);
+                setItems(newItems);
+
+                // Focus the new input on the next render
+                setTimeout(() => {
+                    if (inputRefs.current[index + 1]) {
+                        inputRefs.current[index + 1].focus();
+                    }
+                }, 10);
             }
-
-            const newItem: Item = { id: `temp-${index}-${Date.now()}`, isChecked: false, name: '', quantity: '', price: '' };
-            const newItems = [...items];
-            newItems.splice(index + 1, 0, newItem);
-            setItems(newItems);
-
-            // Focus the new input on the next render
-            setTimeout(() => {
-                if (inputRefs.current[index + 1]) {
-                    inputRefs.current[index + 1].focus();
-                }
-            }, 10);
         }
 
 
@@ -438,10 +440,11 @@ export default function App() {
             e.preventDefault();
             console.log("backspaced pressed")
             console.log(`backspaced pressed for `, items[index])
-            removeItem.mutate(items[index]);
+            if (!items[index].id.toString().startsWith("temp")) {
+                removeItem.mutate(items[index]);
+            }
             const newItems = items.filter((_, i) => i !== index);
             setItems(newItems);
-            // Focus previous line
             if (inputRefs.current[index - 1]) {
                 inputRefs.current[index - 1].focus();
             }
