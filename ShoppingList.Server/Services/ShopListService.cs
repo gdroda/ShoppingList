@@ -47,7 +47,12 @@ namespace ShoppingList.Server.Services
                     var value = await _dbContext.ShopLists
                         .Where(s => s.Id == id)
                         .Where(s => s.Users.Contains(user))
-                        .Select(s => new ShopListGetDTO { Id = s.Id, Title = s.Title, ListedItems = s.ListedItems })
+                        .Select(s => new ShopListGetDTO { Id = s.Id, Title = s.Title, 
+                            ListedItems = s.ListedItems.Select(i => new ItemGetDTO
+                            {
+                                Id = i.Id, Name = i.Name, Quantity = i.Quantity, Price = i.Price, IsChecked = i.IsChecked
+                            }).ToList() ?? new List<ItemGetDTO>()
+                        })
                         .FirstOrDefaultAsync();
 
                     if (value != null)
@@ -85,8 +90,21 @@ namespace ShoppingList.Server.Services
                     var value = await _dbContext.ShopLists
                     .Where(s => s.Users.Contains(user))
                     .Include(s => s.Users)
-                    .Select(s => new ShopListGetDTO { Id = s.Id, Title = s.Title, ListedItems = s.ListedItems })
+                    .Select(s => new ShopListGetDTO
+                    {
+                        Id = s.Id,
+                        Title = s.Title,
+                        ListedItems = s.ListedItems.Select(i => new ItemGetDTO
+                        {
+                            Id = i.Id,
+                            Name = i.Name,
+                            Quantity = i.Quantity,
+                            Price = i.Price,
+                            IsChecked = i.IsChecked
+                        }).ToList() ?? new List<ItemGetDTO>()
+                    })
                     .ToListAsync();
+
                     return value;
                 }
                 else
@@ -167,7 +185,16 @@ namespace ShoppingList.Server.Services
                     {
                         
                         await _dbContext.SaveChangesAsync();
-                        return new ShopListGetDTO { Title = currentList.Title, ListedItems = currentList.ListedItems, Id = currentList.Id };
+                        return new ShopListGetDTO { Title = currentList.Title, 
+                            ListedItems = currentList.ListedItems.Select(i => new ItemGetDTO
+                            {
+                                Id = i.Id,
+                                Name = i.Name,
+                                Quantity = i.Quantity,
+                                Price = i.Price,
+                                IsChecked = i.IsChecked
+                            }).ToList() ?? new List<ItemGetDTO>(),
+                            Id = currentList.Id };
 
                         /*
                         var itemsToDelete = _dbContext.Items
@@ -234,7 +261,14 @@ namespace ShoppingList.Server.Services
                         {
                             await _itemServices.CreateItem(new ItemCreateDTO { Name = itemDTO.Name, IsChecked = itemDTO.IsChecked, Price = itemDTO.Price, Quantity = itemDTO.Quantity }, listId);
                             await _dbContext.SaveChangesAsync();
-                            return new ShopListGetDTO { Title = currentList.Title, ListedItems = currentList.ListedItems, Id = currentList.Id };
+                            return new ShopListGetDTO { Title = currentList.Title, ListedItems = currentList.ListedItems.Select(i => new ItemGetDTO
+                            {
+                                Id = i.Id,
+                                Name = i.Name,
+                                Quantity = i.Quantity,
+                                Price = i.Price,
+                                IsChecked = i.IsChecked
+                            }).ToList() ?? new List<ItemGetDTO>(), Id = currentList.Id };
                         }
                         else
                         {
@@ -286,7 +320,14 @@ namespace ShoppingList.Server.Services
                         {
                             _dbContext.Items.Remove(item);
                             await _dbContext.SaveChangesAsync();
-                            return new ShopListGetDTO { Title = currentList.Title, ListedItems = currentList.ListedItems, Id = currentList.Id };
+                            return new ShopListGetDTO { Title = currentList.Title, ListedItems = currentList.ListedItems.Select(i => new ItemGetDTO
+                            {
+                                Id = i.Id,
+                                Name = i.Name,
+                                Quantity = i.Quantity,
+                                Price = i.Price,
+                                IsChecked = i.IsChecked
+                            }).ToList() ?? new List<ItemGetDTO>(), Id = currentList.Id };
                         }
                         else
                         {
@@ -344,7 +385,15 @@ namespace ShoppingList.Server.Services
                             itemToChange.IsChecked = itemDTO.IsChecked;
 
                             await _dbContext.SaveChangesAsync();
-                            return new ShopListGetDTO { Id = currentList.Id, Title = currentList.Title, ListedItems = currentList.ListedItems };
+                            return new ShopListGetDTO { Id = currentList.Id, Title = currentList.Title, ListedItems = currentList.ListedItems.Select(i => new ItemGetDTO
+                            {
+                                Id = i.Id,
+                                Name = i.Name,
+                                Quantity = i.Quantity,
+                                Price = i.Price,
+                                IsChecked = i.IsChecked
+                            }).ToList() ?? new List<ItemGetDTO>()
+                            };
                         }
                         else
                         {

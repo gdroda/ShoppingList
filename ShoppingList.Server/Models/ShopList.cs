@@ -15,7 +15,7 @@ namespace ShoppingList.Server.Models
     {
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
-        public List<Item> ListedItems { get; set; } = [];
+        public List<ItemGetDTO> ListedItems { get; set; } = [];
     }
 
     public class ShopListCreateDTO()

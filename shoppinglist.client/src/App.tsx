@@ -342,7 +342,7 @@ export default function App() {
     const removeItem = useMutation({
         mutationFn: async (deleteItem: Item) => {
             console.log("Mutation Delete started with:", deleteItem)
-            if (deleteItem.id.toString().startsWith("temp")) return;
+            if (deleteItem.id.toString().startsWith("temp")) return null;
 
             const response = await fetch(`${BACKEND_URL}/api/shoplist/remove/${listId}/${deleteItem.id}`, {
                 method: "DELETE",
