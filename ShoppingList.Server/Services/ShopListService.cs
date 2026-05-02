@@ -15,7 +15,7 @@ namespace ShoppingList.Server.Services
         public Task<ShopListGetDTO> UpdateShopList(ItemCreateDTO[] itemDTO, int listId, string userEmail); //to be removed
         public Task<ShopListGetDTO>  UpdateShopListAddItem(ItemPatchDTO itemDTO, int listId, string userEmail);
         public Task<ShopListGetDTO>  UpdateShopListRemoveItem(int listId, int itemId, string userEmail);
-        public Task<ShopListGetDTO> UpdateShopListItemById(ItemPatchDTO itemDTO, int listId, string userEmail);
+        public Task<ShopListGetDTO> UpdateShopListItemById(ItemPatchDTO[] itemDTO, int listId, string userEmail);
         public Task<string> RenameList(int listId, string userEmail, string newName);
         public Task<string> DeleteList(int listId, string userEmail);
         public Task<UserGetDTO> ShareList(int listId, string userEmail, UserEmailOnlyDTO userToShareDTO);
@@ -354,7 +354,7 @@ namespace ShoppingList.Server.Services
             }
         }
 
-        public async Task<ShopListGetDTO> UpdateShopListItemById(ItemPatchDTO itemDTO, int listId, string userEmail)
+        public async Task<ShopListGetDTO> UpdateShopListItemById(ItemPatchDTO[] itemDTO, int listId, string userEmail)
         {
             try
             {
@@ -371,21 +371,28 @@ namespace ShoppingList.Server.Services
 
                     if (currentList != null)
                     {
-                        var itemToChange = await _dbContext.Items
-                        .Where(i => i.Id == itemDTO.Id)
-                        .Include(i => i.ShopList)
-                        .Where(i => i.ShopList.Id == currentList.Id)
-                        .FirstOrDefaultAsync();
-
-                        if (itemToChange != null)
+                        foreach(var itemReceived in itemDTO)
                         {
-                            itemToChange.Name = itemDTO.Name;
-                            itemToChange.Price = itemDTO.Price;
-                            itemToChange.Quantity = itemDTO.Quantity;
-                            itemToChange.IsChecked = itemDTO.IsChecked;
-
-                            await _dbContext.SaveChangesAsync();
-                            return new ShopListGetDTO { Id = currentList.Id, Title = currentList.Title, ListedItems = currentList.ListedItems.Select(i => new ItemGetDTO
+                            var itemToChange = await _dbContext.Items
+                                .Where(i => i.Id == itemReceived.Id)
+                                .Include(i => i.ShopList)
+                                .Where(i => i.ShopList.Id == currentList.Id)
+                                .FirstOrDefaultAsync();
+                            
+                            if (itemToChange != null)
+                            {
+                                itemToChange.Name = itemReceived.Name;
+                                itemToChange.Price = itemReceived.Price;
+                                itemToChange.Quantity = itemReceived.Quantity;
+                                itemToChange.IsChecked = itemReceived.IsChecked;
+                            }
+                        }
+                        await _dbContext.SaveChangesAsync();
+                        return new ShopListGetDTO
+                        {
+                            Id = currentList.Id,
+                            Title = currentList.Title,
+                            ListedItems = currentList.ListedItems.Select(i => new ItemGetDTO
                             {
                                 Id = i.Id,
                                 Name = i.Name,
@@ -393,13 +400,7 @@ namespace ShoppingList.Server.Services
                                 Price = i.Price,
                                 IsChecked = i.IsChecked
                             }).ToList() ?? new List<ItemGetDTO>()
-                            };
-                        }
-                        else
-                        {
-                            _logger.LogWarning("Item not found when updating a list item by id. User: {Email}, Id: {ListId}, Item: {ItemDTO}", userEmail, listId, itemDTO);
-                            return null!;
-                        }
+                        };
                     }
                     else
                     {

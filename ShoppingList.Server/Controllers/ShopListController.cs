@@ -217,7 +217,7 @@ namespace ShoppingList.Server.Controllers
 
         [Authorize]
         [HttpPatch("{listId}")]
-        public async Task<ActionResult<ShopListGetDTO>> PatchItemEdit([FromBody] ItemPatchDTO itemDTO, int listId)
+        public async Task<ActionResult<ShopListGetDTO>> PatchItemEdit([FromBody] ItemPatchDTO[] itemDTO, int listId)
         {
             if (User.Identity?.IsAuthenticated == true)
             {

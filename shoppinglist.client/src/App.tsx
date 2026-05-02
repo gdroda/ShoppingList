@@ -66,9 +66,10 @@ export default function App() {
     //]);
 
     const [items, setItems] = useState<Item[]>([]);
-    const [itemToUpdate, setItemToUpdate] = useState<Item>();
+    //const [itemToUpdate, setItemToUpdate] = useState<Item>();
 
-    const debouncedSave = useDebounce(items, 500)
+    const [changeSet, setChangeSet] = useState<Item[]>([]);
+    const debouncedSave = useDebounce(changeSet, 500);
     const [needSave, setNeedSave] = useState(false);
 
     useNotificationSocket(listId, debouncedSave);
@@ -211,17 +212,6 @@ export default function App() {
             const list: List = { id: data.id, title: data.title, listedItems: [...mappedItems, emptyRow] };
 
             return list;
-            /*
-            if ([...mappedItems].length > 0) {
-                setItems([...mappedItems]);
-                const list: Item[] = [...mappedItems];
-                return list;
-            }
-            else {
-                setItems([...mappedItems, emptyRow]);
-                const list: Item[] = [...mappedItems, emptyRow];
-                return list;
-            }*/
         }
         catch (error) {
             console.log(error);
@@ -250,29 +240,21 @@ export default function App() {
 
 
     const patchItem = useMutation({
-        mutationFn: async (patchItem: Item) => {
-            console.log("Mutation Patch started with:", patchItem)
-            const payload: ItemToSendWithId = {
-                Id: Number(patchItem.id),
-                Name: patchItem.name,
-                Price: Number(patchItem.price) || 0,
-                Quantity: Number(patchItem.quantity) || 0,
-                IsChecked: patchItem.isChecked
-            };
+        mutationFn: async (patchItems: Item[]) => {
             const response = await fetch(`${BACKEND_URL}/api/shoplist/${listId}`, {
                 method: "PATCH",
                 credentials: "include",
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(patchItems)
             });
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             return await response.json();
         },
-        onMutate: async (patchItem) => {
+        /*onMutate: async (patchItem) => {
             await queryClient.cancelQueries({ queryKey: ['list', listId] })
             const previousList = queryClient.getQueryData(['list', listId])
             queryClient.setQueryData(['list', listId], (old: any) => {
@@ -292,8 +274,10 @@ export default function App() {
             }
         },
         onSettled: () =>
-            queryClient.invalidateQueries({ queryKey: ['list', listId] })
-    })
+            queryClient.invalidateQueries({ queryKey: ['list', listId] })*/
+        onSuccess: (returnedList) =>
+            queryClient.setQueryData(['list'], returnedList)
+    });
 
     const addItem = useMutation({
         mutationFn: async (newItem: Item) => {
@@ -380,10 +364,12 @@ export default function App() {
     
 
     useEffect(() => {
-        if (debouncedSave && !isGuest && needSave) {
-            console.log(`just before mutate ${itemToUpdate}`)
-            patchItem.mutate(itemToUpdate);
-            setNeedSave(false);
+        if (!isGuest && needSave) {
+            if (changeSet.length > 0) {
+                patchItem.mutate(changeSet);
+                setChangeSet([]);
+                setNeedSave(false);
+            }
         }
     }, [debouncedSave])
 
@@ -402,11 +388,8 @@ export default function App() {
         setItems(updatedList);
         console.log("patch code here")
         if (updatedItem && !id.toString().startsWith("temp")) {
-            //if (updatedItem.name.trim() === "") {
-            //    return;
-            //}
-            console.log(`patch code with`, updatedItem)
-            setItemToUpdate(updatedItem);
+            //setItemToUpdate(updatedItem);
+            setChangeSet(prev => [...prev, updatedItem])
             setNeedSave(true);
         }
     };
@@ -532,8 +515,6 @@ export default function App() {
 
     const firstLoad = async () => {
         try {
-            //const backend_url = "https://shoppinglistbackend-production-e843.up.railway.app";
-
             const resp = await fetch(`${BACKEND_URL}/api/shoplist/init`, {
                 method: "GET",
                 credentials: "include"
@@ -547,12 +528,6 @@ export default function App() {
                 return;
             }
             const data = await resp.json() as unknown as User;
-            console.log(data);
-            console.log(data.allLists)
-            console.log(data.name)
-            console.log(data.email)
-            console.log(data.allLists[0])
-            console.log(data.allLists[0].id)
 
 
             if (data.allLists.length > 0) {
@@ -563,7 +538,6 @@ export default function App() {
                 }
                 setUserLists(data.allLists);
             }
-
 
 
             if (data.allLists[0] != null) {
@@ -607,6 +581,7 @@ export default function App() {
         }
     }
 
+    /*
     const fetchUser = async () => {
         try {
             const response = await fetch(`/api/auth/user`, {
@@ -625,7 +600,7 @@ export default function App() {
         catch (error) {
             console.log("Fetch error.", error);
         }
-    };
+    };*/
 
     const { data: userData } = useQuery({
         queryKey: ['user'],
