@@ -32,6 +32,14 @@ interface Item {
     price: string
 }
 
+const emptyRow: Item = {
+    id: `temp-${Date.now()}`,
+    name: '',
+    quantity: '',
+    price: '',
+    isChecked: false
+}
+
 //CUSTOM TRIGGER FOR SIDEBAR BUTTON
 export function CustomTrigger({
     className,
@@ -187,13 +195,7 @@ export default function App() {
                 credentials: "include"
             })
 
-            const emptyRow: Item = {
-                id: `temp-${Date.now()}`,
-                name: '',
-                quantity: '',
-                price: '',
-                isChecked: false
-            }
+            
 
             const data = await resp.json();
             
@@ -283,9 +285,8 @@ export default function App() {
         onSettled: () =>
             queryClient.invalidateQueries({ queryKey: ['list', listId] })*/
         onSuccess: (returnedList) => {
-            console.log(returnedList);
-            console.log(returnedList.listedItems);
-            queryClient.setQueryData(['list'], returnedList.listedItems)
+            const list = [...returnedList.listedItems, emptyRow]
+            queryClient.setQueryData(['list', listId], list)
         }
     });
 
@@ -655,13 +656,6 @@ export default function App() {
     //ADDS 1 LINE FOR GUESTS
     useEffect(() => {
         if (isGuest) {
-            const emptyRow: Item = {
-                id: `temp-${Date.now()}`,
-                name: '',
-                quantity: '',
-                price: '',
-                isChecked: false
-            }
             setItems([emptyRow]);
         }
     }, [userData])
