@@ -371,13 +371,13 @@ namespace ShoppingList.Server.Services
 
                     if (currentList != null)
                     {
+                        var itemIds = itemDTO.Select(i => i.Id).ToList();
+                        var itemsToUpdate = await _dbContext.Items
+                            .Where(i => itemIds.Contains(i.Id) && i.ShopList.Id == currentList.Id)
+                            .ToListAsync();
                         foreach(var itemReceived in itemDTO)
                         {
-                            var itemToChange = await _dbContext.Items
-                                .Where(i => i.Id == itemReceived.Id)
-                                .Include(i => i.ShopList)
-                                .Where(i => i.ShopList.Id == currentList.Id)
-                                .FirstOrDefaultAsync();
+                            var itemToChange = itemsToUpdate.FirstOrDefault(i => i.Id == itemReceived.Id);
                             
                             if (itemToChange != null)
                             {
@@ -391,7 +391,7 @@ namespace ShoppingList.Server.Services
                         var listToReturn = await _dbContext.ShopLists
                             .Where(l => l.Id == currentList.Id)
                             .Select(l => new ShopListGetDTO { Id = currentList.Id, Title = currentList.Title, 
-                                ListedItems = currentList.ListedItems.Select(i => new ItemGetDTO
+                                ListedItems = l.ListedItems.Select(i => new ItemGetDTO
                                 {
                                     Id = i.Id,
                                     Name = i.Name,
