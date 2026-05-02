@@ -282,8 +282,10 @@ export default function App() {
         },
         onSettled: () =>
             queryClient.invalidateQueries({ queryKey: ['list', listId] })*/
-        onSuccess: (returnedList) =>
+        onSuccess: (returnedList) => {
+            console.log(returnedList);
             queryClient.setQueryData(['list'], returnedList)
+        }
     });
 
     const addItem = useMutation({
