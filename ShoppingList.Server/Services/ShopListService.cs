@@ -388,19 +388,20 @@ namespace ShoppingList.Server.Services
                             }
                         }
                         await _dbContext.SaveChangesAsync();
-                        return new ShopListGetDTO
-                        {
-                            Id = currentList.Id,
-                            Title = currentList.Title,
-                            ListedItems = currentList.ListedItems.Select(i => new ItemGetDTO
-                            {
-                                Id = i.Id,
-                                Name = i.Name,
-                                Quantity = i.Quantity,
-                                Price = i.Price,
-                                IsChecked = i.IsChecked
-                            }).ToList() ?? new List<ItemGetDTO>()
-                        };
+                        var listToReturn = await _dbContext.ShopLists
+                            .Where(l => l.Id == currentList.Id)
+                            .Select(l => new ShopListGetDTO { Id = currentList.Id, Title = currentList.Title, 
+                                ListedItems = currentList.ListedItems.Select(i => new ItemGetDTO
+                                {
+                                    Id = i.Id,
+                                    Name = i.Name,
+                                    Quantity = i.Quantity,
+                                    Price = i.Price,
+                                    IsChecked = i.IsChecked
+                                }).ToList() ?? new List<ItemGetDTO>()
+                            })
+                            .FirstOrDefaultAsync();
+                        return listToReturn ?? new ShopListGetDTO();
                     }
                     else
                     {
