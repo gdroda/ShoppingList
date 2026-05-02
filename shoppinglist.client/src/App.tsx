@@ -284,7 +284,7 @@ export default function App() {
             queryClient.invalidateQueries({ queryKey: ['list', listId] })*/
         onSuccess: (returnedList) => {
             console.log(returnedList);
-            queryClient.setQueryData(['list'], returnedList)
+            queryClient.setQueryData(['list'], returnedList.listedItems)
         }
     });
 
