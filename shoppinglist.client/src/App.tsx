@@ -641,8 +641,9 @@ export default function App() {
     useEffect(() => {
         const isUserTyping = addItem.isPending || removeItem.isPending || patchItem.isPending;
         console.log(items);
-        console.log(serverList.listedItems);
+        
         if (serverList && !isUserTyping) {
+            console.log(serverList.listedItems);
             setItems(serverList.listedItems);
         }
     },[serverList, addItem.isPending, removeItem.isPending, patchItem.isPending])
@@ -779,7 +780,7 @@ export default function App() {
                                 {userLists?.map((list) => (
                                     <li key={list.id}>
                                         <div className="flex flex-row md:flex-row">
-                                            <CustomTrigger children={list.title} onClick={() => { setListId(list.id); loadListRefetch(); }}></CustomTrigger>
+                                            <CustomTrigger children={list.title} onClick={() => { setListId(list.id); /*loadListRefetch();*/ }}></CustomTrigger>
                                             <Button onClick={() => {setListIdToDelete(list.id); setIsConfirmOpen(true); }}>X</Button>
                                         </div>
                                     </li>
