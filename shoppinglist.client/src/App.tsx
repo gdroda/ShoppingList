@@ -285,7 +285,7 @@ export default function App() {
         onSettled: () =>
             queryClient.invalidateQueries({ queryKey: ['list', listId] })*/
         onSuccess: (returnedList) => {
-            const list = [...returnedList.listedItems, emptyRow]
+            const list: List = { id: returnedList.id, title: returnedList.title, listedItems: [...returnedList.listedItems, emptyRow] };
             queryClient.setQueryData(['list', listId], list)
         }
     });
