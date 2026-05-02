@@ -241,13 +241,20 @@ export default function App() {
 
     const patchItem = useMutation({
         mutationFn: async (patchItems: Item[]) => {
+            const payload = patchItems.map((item => ({
+                Id: Number(item.id) || -1,
+                Name: item.name,
+                Price: Number(item.price) || 0,
+                Quantity: Number(item.quantity) || 0,
+                isChecked: item.isChecked
+            })))
             const response = await fetch(`${BACKEND_URL}/api/shoplist/${listId}`, {
                 method: "PATCH",
                 credentials: "include",
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(patchItems)
+                body: JSON.stringify(payload)
             });
             if (!response.ok) {
                 throw new Error('Network response was not ok');
