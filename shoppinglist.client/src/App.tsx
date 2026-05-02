@@ -640,7 +640,8 @@ export default function App() {
 
     useEffect(() => {
         const isUserTyping = addItem.isPending || removeItem.isPending || patchItem.isPending;
-
+        console.log(items);
+        console.log(serverList.listedItems);
         if (serverList && !isUserTyping) {
             setItems(serverList.listedItems);
         }
