@@ -280,7 +280,7 @@ export default function App() {
             }
             return await response.json();
         },
-        onMutate: async (newItem) => {
+        /*onMutate: async (newItem) => {
             await queryClient.cancelQueries({ queryKey: ['list', listId] })
             const previousList = queryClient.getQueryData(['list', listId])
             queryClient.setQueryData(['list', listId], (old: any) => {
@@ -296,9 +296,22 @@ export default function App() {
             if (context?.previousList) {
                 queryClient.setQueryData(['list', listId], context.previousList);
             }
-        },
-        onSettled: () =>
-            queryClient.invalidateQueries({queryKey:['list', listId]})
+        },*/
+        //onSettled: () =>
+            //queryClient.invalidateQueries({ queryKey: ['list', listId] }),
+        onSuccess: (returnedList) => {
+            const safeData = Array.isArray(returnedList.listedItems) ? returnedList.listedItems : [];
+            const mappedItems = safeData.map((itemDB: any, index: number) => ({
+                id: itemDB.id === 0 ? `temp-${index}-${Date.now()}` : itemDB.id,
+                name: itemDB.name || '',
+                quantity: itemDB.quantity || '',
+                price: itemDB.price || '',
+                isChecked: itemDB.isChecked || false,
+                position: itemDB.position
+            }));
+            const list: List = { id: returnedList.id, title: returnedList.title, listedItems: [...mappedItems, emptyRow] };
+            queryClient.setQueryData(['list', listId], list)
+        }
     })
 
     const removeItem = useMutation({
@@ -399,7 +412,7 @@ export default function App() {
                 const belowPos = nextItem ? nextItem.position : null;
 
                 let newPosition;
-                if (belowPos === null) {
+                if (belowPos === null || belowPos === -1.0) {
                     newPosition = abovePos + 1.0;
                 } else {
                     newPosition = (abovePos + belowPos) / 2.0;
