@@ -259,7 +259,6 @@ export default function App() {
 
     const addItem = useMutation({
         mutationFn: async (newItem: ItemToSendWithPositions) => {
-            console.log("Mutation Add started with:", newItem)
             const payload: ItemToSendWithPositions = {
                 Id: Number(newItem.Id) || -1,
                 Name: newItem.Name,
@@ -304,7 +303,6 @@ export default function App() {
 
     const removeItem = useMutation({
         mutationFn: async (deleteItem: Item) => {
-            console.log("Mutation Delete started with:", deleteItem)
             if (deleteItem.id.toString().startsWith("temp")) return null;
 
             const response = await fetch(`${BACKEND_URL}/api/shoplist/remove/${listId}/${deleteItem.id}`, {
@@ -365,7 +363,6 @@ export default function App() {
         const updatedItem = updatedList.find(item => item.id == id);
 
         setItems(updatedList);
-        console.log("patch code here")
         if (updatedItem && !id.toString().startsWith("temp")) {
             //setItemToUpdate(updatedItem);
             setChangeSet(prev => [...prev, updatedItem])
@@ -377,7 +374,6 @@ export default function App() {
         if (e.key === 'Enter') {
             e.preventDefault();
             e.stopPropagation();
-            console.log("enter pressed")
             const currentItem = items[index];
             if (currentItem.position === -1.0) {
                 if (items.length === 1) {
@@ -387,17 +383,16 @@ export default function App() {
                 }
             }
             if (currentItem.name && currentItem.name.trim() !== "") {
-                console.log(`enter pressed for `, currentItem)
-                //const itemAbove = (items.length > 1) ? items[index - 1] : null;
-                //const itemBelow = (index + 1 < items.length) ? items[index + 1] : null;
-                addItem.mutate({
-                    Id: Number(currentItem.id),
-                    Name: currentItem.name,
-                    Price: Number(currentItem.price) || 0,
-                    Quantity: Number(currentItem.quantity) || 0,
-                    IsChecked: currentItem.isChecked,
-                    Position: currentItem.position
+                if (currentItem.id.toString().startsWith("temp")) {
+                    addItem.mutate({
+                        Id: Number(currentItem.id),
+                        Name: currentItem.name,
+                        Price: Number(currentItem.price) || 0,
+                        Quantity: Number(currentItem.quantity) || 0,
+                        IsChecked: currentItem.isChecked,
+                        Position: currentItem.position
                     }); //is this fine?
+                }
 
                 const nextItem = items[index + 1];
                 const abovePos = currentItem.position;
@@ -632,10 +627,8 @@ export default function App() {
 
     useEffect(() => {
         const isUserTyping = addItem.isPending || removeItem.isPending || patchItem.isPending;
-        console.log(items);
         
         if (serverList && !isUserTyping) {
-            console.log(serverList.listedItems);
             setItems(serverList.listedItems);
         }
     },[serverList, addItem.isPending, removeItem.isPending, patchItem.isPending])
