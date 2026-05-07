@@ -50,8 +50,8 @@ namespace ShoppingList.Server.Services
                         .Select(s => new ShopListGetDTO { Id = s.Id, Title = s.Title, 
                             ListedItems = s.ListedItems.Select(i => new ItemGetDTO
                             {
-                                Id = i.Id, Name = i.Name, Quantity = i.Quantity, Price = i.Price, IsChecked = i.IsChecked
-                            }).ToList() ?? new List<ItemGetDTO>()
+                                Id = i.Id, Name = i.Name, Quantity = i.Quantity, Price = i.Price, IsChecked = i.IsChecked, Position = i.Position
+                            }).OrderBy(i => i.Position).ToList() ?? new List<ItemGetDTO>()
                         })
                         .FirstOrDefaultAsync();
 
@@ -100,8 +100,9 @@ namespace ShoppingList.Server.Services
                             Name = i.Name,
                             Quantity = i.Quantity,
                             Price = i.Price,
-                            IsChecked = i.IsChecked
-                        }).ToList() ?? new List<ItemGetDTO>()
+                            IsChecked = i.IsChecked,
+                            Position = i.Position
+                        }).OrderBy(i => i.Position).ToList() ?? new List<ItemGetDTO>()
                     })
                     .ToListAsync();
 
@@ -192,8 +193,9 @@ namespace ShoppingList.Server.Services
                                 Name = i.Name,
                                 Quantity = i.Quantity,
                                 Price = i.Price,
-                                IsChecked = i.IsChecked
-                            }).ToList() ?? new List<ItemGetDTO>(),
+                                IsChecked = i.IsChecked,
+                                Position = i.Position
+                            }).OrderBy(i => i.Position).ToList() ?? new List<ItemGetDTO>(),
                             Id = currentList.Id };
 
                         /*
@@ -267,8 +269,9 @@ namespace ShoppingList.Server.Services
                                 Name = i.Name,
                                 Quantity = i.Quantity,
                                 Price = i.Price,
-                                IsChecked = i.IsChecked
-                            }).ToList() ?? new List<ItemGetDTO>(), Id = currentList.Id };
+                                IsChecked = i.IsChecked,
+                                Position = i.Position
+                            }).OrderBy(i => i.Position).ToList() ?? new List<ItemGetDTO>(), Id = currentList.Id };
                         }
                         else
                         {
@@ -326,8 +329,9 @@ namespace ShoppingList.Server.Services
                                 Name = i.Name,
                                 Quantity = i.Quantity,
                                 Price = i.Price,
-                                IsChecked = i.IsChecked
-                            }).ToList() ?? new List<ItemGetDTO>(), Id = currentList.Id };
+                                IsChecked = i.IsChecked,
+                                Position = i.Position
+                            }).OrderBy(i => i.Position).ToList() ?? new List<ItemGetDTO>(), Id = currentList.Id };
                         }
                         else
                         {
@@ -397,8 +401,9 @@ namespace ShoppingList.Server.Services
                                     Name = i.Name,
                                     Quantity = i.Quantity,
                                     Price = i.Price,
-                                    IsChecked = i.IsChecked
-                                }).ToList() ?? new List<ItemGetDTO>()
+                                    IsChecked = i.IsChecked,
+                                    Position = i.Position
+                                }).OrderBy(i => i.Position).ToList() ?? new List<ItemGetDTO>()
                             })
                             .FirstOrDefaultAsync();
                         return listToReturn ?? new ShopListGetDTO();
