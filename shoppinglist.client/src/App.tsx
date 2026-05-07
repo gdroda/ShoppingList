@@ -39,7 +39,7 @@ const emptyRow: Item = {
     quantity: '',
     price: '',
     isChecked: false,
-    position: 1
+    position: -1
 }
 
 //CUSTOM TRIGGER FOR SIDEBAR BUTTON
