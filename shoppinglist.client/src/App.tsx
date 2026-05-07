@@ -379,7 +379,7 @@ export default function App() {
                 if (items.length === 1) {
                     currentItem.position = 1.0;
                 } else {
-                    currentItem.position = items[index - 1].position - 1.0;
+                    currentItem.position = items[index - 1].position + 1.0;
                 }
             }
             if (currentItem.name && currentItem.name.trim() !== "") {
