@@ -37,7 +37,8 @@ namespace ShoppingList.Server.Services
             if (currList != null)
             {
                 var newItem = new Item { Name = itemDTO.Name, Price = itemDTO.Price, Quantity = itemDTO.Quantity, IsChecked = itemDTO.IsChecked
-                , ShopList = currList, ListId = listId};
+                , ShopList = currList, ListId = listId, Position = itemDTO.Position
+                };
                 currList.ListedItems.Add(newItem);
                 await _dbContext.SaveChangesAsync();
 

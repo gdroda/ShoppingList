@@ -259,7 +259,7 @@ namespace ShoppingList.Server.Services
 
                         if (!exists)
                         {
-                            await _itemServices.CreateItem(new ItemCreateDTO { Name = itemDTO.Name, IsChecked = itemDTO.IsChecked, Price = itemDTO.Price, Quantity = itemDTO.Quantity }, listId);
+                            await _itemServices.CreateItem(new ItemCreateDTO { Name = itemDTO.Name, IsChecked = itemDTO.IsChecked, Price = itemDTO.Price, Quantity = itemDTO.Quantity, Position = itemDTO.Position}, listId);
                             await _dbContext.SaveChangesAsync();
                             return new ShopListGetDTO { Title = currentList.Title, ListedItems = currentList.ListedItems.Select(i => new ItemGetDTO
                             {

@@ -29,7 +29,8 @@ interface Item {
     isChecked: false,
     name: string,
     quantity: string,
-    price: string
+    price: string,
+    position: number
 }
 
 const emptyRow: Item = {
@@ -37,7 +38,8 @@ const emptyRow: Item = {
     name: '',
     quantity: '',
     price: '',
-    isChecked: false
+    isChecked: false,
+    position: 1
 }
 
 //CUSTOM TRIGGER FOR SIDEBAR BUTTON
@@ -127,45 +129,6 @@ export default function App() {
 
 
 
-
-    
-
-
-    //TO BE REPLACED
-    //USER FETCH AND AUTHORIZATION
-    /*useEffect(() => {
-        const initiateAuthorization = async () => {
-            //UserSetting();
-            /*const checkLoginStatus = async () => {
-                try {
-                    const resp = await fetch(`/api/auth/user`, {
-                        method: "GET",
-                        credentials: "include"
-                    })
-                    if (resp.ok) {
-                        const data = await resp.json();
-                        setUserData(data);
-                        setIsGuest(false);
-                    } else {
-                        setUserData(null);
-                        setIsGuest(true);
-                    }
-                }
-                catch (error) {
-                    console.log(error);
-                }
-                finally {
-                    setLoading(false);
-                }
-            }
-            checkLoginStatus();/
-        }
-        initiateAuthorization();
-    }, []); */
-
-
-
-
     //LIST LOADING
     const loadAllLists = async (): Promise<List[]> => {
         try {
@@ -195,8 +158,6 @@ export default function App() {
                 credentials: "include"
             })
 
-            
-
             const data = await resp.json();
             
             setListId(data.id);
@@ -208,7 +169,8 @@ export default function App() {
                 name: itemDB.name || '',
                 quantity: itemDB.quantity || '',
                 price: itemDB.price || '',
-                isChecked: itemDB.isChecked || false
+                isChecked: itemDB.isChecked || false,
+                position: itemDB.position
             }));
 
             const list: List = { id: data.id, title: data.title, listedItems: [...mappedItems, emptyRow] };
@@ -225,19 +187,14 @@ export default function App() {
 
 
     // SAVE AND DEBOUNCE
-    interface ItemToSend {
-        Name: string,
-        Price: number,
-        Quantity: number,
-        IsChecked: boolean
-    }
 
-    interface ItemToSendWithId {
+    interface ItemToSendWithPositions {
         Id: number,
         Name: string,
         Price: number,
         Quantity: number,
-        IsChecked: boolean
+        IsChecked: boolean,
+        Position: any
     }
 
 
@@ -248,7 +205,8 @@ export default function App() {
                 Name: item.name,
                 Price: Number(item.price) || 0,
                 Quantity: Number(item.quantity) || 0,
-                isChecked: item.isChecked
+                IsChecked: item.isChecked,
+                Position: item.position
             })))
             const response = await fetch(`${BACKEND_URL}/api/shoplist/${listId}`, {
                 method: "PATCH",
@@ -285,20 +243,30 @@ export default function App() {
         onSettled: () =>
             queryClient.invalidateQueries({ queryKey: ['list', listId] })*/
         onSuccess: (returnedList) => {
-            const list: List = { id: returnedList.id, title: returnedList.title, listedItems: [...returnedList.listedItems, emptyRow] };
+            const safeData = Array.isArray(returnedList.listedItems) ? returnedList.listedItems : [];
+            const mappedItems = safeData.map((itemDB: any, index: number) => ({
+                id: itemDB.id === 0 ? `temp-${index}-${Date.now()}` : itemDB.id,
+                name: itemDB.name || '',
+                quantity: itemDB.quantity || '',
+                price: itemDB.price || '',
+                isChecked: itemDB.isChecked || false,
+                position: itemDB.position
+            }));
+            const list: List = { id: returnedList.id, title: returnedList.title, listedItems: [...mappedItems, emptyRow] };
             queryClient.setQueryData(['list', listId], list)
         }
     });
 
     const addItem = useMutation({
-        mutationFn: async (newItem: Item) => {
+        mutationFn: async (newItem: ItemToSendWithPositions) => {
             console.log("Mutation Add started with:", newItem)
-            const payload: ItemToSendWithId = {
-                Id: Number(newItem.id) || -1,
-                Name: newItem.name,
-                Price: Number(newItem.price) || 0,
-                Quantity: Number(newItem.quantity) || 0,
-                IsChecked: newItem.isChecked
+            const payload: ItemToSendWithPositions = {
+                Id: Number(newItem.Id) || -1,
+                Name: newItem.Name,
+                Price: Number(newItem.Price) || 0,
+                Quantity: Number(newItem.Quantity) || 0,
+                IsChecked: newItem.IsChecked,
+                Position: newItem.Position
             };
             const response = await fetch(`${BACKEND_URL}/api/shoplist/add/${listId}`, {
                 method: "POST",
@@ -410,12 +378,39 @@ export default function App() {
             e.preventDefault();
             e.stopPropagation();
             console.log("enter pressed")
-            if (items[index].name && items[index].name.trim() !== "") {
-                console.log(`enter pressed for `, items[index])
-                addItem.mutate(items[index]); //is this fine?
+            const currentItem = items[index];
+            if (currentItem.position === -1.0) {
+                if (items.length === 1) {
+                    currentItem.position = 1.0;
+                } else {
+                    currentItem.position = items[index - 1].position - 1.0;
+                }
+            }
+            if (currentItem.name && currentItem.name.trim() !== "") {
+                console.log(`enter pressed for `, currentItem)
+                //const itemAbove = (items.length > 1) ? items[index - 1] : null;
+                //const itemBelow = (index + 1 < items.length) ? items[index + 1] : null;
+                addItem.mutate({
+                    Id: Number(currentItem.id),
+                    Name: currentItem.name,
+                    Price: Number(currentItem.price) || 0,
+                    Quantity: Number(currentItem.quantity) || 0,
+                    IsChecked: currentItem.isChecked,
+                    Position: currentItem.position
+                    }); //is this fine?
 
+                const nextItem = items[index + 1];
+                const abovePos = currentItem.position;
+                const belowPos = nextItem ? nextItem.position : null;
 
-                const newItem: Item = { id: `temp-${index}-${Date.now()}`, isChecked: false, name: '', quantity: '', price: '' };
+                let newPosition;
+                if (belowPos === null) {
+                    newPosition = abovePos + 1.0;
+                } else {
+                    newPosition = (abovePos + belowPos) / 2.0;
+                }
+
+                const newItem: Item = { id: `temp-${index}-${Date.now()}`, isChecked: false, name: '', quantity: '', price: '', position: newPosition };
                 const newItems = [...items];
                 newItems.splice(index + 1, 0, newItem);
                 setItems(newItems);
@@ -562,16 +557,9 @@ export default function App() {
                     name: itemDB.name || '',
                     quantity: itemDB.quantity || '',
                     price: itemDB.price || '',
-                    isChecked: itemDB.isChecked || false
+                    isChecked: itemDB.isChecked || false,
+                    position: itemDB.position
                 }));
-
-                const emptyRow: Item = {
-                    id: `temp-${Date.now()}`,
-                    name: '',
-                    quantity: '',
-                    price: '',
-                    isChecked: false
-                }
 
                 setItems([...mappedItems, emptyRow]);
 
