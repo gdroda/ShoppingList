@@ -377,12 +377,14 @@ export default function App() {
 
 
     //ITEM UPDATES AND KEY HANDLES
-    const updateItem = (id, field, value) => {
+    const updateItem = (id, field, value, index) => {
         const updatedList = items.map(item =>
             item.id === id ? { ...item, [field]: value } : item
         );
 
         const updatedItem = updatedList.find(item => item.id == id);
+
+        setFocusIndex(index);
 
         setItems(updatedList);
         if (updatedItem && !id.toString().startsWith("temp")) {
@@ -702,7 +704,7 @@ export default function App() {
                                         <input
                                             type="checkbox"
                                             checked={item.isChecked}
-                                            onChange={(e) => updateItem(item.id, 'isChecked', e.target.checked)}
+                                            onChange={(e) => updateItem(item.id, 'isChecked', e.target.checked, index)}
                                             className="w-1/8"
                                         />
                                         <input
@@ -711,7 +713,7 @@ export default function App() {
                                             value={item.name}
                                             placeholder="Item name..."
                                             spellCheck="false"
-                                            onChange={(e) => { updateItem(item.id, 'name', e.target.value); handleChange(e, index); }}
+                                            onChange={(e) => { updateItem(item.id, 'name', e.target.value, index); handleChange(e, index); }}
                                             onKeyDown={(e) => handleKeyDown(e, index)}
                                             enterKeyHint="enter"
                                             className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -722,7 +724,7 @@ export default function App() {
                                             maxLength={3}
                                             inputMode="decimal"
                                             value={item.quantity}
-                                            onChange={(e) => updateItem(item.id, 'quantity', e.target.value)}
+                                            onChange={(e) => updateItem(item.id, 'quantity', e.target.value, index)}
                                             onKeyDown={(e) => {
                                                 if (!/[0-9]/.test(e.key) && e.key !== 'Tab' && e.key !== 'Backspace') { e.preventDefault(); }
                                                 //handleKeyDown(e, index)
@@ -736,7 +738,7 @@ export default function App() {
                                             placeholder="$"
                                             value={item.price}
                                             inputMode="decimal"
-                                            onChange={(e) => updateItem(item.id, 'price', e.target.value)}
+                                            onChange={(e) => updateItem(item.id, 'price', e.target.value, index)}
                                             onKeyDown={(e) => {
                                                 if (!/[0-9]/.test(e.key) && e.key !== 'Backspace') { e.preventDefault(); }
                                                 //handleKeyDown(e, index)
