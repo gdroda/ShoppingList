@@ -369,7 +369,10 @@ export default function App() {
     const [focusIndex, setFocusIndex] = useState<number>();
     useEffect(() => {
         console.log("add item success effect");
-        inputRefs.current[focusIndex].focus();
+        if (focusIndex) {
+            
+            inputRefs.current[focusIndex].focus();
+        }
     },[addItem.isSuccess])
 
 
