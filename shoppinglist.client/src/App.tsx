@@ -63,6 +63,8 @@ export function CustomTrigger({
 
 
 export default function App() {
+
+    const inputRefs = useRef([]);
     //const [userData, setUserData] = useState < User | null > (null);   REPLACED
     //const [isLoadings, setLoading] = useState(true);   NOT USED
     const [isGuest, setIsGuest] = useState(true);
@@ -125,7 +127,7 @@ export default function App() {
     }
 
 
-    const inputRefs = useRef([]);
+    
 
 
 
@@ -364,7 +366,11 @@ export default function App() {
     }, [debouncedSave])
 
 
-
+    const [focusIndex, setFocusIndex] = useState<number>();
+    useEffect(() => {
+        console.log("add item success effect");
+        inputRefs.current[focusIndex].focus();
+    },[addItem.isSuccess])
 
 
     //ITEM UPDATES AND KEY HANDLES
@@ -426,6 +432,7 @@ export default function App() {
                 // Focus the new input on the next render
                 setTimeout(() => {
                     if (inputRefs.current[index + 1]) {
+                        setFocusIndex(index + 1);
                         inputRefs.current[index + 1].focus();
                     }
                 }, 10);
