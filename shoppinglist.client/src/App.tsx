@@ -313,6 +313,10 @@ export default function App() {
             }));
             const list: List = { id: returnedList.id, title: returnedList.title, listedItems: [...mappedItems, emptyRow] };
             queryClient.setQueryData(['list', listId], list)
+            if (focusIndex) {
+
+                inputRefs.current[focusIndex].focus();
+            }
         }
     })
 
