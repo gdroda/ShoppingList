@@ -409,10 +409,8 @@ export default function App() {
                 }
             }
             if (currentItem.name && currentItem.name.trim() !== "") {
-                if (inputRefs.current[index + 1]) {
-                    setFocusIndex(index + 1);
-                    console.log(index + 1);
-                }
+                setFocusIndex(index + 1);
+                console.log(index + 1);
                 if (currentItem.id.toString().startsWith("temp")) {
                     addItem.mutate({
                         Id: Number(currentItem.id),
