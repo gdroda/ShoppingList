@@ -313,10 +313,6 @@ export default function App() {
             }));
             const list: List = { id: returnedList.id, title: returnedList.title, listedItems: [...mappedItems, emptyRow] };
             queryClient.setQueryData(['list', listId], list)
-            if (focusIndex) {
-
-                inputRefs.current[focusIndex].focus();
-            }
         }
     })
 
@@ -370,14 +366,14 @@ export default function App() {
     }, [debouncedSave])
 
 
+
+
     const [focusIndex, setFocusIndex] = useState<number>();
     useEffect(() => {
-        console.log("add item success effect");
-        if (focusIndex) {
-            
-            inputRefs.current[focusIndex].focus();
+        if (focusIndex !== undefined && focusIndex !== null) {
+            inputRefs.current[focusIndex]?.focus();
         }
-    },[addItem.isSuccess])
+    },[items, focusIndex])
 
 
     //ITEM UPDATES AND KEY HANDLES
@@ -409,8 +405,6 @@ export default function App() {
                 }
             }
             if (currentItem.name && currentItem.name.trim() !== "") {
-                setFocusIndex(index + 1);
-                console.log(index + 1);
                 if (currentItem.id.toString().startsWith("temp")) {
                     addItem.mutate({
                         Id: Number(currentItem.id),
@@ -421,6 +415,8 @@ export default function App() {
                         Position: currentItem.position
                     }); //is this fine?
                 }
+
+                setFocusIndex(index + 1);
 
                 const nextItem = items[index + 1];
                 const abovePos = currentItem.position;
@@ -438,30 +434,31 @@ export default function App() {
                 newItems.splice(index + 1, 0, newItem);
                 setItems(newItems);
 
+                
                 // Focus the new input on the next render
-                setTimeout(() => {
-                    if (inputRefs.current[index + 1]) {
-                        setFocusIndex(index + 1);
-                        console.log(index + 1);
-                        inputRefs.current[index + 1].focus();
-                    }
-                }, 10);
+                //setTimeout(() => {
+                    //if (inputRefs.current[index + 1]) {
+                        //setFocusIndex(index + 1);
+                        //console.log(index + 1);
+                        //inputRefs.current[index + 1].focus();
+                    //}
+                //}, 10);
             }
         }
 
 
         if (e.key === 'Backspace' && items[index].name === '' && items.length > 1) {
             e.preventDefault();
-            console.log("backspaced pressed")
-            console.log(`backspaced pressed for `, items[index])
+            setFocusIndex(index - 1);
+
             if (!items[index].id.toString().startsWith("temp")) {
                 removeItem.mutate(items[index]);
             }
             const newItems = items.filter((_, i) => i !== index);
             setItems(newItems);
-            if (inputRefs.current[index - 1]) {
-                inputRefs.current[index - 1].focus();
-            }
+            //if (inputRefs.current[index - 1]) {
+            //    inputRefs.current[index - 1].focus();
+            //}
         }
     };
 
