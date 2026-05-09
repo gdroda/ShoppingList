@@ -25,8 +25,8 @@ interface List {
 }
 
 interface Item {
-    id: string,
-    isChecked: false,
+    id: string | number,
+    isChecked: boolean,
     name: string,
     quantity: string,
     price: string,
@@ -699,13 +699,13 @@ export default function App() {
                                     <div
                                         key={item.id}
                                         className={`flex flex-row items-center gap-1 p-0.5 
-                                ${item.isChecked ? `line-through text-gray-400 bg-gray-50` : `text-gray-900`}`}
+                                ${item.isChecked ? `line-through text-gray-400 bg-[oklch(0.95_0.02_87)]` : `text-gray-900`}`}
                                     >
                                         <input
                                             type="checkbox"
                                             checked={item.isChecked}
                                             onChange={(e) => updateItem(item.id, 'isChecked', e.target.checked, index)}
-                                            className="w-1/8"
+                                            className="w-1/8 accent-black"
                                         />
                                         <input
                                             ref={el => { if (el) { inputRefs.current[index] = el; } else { delete inputRefs.current[index] } }}
@@ -716,7 +716,7 @@ export default function App() {
                                             onChange={(e) => { updateItem(item.id, 'name', e.target.value, index); handleChange(e, index); }}
                                             onKeyDown={(e) => handleKeyDown(e, index)}
                                             enterKeyHint="enter"
-                                            className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                            className="w-full px-2 py-1 border-b-2 border-gray-400 focus:outline-none"
                                         />
                                         <input
                                             type="text"
@@ -729,7 +729,7 @@ export default function App() {
                                                 if (!/[0-9]/.test(e.key) && e.key !== 'Tab' && e.key !== 'Backspace') { e.preventDefault(); }
                                                 //handleKeyDown(e, index)
                                             }}
-                                            className="w-1/8 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                            className="w-1/8 px-2 py-1 border-b-2 border-gray-400 focus:outline-none"
 
                                         />
                                         <input
@@ -743,7 +743,7 @@ export default function App() {
                                                 if (!/[0-9]/.test(e.key) && e.key !== 'Backspace') { e.preventDefault(); }
                                                 //handleKeyDown(e, index)
                                             }}
-                                            className="w-1/8 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                            className="w-1/8 px-2 py-1 border-b-2 border-gray-400 focus:outline-none"
 
                                         />
                                     </div>
