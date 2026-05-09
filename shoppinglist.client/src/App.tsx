@@ -658,7 +658,7 @@ export default function App() {
         const isUserTyping = addItem.isPending || removeItem.isPending || patchItem.isPending;
         
         if (serverList && !isUserTyping) {
-            setItems(serverList.listedItems);
+            //setItems(serverList.listedItems);
         }
     },[serverList, addItem.isPending, removeItem.isPending, patchItem.isPending])
 
