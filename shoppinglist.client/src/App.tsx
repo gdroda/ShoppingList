@@ -63,10 +63,9 @@ export function CustomTrigger({
 
 
 export default function App() {
-
+    const [hasQty, setHasQty] = useState(false);
+    const [hasPrice, setHasPrice] = useState(false);
     const inputRefs = useRef([]);
-    //const [userData, setUserData] = useState < User | null > (null);   REPLACED
-    //const [isLoadings, setLoading] = useState(true);   NOT USED
     const [isGuest, setIsGuest] = useState(true);
     const [listId, setListId] = useState<number | null>();
     const [listTitle, setListTitle] = useState<string>();
@@ -673,7 +672,7 @@ export default function App() {
 
     if (items) {
         return (
-            <div className="fixed">
+            <div className="w-full">
                 
                 
 
@@ -694,18 +693,18 @@ export default function App() {
                                 </div>
                             </div>
                             
-                            <div className="flex flex-col items-center py-10 " >
+                            <div className="flex flex-col w-full max-w-3xl mx-auto py-10 " >
                                 {items?.map((item, index) => (
                                     <div
                                         key={item.id}
-                                        className={`flex flex-row items-center gap-1 p-0.5 
+                                        className={`flex flex-row items-center w-full gap-1 p-0.5 
                                 ${item.isChecked ? `line-through text-gray-400 bg-[oklch(0.95_0.02_87)]` : `text-gray-900`}`}
                                     >
                                         <input
                                             type="checkbox"
                                             checked={item.isChecked}
                                             onChange={(e) => updateItem(item.id, 'isChecked', e.target.checked, index)}
-                                            className="w-1/8 accent-black"
+                                            className="w-8 h-4 accent-black"
                                         />
                                         <input
                                             ref={el => { if (el) { inputRefs.current[index] = el; } else { delete inputRefs.current[index] } }}
@@ -716,9 +715,9 @@ export default function App() {
                                             onChange={(e) => { updateItem(item.id, 'name', e.target.value, index); handleChange(e, index); }}
                                             onKeyDown={(e) => handleKeyDown(e, index)}
                                             enterKeyHint="enter"
-                                            className="w-full px-2 py-1 border-b-2 border-gray-400 focus:outline-none"
+                                            className="flex-1 min-w-0 px-2 py-1 border-b-2 border-gray-400 focus:outline-none"
                                         />
-                                        <input
+                                        {hasQty ? <input
                                             type="text"
                                             placeholder="Qty"
                                             maxLength={3}
@@ -730,9 +729,9 @@ export default function App() {
                                                 //handleKeyDown(e, index)
                                             }}
                                             className="w-1/8 px-2 py-1 border-b-2 border-gray-400 focus:outline-none"
-
-                                        />
-                                        <input
+                                        /> : null}
+                                        
+                                        {hasPrice ? <input
                                             type="text"
                                             maxLength={4}
                                             placeholder="$"
@@ -744,8 +743,7 @@ export default function App() {
                                                 //handleKeyDown(e, index)
                                             }}
                                             className="w-1/8 px-2 py-1 border-b-2 border-gray-400 focus:outline-none"
-
-                                        />
+                                        /> : null}
                                     </div>
                                 ))}
                             </div>
