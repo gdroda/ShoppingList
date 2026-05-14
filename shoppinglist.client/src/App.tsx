@@ -16,7 +16,7 @@ interface User {
     name: string,
     email: string,
     allLists: List[],
-    userPicture: string
+    pictureUrl: string
 }
 
 interface List {
@@ -91,6 +91,8 @@ export default function App() {
     //RENAMING SUBMIT
     const [isRenameOpen, setIsRenameOpen] = useState(false);
     const handleNameSubmit = async (newName: string) => {
+        const prevName = listTitle;
+        setListTitle(newName);
         try {
             const response = await fetch(`${BACKEND_URL}/api/shoplist/rename/${listId}`, {
                 method: "PUT",
@@ -108,6 +110,7 @@ export default function App() {
         }
         catch (error) {
             console.log("Rename list failed.", error);
+            setListTitle(prevName);
         }
         setIsRenameOpen(false);
     }
@@ -670,7 +673,7 @@ export default function App() {
         }
     }, [userData])
 
-
+    console.log("User Data:", userData)
     if (items) {
         return (
             <div className="fixed inset-0 flex flex-col overflow-hidden">
@@ -765,7 +768,7 @@ export default function App() {
                                     : <Button onClick={() => Login()}>Log in with Google</Button>}
 
                                 <h2>{userData?.name}, {userData?.email}</h2>
-                                {userData?.userPicture ? <img src={userData.userPicture} referrerPolicy="no-referrer" className="w-6 h-6 rounded-full" /> : <h3>pic:{userData?.userPicture}</h3>}
+                                {userData?.pictureUrl ? <img src={userData.pictureUrl} referrerPolicy="no-referrer" className="w-6 h-6 rounded-full" /> : <h3>pic:{userData?.pictureUrl}</h3>}
                             </div>
                             <div className="flex items-center gap-2 w-auto">
                                 <input placeholder="a" className="border"/>
