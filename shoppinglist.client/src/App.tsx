@@ -671,7 +671,7 @@ export default function App() {
         const isUserTyping = addItem.isPending || removeItem.isPending || patchItem.isPending;
         
         if (serverList && !isUserTyping) {
-            //setItems(serverList.listedItems); this seems not needed at this point
+            setItems(serverList.listedItems); //this seems not needed at this point // think its needed to update ids?
         }
     },[serverList, addItem.isPending, removeItem.isPending, patchItem.isPending])
 
