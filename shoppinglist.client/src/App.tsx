@@ -672,97 +672,98 @@ export default function App() {
 
     if (items) {
         return (
-            <div className="w-full">
+            <div className="fixed inset-0 flex flex-col overflow-hidden">
                 
                 
 
                 <SidebarProvider defaultOpen={false}>
-                    <SidebarInset>
+                    <SidebarInset className="flex flex-col h-full overflow-hidden">
 
 
-
-                        <SidebarTrigger />
-
+                        <div className="flex p-4">
+                            <SidebarTrigger />
+                        </div>
                         
-                        <div className="w-full">
-                            <div className="flex flex-row md:flex-row items-center justify-between gap-4 p-1">
+                        <div className="flex flex-col h-full overflow-hidden w-full max-w-4xl mx-auto">
+                            <div className="flex-none flex flex-row items-center justify-between gap-4 p-1">
                                 <h2 className="whitespace-nowrap">{listId ? listTitle : "New List"}</h2>
-                                <div className="flex flex-row gap-2">
+                                <div className="flex flex-row gap-2 px-10">
                                     <Button disabled={isGuest ? true : false} onClick={() => setIsRenameOpen(true)}>Rename</Button>
                                     <Button disabled={isGuest ? true : false} onClick={() => setIsShareOpen(true) }>Share</Button>
                                 </div>
                             </div>
-                            
-                            <div className="flex flex-col w-full max-w-3xl mx-auto py-10 " >
-                                {items?.map((item, index) => (
-                                    <div
-                                        key={item.id}
-                                        className={`flex flex-row items-center w-full gap-1 p-0.5 
-                                ${item.isChecked ? `line-through text-gray-400 bg-[oklch(0.95_0.02_87)]` : `text-gray-900`}`}
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            checked={item.isChecked}
-                                            onChange={(e) => updateItem(item.id, 'isChecked', e.target.checked, index)}
-                                            className="w-8 h-4 accent-black"
-                                        />
-                                        <input
-                                            ref={el => { if (el) { inputRefs.current[index] = el; } else { delete inputRefs.current[index] } }}
-                                            type="text"
-                                            value={item.name}
-                                            placeholder="Item name..."
-                                            spellCheck="false"
-                                            onChange={(e) => { updateItem(item.id, 'name', e.target.value, index); handleChange(e, index); }}
-                                            onKeyDown={(e) => handleKeyDown(e, index)}
-                                            enterKeyHint="enter"
-                                            className="flex-1 min-w-0 px-2 py-1 border-b-2 border-gray-400 focus:outline-none"
-                                        />
-                                        {hasQty ? <input
-                                            type="text"
-                                            placeholder="Qty"
-                                            maxLength={3}
-                                            inputMode="decimal"
-                                            value={item.quantity}
-                                            onChange={(e) => updateItem(item.id, 'quantity', e.target.value, index)}
-                                            onKeyDown={(e) => {
-                                                if (!/[0-9]/.test(e.key) && e.key !== 'Tab' && e.key !== 'Backspace') { e.preventDefault(); }
-                                                //handleKeyDown(e, index)
-                                            }}
-                                            className="w-1/8 px-2 py-1 border-b-2 border-gray-400 focus:outline-none"
-                                        /> : null}
+
+                            <div className="flex-1 overflow-y-auto">
+                                <div className="flex flex-col w-full max-w-3xl mx-auto py-10 pb-48" >
+                                    {items?.map((item, index) => (
+                                        <div
+                                            key={item.id}
+                                            className={`flex flex-row items-center w-full gap-1 p-0.5 
+                                    ${item.isChecked ? `line-through text-gray-400 bg-[oklch(0.95_0.02_87)]` : `text-gray-900`}`}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={item.isChecked}
+                                                onChange={(e) => updateItem(item.id, 'isChecked', e.target.checked, index)}
+                                                className="w-8 h-4 accent-black"
+                                            />
+                                            <input
+                                                ref={el => { if (el) { inputRefs.current[index] = el; } else { delete inputRefs.current[index] } }}
+                                                type="text"
+                                                value={item.name}
+                                                placeholder="Item name..."
+                                                spellCheck="false"
+                                                onChange={(e) => { updateItem(item.id, 'name', e.target.value, index); handleChange(e, index); }}
+                                                onKeyDown={(e) => handleKeyDown(e, index)}
+                                                enterKeyHint="enter"
+                                                className="flex-1 min-w-0 px-2 py-1 border-b-2 border-gray-400 focus:outline-none"
+                                            />
+                                            {hasQty ? <input
+                                                type="text"
+                                                placeholder="Qty"
+                                                maxLength={3}
+                                                inputMode="decimal"
+                                                value={item.quantity}
+                                                onChange={(e) => updateItem(item.id, 'quantity', e.target.value, index)}
+                                                onKeyDown={(e) => {
+                                                    if (!/[0-9]/.test(e.key) && e.key !== 'Tab' && e.key !== 'Backspace') { e.preventDefault(); }
+                                                    //handleKeyDown(e, index)
+                                                }}
+                                                className="w-1/8 px-2 py-1 border-b-2 border-gray-400 focus:outline-none"
+                                            /> : null}
                                         
-                                        {hasPrice ? <input
-                                            type="text"
-                                            maxLength={4}
-                                            placeholder="$"
-                                            value={item.price}
-                                            inputMode="decimal"
-                                            onChange={(e) => updateItem(item.id, 'price', e.target.value, index)}
-                                            onKeyDown={(e) => {
-                                                if (!/[0-9]/.test(e.key) && e.key !== 'Backspace') { e.preventDefault(); }
-                                                //handleKeyDown(e, index)
-                                            }}
-                                            className="w-1/8 px-2 py-1 border-b-2 border-gray-400 focus:outline-none"
-                                        /> : null}
-                                    </div>
-                                ))}
+                                            {hasPrice ? <input
+                                                type="text"
+                                                maxLength={4}
+                                                placeholder="$"
+                                                value={item.price}
+                                                inputMode="decimal"
+                                                onChange={(e) => updateItem(item.id, 'price', e.target.value, index)}
+                                                onKeyDown={(e) => {
+                                                    if (!/[0-9]/.test(e.key) && e.key !== 'Backspace') { e.preventDefault(); }
+                                                    //handleKeyDown(e, index)
+                                                }}
+                                                className="w-1/8 px-2 py-1 border-b-2 border-gray-400 focus:outline-none"
+                                            /> : null}
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
 
 
 
+                        
 
-                        <div>
-                            {isGuest ? <h2>Log in to save your lists!</h2> : ""}
-                            <br/>
-                            {userData ? 
-                                <Button onClick={() => Logout()}>Log out</Button>
-                                : <Button onClick={() => Login()}>Log in with Google</Button>}
-                            
-                            <h2>{userData?.name}, {userData?.email}</h2>
-                        </div>
+                        <div className="flex-none flex flex-row items-center justify-between gap-4 bottom-0 left-0 z-50 w-full p-5 border rounded-t-lg shadow-sm">
+                            <div>
+                                <br />
+                                {userData ?
+                                    <Button onClick={() => Logout()}>Log out</Button>
+                                    : <Button onClick={() => Login()}>Log in with Google</Button>}
 
-                        <div className="fixed flex flex-row items-center justify-between gap-4 bottom-0 left-0 w-full p-5 border rounded-t-lg shadow-sm">
+                                <h2>{userData?.name}, {userData?.email}</h2>
+                            </div>
                             <div>
                                  <Button className="m-2">Btn</Button>
                             </div>
@@ -785,7 +786,7 @@ export default function App() {
                                 {userLists?.map((list) => (
                                     <li key={list.id}>
                                         <div className="flex flex-row md:flex-row">
-                                            <CustomTrigger children={list.title} onClick={() => { setListId(list.id); /*loadListRefetch();*/ }}></CustomTrigger>
+                                            <CustomTrigger children={list.title} onClick={() => { setListId(list.id); loadListRefetch(); }}></CustomTrigger>
                                             <Button onClick={() => {setListIdToDelete(list.id); setIsConfirmOpen(true); }}>X</Button>
                                         </div>
                                     </li>
