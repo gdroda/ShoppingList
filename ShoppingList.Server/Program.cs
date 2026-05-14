@@ -105,6 +105,7 @@ builder.Services.AddCors(opt => opt.AddPolicy("MyCorsPolicy", policy =>
     {
         policy.WithOrigins(origins).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
     }
+    policy.SetPreflightMaxAge(TimeSpan.FromMinutes(10));
 }));
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
