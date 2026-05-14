@@ -332,15 +332,24 @@ namespace ShoppingList.Server.Services
                         {
                             _dbContext.Items.Remove(item);
                             await _dbContext.SaveChangesAsync();
-                            return new ShopListGetDTO { Title = currentList.Title, ListedItems = currentList.ListedItems.Select(i => new ItemGetDTO
+                            var listToReturn = await _dbContext.ShopLists
+                            .Where(l => l.Id == currentList.Id)
+                            .Select(l => new ShopListGetDTO
                             {
-                                Id = i.Id,
-                                Name = i.Name,
-                                Quantity = i.Quantity,
-                                Price = i.Price,
-                                IsChecked = i.IsChecked,
-                                Position = i.Position
-                            }).OrderBy(i => i.Position).ToList() ?? new List<ItemGetDTO>(), Id = currentList.Id };
+                                Id = currentList.Id,
+                                Title = currentList.Title,
+                                ListedItems = l.ListedItems.Select(i => new ItemGetDTO
+                                {
+                                    Id = i.Id,
+                                    Name = i.Name,
+                                    Quantity = i.Quantity,
+                                    Price = i.Price,
+                                    IsChecked = i.IsChecked,
+                                    Position = i.Position
+                                }).OrderBy(i => i.Position).ToList() ?? new List<ItemGetDTO>()
+                            })
+                            .FirstOrDefaultAsync();
+                            return listToReturn ?? new ShopListGetDTO();
                         }
                         else
                         {

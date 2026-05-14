@@ -332,7 +332,7 @@ export default function App() {
             }
             return await response.json();
         },
-        onMutate: async (deleteItem) => {
+        /*onMutate: async (deleteItem) => {
             await queryClient.cancelQueries({ queryKey: ['list', listId] })
             const previousList = queryClient.getQueryData(['list', listId])
             queryClient.setQueryData(['list', listId], (old: any) => {
@@ -351,7 +351,20 @@ export default function App() {
             }
         },
         onSettled: () =>
-            queryClient.invalidateQueries({ queryKey: ['list', listId] })
+            queryClient.invalidateQueries({ queryKey: ['list', listId] }) */
+        onSuccess: (returnedList) => {
+            const safeData = Array.isArray(returnedList.listedItems) ? returnedList.listedItems : [];
+            const mappedItems = safeData.map((itemDB: any, index: number) => ({
+                id: itemDB.id === 0 ? `temp-${index}-${Date.now()}` : itemDB.id,
+                name: itemDB.name || '',
+                quantity: itemDB.quantity || '',
+                price: itemDB.price || '',
+                isChecked: itemDB.isChecked || false,
+                position: itemDB.position
+            }));
+            const list: List = { id: returnedList.id, title: returnedList.title, listedItems: [...mappedItems, emptyRow] };
+            queryClient.setQueryData(['list', listId], list)
+        }
     })
     
 
