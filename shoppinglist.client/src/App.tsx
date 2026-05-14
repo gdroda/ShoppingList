@@ -765,7 +765,7 @@ export default function App() {
                                     : <Button onClick={() => Login()}>Log in with Google</Button>}
 
                                 <h2>{userData?.name}, {userData?.email}</h2>
-                                {userData?.userPicture ? <img src={userData.userPicture} referrerPolicy="no-referrer" className="w-6 h-6 rounded-full"/> : null}
+                                {userData?.userPicture ? <img src={userData.userPicture} referrerPolicy="no-referrer" className="w-6 h-6 rounded-full" /> : <h3>pic:{userData?.userPicture}</h3>}
                             </div>
                             <div className="flex items-center gap-2 w-auto">
                                 <input placeholder="a" className="border"/>

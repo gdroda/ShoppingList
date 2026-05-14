@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using ShoppingList.Server.Data;
 using ShoppingList.Server.Hubs;
 using ShoppingList.Server.Services;
@@ -77,6 +79,7 @@ builder.Services.AddAuthentication(opt =>
         opt.ClientSecret = googleAuth["ClientSecret"];
 
         opt.CallbackPath = "/api/signin-google";
+        opt.ClaimActions.MapJsonKey("picture", "picture");
     });
 builder.Services.AddAuthorization();
 
