@@ -1,11 +1,9 @@
-﻿using Google.Apis.Auth;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.VisualBasic;
 using ShoppingList.Server.Services;
 using System.Security.Claims;
 
@@ -68,9 +66,10 @@ namespace ShoppingList.Server.Controllers
                 var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
                 var googleId = User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
                 var user = await _userServices.GetUser(email);
+                var pictureUrl = User.FindFirst(c => c.Type == "picture")?.Value;
                 if (user != null)
                 {
-                    return Ok(user);
+                    return Ok(new { user.Name, user.Email, user.AllLists, pictureUrl});
                 }
                 else
                 {

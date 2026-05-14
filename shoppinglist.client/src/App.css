@@ -133,4 +133,29 @@ th, td {
   body {
     @apply bg-background text-foreground;
     }
+
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track{
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--muted-foreground);
+        border-radius: 10px;
+        border: 2px solid var(--background);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--primary);
+    }
+
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted-foreground) transparent;
 }

@@ -53,6 +53,7 @@ namespace ShoppingList.Server.Controllers
                 var name = User.Identity.Name;
                 var email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
                 var googleId = User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                var pictureUrl = User.FindFirst(c => c.Type == "picture")?.Value;
                 if (email != null)
                 {
                     var user = await _userServices.GetUser(email);
@@ -60,9 +61,9 @@ namespace ShoppingList.Server.Controllers
                     {
                         await _userServices.CreateUser(new UserCreateDTO { Name = name, Email = email, GoogleId = googleId });
                         user = await _userServices.GetUser(email);
-                        return Ok(user);
+                        return Ok(new { user.Name, user.Email, user.AllLists, pictureUrl });
                     }
-                    else return Ok(user);
+                    else return Ok(new { user.Name, user.Email, user.AllLists, pictureUrl });
                 }
                 else return NotFound();
             }

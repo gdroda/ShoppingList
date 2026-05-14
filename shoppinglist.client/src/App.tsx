@@ -12,10 +12,11 @@ import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-interface User { 
-    name: string;
-    email: string
-    allLists: List[]
+interface User {
+    name: string,
+    email: string,
+    allLists: List[],
+    userPicture: string
 }
 
 interface List {
@@ -680,20 +681,21 @@ export default function App() {
                     <SidebarInset className="flex flex-col h-full overflow-hidden">
 
 
-                        <div className="flex p-4">
+                        <div className="flex p-4 items-center justify-between">
                             <SidebarTrigger />
+                            <div className="flex flex-row gap-5 px-5">
+                                <Button disabled={isGuest ? true : false} onClick={() => setIsRenameOpen(true)}>Rename</Button>
+                                <Button disabled={isGuest ? true : false} onClick={() => setIsShareOpen(true)}>Share</Button>
+                            </div>
                         </div>
                         
-                        <div className="flex flex-col h-full overflow-hidden w-full max-w-4xl mx-auto">
+                        <div className="flex flex-col h-full overflow-hidden w-full max-w-4xl mx-auto px-3">
                             <div className="flex-none flex flex-row items-center justify-between gap-4 p-1">
                                 <h2 className="whitespace-nowrap">{listId ? listTitle : "New List"}</h2>
-                                <div className="flex flex-row gap-2 px-10">
-                                    <Button disabled={isGuest ? true : false} onClick={() => setIsRenameOpen(true)}>Rename</Button>
-                                    <Button disabled={isGuest ? true : false} onClick={() => setIsShareOpen(true) }>Share</Button>
-                                </div>
+                                
                             </div>
 
-                            <div className="flex-1 overflow-y-auto">
+                            <div className="flex-1 overflow-y-auto pr-2">
                                 <div className="flex flex-col w-full max-w-3xl mx-auto py-10 pb-48" >
                                     {items?.map((item, index) => (
                                         <div
@@ -755,7 +757,7 @@ export default function App() {
 
                         
 
-                        <div className="flex-none flex flex-row items-center justify-between gap-4 bottom-0 left-0 z-50 w-full p-5 border rounded-t-lg shadow-sm">
+                        <div className="flex-none flex flex-row items-center justify-between gap-4 bottom-0 left-0 z-50 w-full p-5 border shadow-sm">
                             <div>
                                 <br />
                                 {userData ?
@@ -763,9 +765,7 @@ export default function App() {
                                     : <Button onClick={() => Login()}>Log in with Google</Button>}
 
                                 <h2>{userData?.name}, {userData?.email}</h2>
-                            </div>
-                            <div>
-                                 <Button className="m-2">Btn</Button>
+                                {userData?.userPicture ? <img src={userData.userPicture} referrerPolicy="no-referrer" className="w-6 h-6 rounded-full"/> : null}
                             </div>
                             <div className="flex items-center gap-2 w-auto">
                                 <input placeholder="a" className="border"/>
