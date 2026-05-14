@@ -91,8 +91,6 @@ export default function App() {
     //RENAMING SUBMIT
     const [isRenameOpen, setIsRenameOpen] = useState(false);
     const handleNameSubmit = async (newName: string) => {
-        const prevName = listTitle;
-        setListTitle(newName);
         try {
             const response = await fetch(`${BACKEND_URL}/api/shoplist/rename/${listId}`, {
                 method: "PUT",
@@ -110,7 +108,6 @@ export default function App() {
         }
         catch (error) {
             console.log("Rename list failed.", error);
-            setListTitle(prevName);
         }
         setIsRenameOpen(false);
     }
