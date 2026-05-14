@@ -313,6 +313,7 @@ export default function App() {
             }));
             const list: List = { id: returnedList.id, title: returnedList.title, listedItems: [...mappedItems, emptyRow] };
             queryClient.setQueryData(['list', listId], list)
+            setItems([...mappedItems, emptyRow]);
         }
     })
 
@@ -671,7 +672,7 @@ export default function App() {
         const isUserTyping = addItem.isPending || removeItem.isPending || patchItem.isPending;
         
         if (serverList && !isUserTyping) {
-            setItems(serverList.listedItems); //this seems not needed at this point // think its needed to update ids?
+            //setItems(serverList.listedItems);
         }
     },[serverList, addItem.isPending, removeItem.isPending, patchItem.isPending])
 
